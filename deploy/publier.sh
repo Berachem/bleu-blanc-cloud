@@ -24,9 +24,14 @@ CLONE_PAGES="${CLONE_PAGES:-$RACINE/donnees/depot-pages}"
 echo "▶ Export des données"
 (cd "$RACINE/scanner" && uv run bbcloud exporter --vers "$RACINE/site/public/donnees")
 if [ "${EXIGER_DONNEES:-0}" = "1" ]; then
-  nombre="$(grep -oE '"nombre_organisations": *[0-9]+' "$RACINE/site/public/donnees/meta.json" \
-    2>/dev/null | grep -oE '[0-9]+$' || true)"
-  if [ "${nombre:-0}" -eq 0 ]; then
+  # Organisations de l'observatoire + fiches d'analyses sur demande
+  nombre=0
+  for champ in nombre_organisations nombre_sur_demande; do
+    valeur="$(grep -oE "\"$champ\": *[0-9]+" "$RACINE/site/public/donnees/meta.json" \
+      2>/dev/null | grep -oE '[0-9]+$' || true)"
+    nombre=$((nombre + ${valeur:-0}))
+  done
+  if [ "$nombre" -eq 0 ]; then
     echo "⚠ Aucune organisation notée dans la base : site non régénéré ni publié."
     exit 0
   fi
@@ -62,6 +67,9 @@ fi
 # Remplace tout le contenu publié par le nouveau build (l'historique git est conservé)
 find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 cp -a "$RACINE/site/dist/." .
+# Fichiers propres au dépôt Codeberg (modèle de ticket « Analyser mon site », README) :
+# recopiés à chaque publication pour survivre au remplacement complet du contenu.
+cp -a "$RACINE/deploy/codeberg/." .
 # .domains : ignoré par git-pages (domaine autorisé par l'enregistrement TXT
 # _git-pages-repository), conservé pour les comptes encore sur l'ancien serveur Pages v2.
 printf '%s\n' "$DOMAINE_SITE" > .domains

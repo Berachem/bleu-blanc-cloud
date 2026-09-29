@@ -84,7 +84,49 @@ def test_migrations_idempotentes(tmp_path: Path) -> None:
         assert b.migrer() == []
     with Base(chemin) as b:
         versions = [r["version"] for r in b.connexion.execute("SELECT version FROM migrations")]
-    assert versions == ["001_initial"]
+    assert versions == ["001_initial", "002_demandes"]
+
+
+def test_migration_002_conserve_les_donnees(tmp_path: Path) -> None:
+    """La reconstruction de « organisations » ne supprime aucun scan (clés étrangères)."""
+    import sqlite3
+
+    from bleublanccloud.stockage.base import DOSSIER_MIGRATIONS
+
+    chemin = tmp_path / "ancienne.db"
+    connexion = sqlite3.connect(chemin)
+    connexion.execute("PRAGMA foreign_keys = ON")
+    connexion.executescript((DOSSIER_MIGRATIONS / "001_initial.sql").read_text())
+    connexion.execute("CREATE TABLE migrations (version TEXT PRIMARY KEY, appliquee_le TEXT)")
+    connexion.execute("INSERT INTO migrations VALUES ('001_initial', '2026-09-01')")
+    connexion.execute(
+        "INSERT INTO organisations (id, slug, nom, type, source, cree_le) "
+        "VALUES (7, 'ville-00001', 'Ville', 'commune', 'test', '2026-09-01')"
+    )
+    connexion.execute(
+        "INSERT INTO scans (organisation_id, domaine, debut, statut, version_methodo) "
+        "VALUES (7, 'ville.fr', '2026-09-01T03:00:00+00:00', 'termine', '1.2')"
+    )
+    connexion.commit()
+    connexion.close()
+
+    with Base(chemin) as b:
+        assert b.connexion.execute("SELECT COUNT(*) FROM scans").fetchone()[0] == 1
+        assert b.organisation_par_slug("ville-00001") is not None
+        assert b.connexion.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+        assert b.connexion.execute("PRAGMA foreign_key_check").fetchall() == []
+        # Le nouveau type est accepté, un type inconnu toujours refusé
+        b.enregistrer_organisation(
+            organisation("site-demande-fr", type="sur_demande", source="demande")
+        )
+        with pytest.raises(sqlite3.IntegrityError):
+            b.connexion.execute(
+                "INSERT INTO organisations (slug, nom, type, source, cree_le) "
+                "VALUES ('x', 'x', 'inconnu', 'x', 'x')"
+            )
+        # La cascade fonctionne toujours après la reconstruction
+        b.connexion.execute("DELETE FROM organisations WHERE id = 7")
+        assert b.connexion.execute("SELECT COUNT(*) FROM scans").fetchone()[0] == 0
 
 
 def test_organisation_upsert(base: Base) -> None:
@@ -351,3 +393,44 @@ def test_exporter_recalcule_un_score_d_une_ancienne_methodologie(
     assert detail.score.provisoire and detail.score.couverture == 65.0
     [entree] = json.loads((tmp_path / "index.json").read_text())
     assert entree["note_provisoire"] is True
+
+
+def test_export_fiches_sur_demande_hors_statistiques(
+    base: Base, referentiels: Referentiels, tmp_path: Path
+) -> None:
+    base.enregistrer_territoire("departement", "33", "Gironde", "75")
+    commune = base.enregistrer_organisation(organisation())
+    res = resultat()
+    base.enregistrer_scan(commune, res, calculer_score(res.constats), VERSION_METHODO)
+    demande = base.enregistrer_organisation(
+        organisation("sur-demande-exemple-fr", nom="exemple.fr", type="sur_demande",
+                     departement="33", site_web="https://exemple.fr/", source="demande")
+    )  # fmt: skip
+    res_demande = resultat("exemple.fr", jour=20)
+    base.enregistrer_scan(demande, res_demande, calculer_score(res_demande.constats), "1.2")
+
+    exporter(base, referentiels, tmp_path)
+    meta = MetaExport.model_validate_json((tmp_path / "meta.json").read_text())
+    assert (meta.nombre_organisations, meta.nombre_sur_demande) == (1, 1)
+    # La date de campagne ne suit pas les analyses sur demande
+    assert meta.date_campagne == res.debut
+    index = json.loads((tmp_path / "index.json").read_text())
+    assert {e["slug"]: e["type"] for e in index} == {
+        "exempleville-99999": "commune",
+        "sur-demande-exemple-fr": "sur_demande",
+    }
+    [gironde] = json.loads((tmp_path / "departements.json").read_text())
+    assert gironde["nombre_organisations"] == 1
+    assert (tmp_path / "organisations" / "sur-demande-exemple-fr.json").exists()
+
+
+def test_campagne_ignore_les_fiches_sur_demande(base: Base) -> None:
+    from bleublanccloud.campagne import preparer_cibles
+
+    base.enregistrer_organisation(organisation())
+    base.enregistrer_organisation(
+        organisation("sur-demande-exemple-fr", type="sur_demande",
+                     site_web="https://exemple.fr/", source="demande")
+    )  # fmt: skip
+    cibles, _ = preparer_cibles(base.organisations(), lambda _: False)
+    assert [c.domaine for c in cibles] == ["exempleville.fr"]

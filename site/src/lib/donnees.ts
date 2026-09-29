@@ -41,3 +41,8 @@ export const organisation = (slug: string): OrganisationExport =>
   lire<OrganisationExport>(`organisations/${slug}.json`);
 export const organisations = (): OrganisationExport[] =>
   index().map((entree) => organisation(entree.slug));
+
+// Organisations de l'observatoire : les analyses « sur demande » restent accessibles par leur
+// lien et la recherche, mais sont exclues de la carte, des classements et des statistiques.
+export const estSurDemande = (type: string): boolean => type === "sur_demande";
+export const observatoire = (): EntreeIndex[] => index().filter((e) => !estSurDemande(e.type));

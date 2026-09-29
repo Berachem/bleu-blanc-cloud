@@ -142,6 +142,8 @@ nano /opt/bleu-blanc-cloud/.env
 | `MISTRAL_PRIX_ENTREE_PAR_M` / `…_SORTIE_…` | tarifs en $ par million de jetons, pour l'estimation `--dry-run` (vérifie-les sur <https://mistral.ai/pricing>) |
 | `IPINFO_TOKEN` | ton jeton IPinfo (facultatif mais conseillé) |
 | `DEPOT_PAGES` | `git@codeberg.org:<ton-pseudo>/bleublanccloud-pages.git` (étape 4) |
+| `CODEBERG_JETON` | jeton des analyses sur demande (étape 6 bis) ; vide = fonctionnalité désactivée |
+| `DEPOT_DEMANDES` | `<ton-pseudo>/bleublanccloud-pages` : dépôt où les visiteurs ouvrent leurs tickets |
 
 Les autres valeurs (politesse du robot, chemins) peuvent rester telles quelles.
 
@@ -158,6 +160,7 @@ Fais ces étapes **dans l'ordre, avant la première publication** (étape 5) : l
 1. Sur Codeberg, crée un dépôt **public et vide** nommé `bleublanccloud-pages` (git-pages le clone en HTTPS, sans identifiant).
 2. *Paramètres du dépôt → Clés de déploiement → Ajouter une clé* : colle la clé publique affichée par l'installateur
    (ou `cat /home/bbcloud/.ssh/id_ed25519_codeberg.pub`) et coche **Activer l'accès en écriture** : c'est elle que `publier.sh` utilise pour pousser.
+3. Après la première publication, vérifie que **`pages` est la branche par défaut** du dépôt (*Paramètres → Branches*) : c'est le cas automatiquement si le dépôt était vide. Forgejo y lit le modèle de ticket « Analyser mon site » (étape 6 bis).
 
 ### 4.2 Enregistrements DNS
 
@@ -296,6 +299,63 @@ systemctl list-timers 'bbcloud*'           # prochaines exécutions
 systemctl disable --now bbcloud-maj-auto.timer   # suspendre les mises à jour automatiques
 ```
 
+> ⚠️ La mise à jour automatique récupère le code, mais **n'installe pas de nouveaux services systemd**. Quand une version en ajoute (par exemple `bbcloud-demandes`, étape 6 bis), relance simplement `bash installer.sh` en root : il est idempotent.
+
+---
+
+## 6 bis. Analyses sur demande (« Analyser mon site »)
+
+Le bouton « Analyser mon site » du site ouvre un **ticket** sur le dépôt Codeberg `bleublanccloud-pages`. Toutes les heures (à la demie), `bbcloud-demandes.timer` lance `bbcloud demandes traiter`, qui lit les tickets via l'API Codeberg, valide le domaine, lance l'analyse passive, publie la fiche et répond dans le ticket. **Aucun port entrant** : c'est le serveur qui va chercher les tickets.
+
+### Étiquettes
+
+Dans le dépôt `bleublanccloud-pages` : *Tickets → Étiquettes → Nouvelle étiquette*, crée ces quatre étiquettes (noms exacts, accents compris) :
+
+| Étiquette | Rôle | Couleur suggérée |
+|---|---|---|
+| `analyse` | posée automatiquement par le formulaire : c'est une demande | `#003399` |
+| `traitée` | le robot a répondu avec la fiche | `#2E7D32` |
+| `refusée` | domaine invalide, retrait, limite atteinte… (la raison est expliquée) | `#6B7280` |
+| `erreur` | erreur technique ; nouvel essai automatique (3 tentatives au maximum) | `#ED2939` |
+
+Vérifie aussi que les **tickets sont activés** (*Paramètres → Unités → Tickets*).
+
+### Jeton Codeberg aux droits minimaux
+
+1. Codeberg → avatar → *Paramètres → Applications → Générer un nouveau jeton*.
+2. **Nom** : `bbcloud-demandes`.
+3. **Accès aux dépôts** : **Dépôts spécifiques** → sélectionne uniquement `bleublanccloud-pages`.
+4. **Permissions** : `issue` en **Lecture et écriture** ; **tout le reste sans accès**.
+5. Copie le jeton (il ne sera plus affiché) dans `/opt/bleu-blanc-cloud/.env` : `CODEBERG_JETON=…` (le fichier est en droits `600`).
+
+Le jeton n'apparaît jamais dans les journaux ni dans les réponses. Les réponses du robot sont publiées au nom du compte qui a créé le jeton ; pour une identité séparée, crée un compte robot dédié, ajoute-le comme collaborateur (droit *Écriture*) de `bleublanccloud-pages` et génère le jeton depuis ce compte.
+
+### Activer et tester
+
+```bash
+bash installer.sh                                   # installe et active bbcloud-demandes.timer
+su - bbcloud -c 'cd /opt/bleu-blanc-cloud/scanner && uv run bbcloud demandes lister'
+```
+
+Ouvre ensuite un ticket de test depuis le bouton du site, **avec le domaine `berachem.dev`** (domaine autorisé pour les tests), puis :
+
+```bash
+systemctl start bbcloud-demandes.service   # traitement immédiat au lieu d'attendre la demie
+journalctl -u bbcloud-demandes -e          # journaux du traitement
+```
+
+Le ticket doit recevoir une réponse (note, score, lien vers la fiche), l'étiquette `traitée`, puis être fermé.
+
+### Règles appliquées
+
+- **Validation stricte** : nom de domaine seul (punycode accepté), ni chemin, ni port, ni adresse IP, ni `localhost` / `.local` / `.internal`… ; un domaine qui résout vers une adresse privée ou locale est refusé. La case d'engagement doit être cochée. `retraits.yaml` est respecté.
+- **Garde réseau** : pour tous les scans (campagnes comprises), le robot refuse de se connecter à une adresse non publique, même après une redirection.
+- **Limites** : 10 demandes acceptées par jour au total, 1 par jour et par compte (`DEMANDES_LIMITE_JOUR`, `DEMANDES_LIMITE_COMPTE`). Une analyse de moins de 7 jours est réutilisée.
+- **Fiches « sur demande »** : visibles par leur lien et la recherche, exclues de la carte, des classements et des statistiques, jamais rescannées par la campagne hebdomadaire. Si le domaine appartient déjà à une organisation de l'observatoire, c'est sa fiche qui est mise à jour.
+- **Rapport IA** : généré avec le cache habituel si `MISTRAL_API_KEY` est renseignée (10 rapports par jour au plus).
+- Le compte Codeberg de l'auteur est conservé dans la base locale pour appliquer les limites ; il n'est jamais publié.
+- Même **verrou** que la campagne et la mise à jour automatique : si l'une d'elles tourne, le traitement est reporté au passage suivant.
+
 ---
 
 ## 7. Sauvegardes et restauration
@@ -304,10 +364,10 @@ systemctl disable --now bbcloud-maj-auto.timer   # suspendre les mises à jour a
 - Lancer une sauvegarde : `systemctl start bbcloud-sauvegarde.service`
 - Restaurer :
   ```bash
-  systemctl stop bbcloud-campagne.timer bbcloud-maj-auto.timer
+  systemctl stop bbcloud-campagne.timer bbcloud-maj-auto.timer bbcloud-demandes.timer
   gunzip -c /mnt/sauvegardes/bleublanccloud-AAAA-MM-JJ.db.gz > /opt/bleu-blanc-cloud/donnees/bleublanccloud.db
   chown bbcloud:bbcloud /opt/bleu-blanc-cloud/donnees/bleublanccloud.db
-  systemctl start bbcloud-campagne.timer bbcloud-maj-auto.timer
+  systemctl start bbcloud-campagne.timer bbcloud-maj-auto.timer bbcloud-demandes.timer
   ```
 - Pense aussi à inclure le conteneur dans tes sauvegardes Proxmox (*Datacenter → Backup*).
 
@@ -329,6 +389,7 @@ Tant que le dépôt GitHub est privé, renseigne dans le formulaire de migration
 - [ ] **Campagne de test** (10 organisations) relue sur le site local.
 - [ ] **Première campagne complète** lancée puis publiée.
 - [ ] **Webhook Codeberg** repassé en `https://` après l'émission du certificat (étape 4.4).
+- [ ] **Analyses sur demande** : étiquettes créées, jeton renseigné, ticket de test traité (étape 6 bis).
 - [ ] **Dogfooding** : `bbcloud scanner bleublanccloud.berachem.dev` donne A.
 - [ ] **Dépôt GitHub passé en public** : le site renvoie vers le code source, la méthodologie et les référentiels.
 
@@ -345,6 +406,9 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur
 | Changer la **méthodologie** | nouvelle version dans `analyse/score.py` + entrée dans `docs/methodologie.md` |
 | Changer les **consignes IA** | incrémenter `VERSION_INVITE` dans `ia/invites.py` (les rapports seront régénérés) |
 | Mettre à jour le code tout de suite | `systemctl start bbcloud-maj-auto.service` (tests puis republication) |
+| Voir les **demandes d'analyse** en attente | `su - bbcloud -c 'cd /opt/bleu-blanc-cloud/scanner && uv run bbcloud demandes lister'` |
+| Suspendre les **demandes d'analyse** | `systemctl disable --now bbcloud-demandes.timer` (ou vider `CODEBERG_JETON`) |
+| Relancer une demande **refusée ou en échec** | demander au visiteur d'ouvrir un nouveau ticket : un ticket fermé puis rouvert n'est plus traité par le robot |
 
 ---
 
@@ -362,6 +426,14 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur
 | Le site affiche encore une ancienne version | contrôler la branche `pages` du dépôt Codeberg et la dernière livraison du webhook (une URL cible restée en `http://` après l'émission du certificat peut faire échouer les livraisons : la passer en `https://`). |
 | `npm run build` échoue par manque de mémoire | passer le conteneur à 3–4 Go de RAM. |
 | Beaucoup de « robots.txt injoignable » | réseau sortant filtré ou sites en panne : le robot n'analyse alors aucune page, par respect de la RFC 9309. |
+| `bbcloud-demandes` : « CODEBERG_JETON absent du fichier .env » | normal tant que la fonctionnalité n'est pas configurée (étape 6 bis). |
+| `bbcloud-demandes` : « Codeberg injoignable : GET /issues : HTTP 401 » ou « HTTP 403 » | jeton invalide, expiré ou révoqué, non limité au bon dépôt, ou sans la permission `issue` en écriture : régénérer le jeton (étape 6 bis). |
+| `bbcloud-demandes` : « HTTP 404 » | `DEPOT_DEMANDES` ne correspond pas au dépôt (`<pseudo>/bleublanccloud-pages`), ou les tickets sont désactivés sur le dépôt. |
+| `bbcloud-demandes` : « Codeberg injoignable : … ConnectError » | réseau sortant coupé ou Codeberg en panne : rien n'est modifié, nouvel essai à la demie suivante. |
+| Journal : « Étiquette « traitée » absente du dépôt » | créer les quatre étiquettes avec leur nom exact (étape 6 bis) ; les réponses sont tout de même publiées. |
+| Le bouton ouvre un ticket **vide**, sans formulaire | le modèle n'est pas lu : vérifier que `.forgejo/issue_template/analyse.yaml` est présent sur la branche `pages` (publié par `publier.sh`) et que `pages` est la branche par défaut (étape 4.1). En attendant, le lien « Version simplifiée » fonctionne (ticket reconnu par son titre `[Analyse]`). |
+| Un ticket reste **sans réponse** | vérifier `journalctl -u bbcloud-demandes -e` ; le traitement est reporté pendant la campagne du dimanche (verrou) ; un ticket sans étiquette `analyse` ni titre commençant par `[Analyse]` est ignoré. |
+| Ticket avec l'étiquette `erreur` | erreur technique (site injoignable, publication impossible…) : nouvel essai automatique à chaque passage, 3 tentatives au maximum, puis fermeture avec explication. Cause dans `journalctl -u bbcloud-demandes -p warning`. |
 | `bbcloud-maj-auto` en échec : « Tests en échec » | le serveur est resté sur l'ancienne version. Lire `journalctl -u bbcloud-maj-auto -p warning`, corriger dans le dépôt et pousser : le nouveau commit est testé à l'heure suivante. |
 | `bbcloud-maj-auto` : « Fusion en avance rapide impossible » | des fichiers ont été modifiés à la main sur le serveur : `su - bbcloud -c 'git -C /opt/bleu-blanc-cloud status'`, puis annuler ces modifications (le code se modifie dans le dépôt GitHub). |
 | `bbcloud-maj-auto` : « mise à jour reportée » | normal pendant la campagne hebdomadaire (verrou partagé) : nouvel essai à l'heure suivante. |

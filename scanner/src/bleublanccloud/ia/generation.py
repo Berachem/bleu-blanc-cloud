@@ -79,6 +79,42 @@ def planifier(base: Base, referentiels: Referentiels, modele: str) -> PlanRappor
     return plan
 
 
+def tache_pour_scan(
+    base: Base, referentiels: Referentiels, modele: str, scan_id: int
+) -> TacheRapport | None:
+    """Rapport d'un seul scan (analyse sur demande) : None s'il est déjà à jour ou s'il a pu
+    être repris du cache (constats identiques déjà rédigés), sinon la tâche à générer."""
+    scan = base.scan(scan_id)
+    if scan is None or scan.score is None or scan.organisation_id is None:
+        return None
+    enregistree = base.organisation_par_id(scan.organisation_id)
+    if enregistree is None or referentiels.est_retire(scan.resultat.domaine):
+        return None
+    existant = base.rapport_du_scan(scan.id)
+    if existant and existant.modele == modele and existant.version_invite == VERSION_INVITE:
+        return None
+    empreinte = empreinte_constats(scan.resultat.constats, VERSION_INVITE, modele)
+    cache = base.rapport_en_cache(empreinte, modele, VERSION_INVITE)
+    if cache is not None:
+        base.enregistrer_rapport(scan.id, empreinte, modele, VERSION_INVITE, cache.contenu)
+        return None
+    organisation = enregistree.organisation
+    return TacheRapport(
+        scan_id=scan.id,
+        nom=organisation.nom,
+        empreinte=empreinte,
+        demande=DemandeRapport(
+            nom_organisation=organisation.nom,
+            type_organisation=organisation.type,
+            score=scan.score,
+            constats=scan.resultat.constats,
+            alternatives=choisir_alternatives(
+                scan.score, scan.resultat.constats, referentiels.alternatives
+            ),
+        ),
+    )
+
+
 def appliquer_cache(base: Base, plan: PlanRapports, modele: str) -> int:
     """Rattache aux nouveaux scans les rapports déjà générés pour des constats identiques."""
     for scan_id, empreinte, rapport in plan.depuis_cache:

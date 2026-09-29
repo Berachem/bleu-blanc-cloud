@@ -247,6 +247,8 @@ principal() {
   systemctl enable --now bbcloud-sauvegarde.timer >/dev/null
   systemctl enable --now bbcloud-maj-auto.timer >/dev/null
   echo "→ Mise à jour automatique activée (toutes les heures) : journalctl -u bbcloud-maj-auto"
+  systemctl enable --now bbcloud-demandes.timer >/dev/null
+  echo "→ Demandes « Analyser mon site » activées (toutes les heures, inactives tant que CODEBERG_JETON est vide)"
   echo "→ Timer de campagne installé mais NON activé : activez-le après votre première campagne de test."
 
   etape "Vérification"
@@ -257,7 +259,7 @@ principal() {
 ✓ Installation terminée ($([ "$prive" = 1 ] && echo "dépôt privé, accès par clé de déploiement" || echo "dépôt public")).
 
 Prochaines étapes (voir deploy/README.md) :
-  1. Complétez $RACINE/.env (clé Mistral, jeton IPinfo, dépôt Codeberg Pages).
+  1. Complétez $RACINE/.env (clé Mistral, jeton IPinfo, dépôt Codeberg Pages, jeton Codeberg des demandes).
   2. Ajoutez cette clé publique comme « clé de déploiement » AVEC écriture du dépôt Codeberg Pages :
      $(cat "$CLE_CODEBERG.pub")
   3. Lancez la première campagne de test, puis activez le timer :

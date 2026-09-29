@@ -16,6 +16,16 @@ export const SITE = {
   licenceCode: "EUPL-1.2",
 } as const;
 
+// « Analyser mon site » : un ticket est ouvert sur Codeberg ; le serveur le lit via l'API
+// (aucun port entrant) et y répond. Le modèle de ticket est publié avec le site (branche
+// « pages », qui doit être la branche par défaut du dépôt).
+export const DEMANDES = {
+  forge: "https://codeberg.org",
+  depot: "berachem/bleublanccloud-pages",
+  modele: ".forgejo/issue_template/analyse.yaml",
+  limiteJour: 10,
+} as const;
+
 export const MENTIONS_LEGALES = {
   editeur: {
     nom: "Berachem Markria",

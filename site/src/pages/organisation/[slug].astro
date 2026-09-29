@@ -102,6 +102,19 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
       )
     }
 
+    {
+      org.type === "sur_demande" && (
+        <div class="alerte">
+          <p>
+            <strong>Analyse sur demande.</strong> Ce site a été analysé à la demande d'un visiteur
+            (ticket Codeberg). Cette fiche ne fait pas partie de l'observatoire : elle n'apparaît
+            ni sur la carte, ni dans les classements, ni dans les statistiques.
+            <a href="/methodologie/#8-analyses-sur-demande">En savoir plus</a>
+          </p>
+        </div>
+      )
+    }
+
     <div class="alerte">
       <p>
         Ce score ne reflète que l'empreinte <strong>externe et visible publiquement</strong> de

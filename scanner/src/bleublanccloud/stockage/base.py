@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from types import TracebackType
-from typing import Any
+from typing import Any, Literal
 
 from bleublanccloud.modeles import (
     Constat,
@@ -55,6 +55,37 @@ class RapportEnregistre:
     modele: str
     version_invite: str
     cree_le: datetime
+
+
+StatutDemande = Literal["nouvelle", "a_publier", "traitee", "refusee", "erreur", "echec"]
+"""Cycle d'une demande : nouvelle → a_publier → traitee, ou refusee, ou erreur (réessayée)
+puis echec après le nombre maximal de tentatives."""
+
+
+@dataclass
+class DemandeEnregistree:
+    """Suivi d'un ticket « Analyser mon site » (le contenu du ticket n'est jamais stocké)."""
+
+    depot: str
+    numero: int
+    auteur: str
+    statut: StatutDemande
+    recue_le: datetime
+    domaine: str | None = None
+    motif: str | None = None
+    tentatives: int = 0
+    organisation_id: int | None = None
+    acceptee_le: datetime | None = None
+    commentee_le: datetime | None = None
+    cloturee_le: datetime | None = None
+
+
+def _date_ou_rien(valeur: str | None) -> datetime | None:
+    return datetime.fromisoformat(valeur) if valeur else None
+
+
+def _iso_ou_rien(valeur: datetime | None) -> str | None:
+    return valeur.astimezone(UTC).isoformat() if valeur else None
 
 
 class Base:
@@ -158,6 +189,12 @@ class Base:
     def organisation_par_slug(self, slug: str) -> OrganisationEnregistree | None:
         ligne = self.connexion.execute(
             "SELECT * FROM organisations WHERE slug = ?", (slug,)
+        ).fetchone()
+        return self._organisation(ligne) if ligne else None
+
+    def organisation_par_id(self, identifiant: int) -> OrganisationEnregistree | None:
+        ligne = self.connexion.execute(
+            "SELECT * FROM organisations WHERE id = ?", (identifiant,)
         ).fetchone()
         return self._organisation(ligne) if ligne else None
 
@@ -292,6 +329,18 @@ class Base:
         ligne = self.connexion.execute(requete, (organisation_id,)).fetchone()
         return self._scan(ligne) if ligne else None
 
+    def dernier_scan_note_du_domaine(self, domaine: str, depuis: datetime) -> ScanEnregistre | None:
+        """Scan noté le plus récent d'un domaine depuis une date (réutilisation d'une fiche)."""
+        ligne = self.connexion.execute(
+            """
+            SELECT s.* FROM scans s JOIN scores sc ON sc.scan_id = s.id
+            WHERE s.domaine = ? AND s.debut >= ? AND s.organisation_id IS NOT NULL
+            ORDER BY s.debut DESC, s.id DESC LIMIT 1
+            """,
+            (domaine, depuis.astimezone(UTC).isoformat()),
+        ).fetchone()
+        return self._scan(ligne) if ligne else None
+
     def historique_scores(self, organisation_id: int) -> list[tuple[str, int, str]]:
         """(date, score, note) de tous les scans notés d'une organisation (phase 8)."""
         lignes = self.connexion.execute(
@@ -342,6 +391,75 @@ class Base:
             scans_par_cle.setdefault((ligne["categorie"], cle), set()).add(ligne["scan_id"])
         comptes = [(cat, cle, len(scans)) for (cat, cle), scans in scans_par_cle.items()]
         return sorted(comptes, key=lambda e: (-e[2], e[0], e[1]))[:limite]
+
+    # ------------------------------------------------------------------ #
+    # Demandes d'analyse (tickets Codeberg)
+    # ------------------------------------------------------------------ #
+
+    def _demande(self, ligne: sqlite3.Row) -> DemandeEnregistree:
+        return DemandeEnregistree(
+            depot=ligne["depot"],
+            numero=int(ligne["numero"]),
+            auteur=ligne["auteur"],
+            statut=ligne["statut"],
+            recue_le=datetime.fromisoformat(ligne["recue_le"]),
+            domaine=ligne["domaine"],
+            motif=ligne["motif"],
+            tentatives=int(ligne["tentatives"]),
+            organisation_id=ligne["organisation_id"],
+            acceptee_le=_date_ou_rien(ligne["acceptee_le"]),
+            commentee_le=_date_ou_rien(ligne["commentee_le"]),
+            cloturee_le=_date_ou_rien(ligne["cloturee_le"]),
+        )
+
+    def demande(self, depot: str, numero: int) -> DemandeEnregistree | None:
+        ligne = self.connexion.execute(
+            "SELECT * FROM demandes WHERE depot = ? AND numero = ?", (depot, numero)
+        ).fetchone()
+        return self._demande(ligne) if ligne else None
+
+    def enregistrer_demande(self, demande: DemandeEnregistree) -> None:
+        """Crée ou met à jour le suivi d'une demande."""
+        with self.transaction() as c:
+            c.execute(
+                """
+                INSERT INTO demandes (depot, numero, auteur, domaine, statut, motif, tentatives,
+                                      organisation_id, recue_le, acceptee_le, commentee_le,
+                                      cloturee_le, maj_le)
+                VALUES (:depot, :numero, :auteur, :domaine, :statut, :motif, :tentatives,
+                        :organisation_id, :recue_le, :acceptee_le, :commentee_le,
+                        :cloturee_le, :maj_le)
+                ON CONFLICT (depot, numero) DO UPDATE SET
+                    domaine = excluded.domaine, statut = excluded.statut,
+                    motif = excluded.motif, tentatives = excluded.tentatives,
+                    organisation_id = excluded.organisation_id,
+                    acceptee_le = excluded.acceptee_le, commentee_le = excluded.commentee_le,
+                    cloturee_le = excluded.cloturee_le, maj_le = excluded.maj_le
+                """,
+                {
+                    "depot": demande.depot,
+                    "numero": demande.numero,
+                    "auteur": demande.auteur,
+                    "domaine": demande.domaine,
+                    "statut": demande.statut,
+                    "motif": demande.motif,
+                    "tentatives": demande.tentatives,
+                    "organisation_id": demande.organisation_id,
+                    "recue_le": _iso_ou_rien(demande.recue_le),
+                    "acceptee_le": _iso_ou_rien(demande.acceptee_le),
+                    "commentee_le": _iso_ou_rien(demande.commentee_le),
+                    "cloturee_le": _iso_ou_rien(demande.cloturee_le),
+                    "maj_le": _maintenant(),
+                },
+            )
+
+    def demandes_acceptees_depuis(self, depuis: datetime) -> list[DemandeEnregistree]:
+        """Demandes acceptées (comptées dans les limites) depuis une date, tous dépôts."""
+        lignes = self.connexion.execute(
+            "SELECT * FROM demandes WHERE acceptee_le >= ? ORDER BY acceptee_le",
+            (depuis.astimezone(UTC).isoformat(),),
+        )
+        return [self._demande(ligne) for ligne in lignes]
 
     # ------------------------------------------------------------------ #
     # Rapports IA

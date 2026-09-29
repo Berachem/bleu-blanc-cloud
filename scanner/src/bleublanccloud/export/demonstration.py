@@ -110,7 +110,7 @@ def _informatifs(spf: str | None, dmarc: str | None) -> list[Constat]:
 class ProfilDemo:
     nom: str
     type: TypeOrganisation
-    departement: str
+    departement: str | None
     population: int | None
     domaine: str
     constats: list[Constat]
@@ -347,6 +347,20 @@ def profils(referentiels: Referentiels) -> list[ProfilDemo]:
             ],
             info(bureau_enregistrement="Bureau fictif"),
         ),
+        # Analyse sur demande (ticket Codeberg) : visible par lien et recherche, hors carte,
+        # classements et statistiques de l'observatoire.
+        ProfilDemo(
+            "association-fictive.example", "sur_demande", None, None,
+            "association-fictive.example",
+            [
+                _hebergement("infomaniak", "B", "198.51.100.150 (AS29222 Infomaniak Network SA)"),
+                _serveur("messagerie", "mx", "mta-gw.infomaniak.ch", "infomaniak", "B"),
+                _serveur("dns", "ns", "ns11.infomaniak.ch", "infomaniak", "B"),
+                s("matomo-auto-heberge", "https://stats.association-fictive.example/matomo.js"),
+                *_informatifs("v=spf1 include:spf.infomaniak.ch -all", "v=DMARC1; p=reject"),
+            ],
+            info(bureau_enregistrement="Bureau fictif"),
+        ),
     ]  # fmt: skip
 
 
@@ -392,7 +406,7 @@ def generer_demonstration(referentiels: Referentiels) -> list[OrganisationExport
             nom=profil.nom,
             type=profil.type,
             departement=profil.departement,
-            region=DEPARTEMENTS_DEMO[profil.departement][1],
+            region=DEPARTEMENTS_DEMO[profil.departement][1] if profil.departement else None,
             population=profil.population,
             site_web=f"https://www.{profil.domaine}/",
             source="demonstration",

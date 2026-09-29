@@ -32,6 +32,8 @@ class Parametres(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
+        # « CODEBERG_JETON= » (valeur vide, comme dans .env.example) vaut « non renseigné »
+        env_ignore_empty=True,
     )
 
     mistral_api_key: SecretStr | None = None
@@ -53,6 +55,17 @@ class Parametres(BaseSettings):
     relances_max: int = Field(default=2, ge=0, le=2)
 
     depot_pages: str | None = None
+    domaine_site: str = "bleublanccloud.berachem.dev"
+    # Verrou partagé par la campagne, la mise à jour automatique et les demandes (flock)
+    chemin_verrou: Path = Path("donnees/bbcloud.verrou")
+
+    # Analyses sur demande (tickets Codeberg). Jeton aux droits minimaux : « write:issue »
+    # limité au seul dépôt des demandes. Jamais écrit dans les journaux.
+    codeberg_jeton: SecretStr | None = None
+    codeberg_api: str = "https://codeberg.org/api/v1"
+    depot_demandes: str = "berachem/bleublanccloud-pages"
+    demandes_limite_jour: int = Field(default=10, ge=0, le=1000)
+    demandes_limite_compte: int = Field(default=1, ge=0, le=100)
 
     def chemin_absolu(self, chemin: Path) -> Path:
         """Résout un chemin relatif depuis la racine du dépôt."""
@@ -65,6 +78,14 @@ class Parametres(BaseSettings):
     @property
     def base_sqlite(self) -> Path:
         return self.chemin_absolu(self.chemin_base_sqlite)
+
+    @property
+    def verrou(self) -> Path:
+        return self.chemin_absolu(self.chemin_verrou)
+
+    @property
+    def url_site(self) -> str:
+        return f"https://{self.domaine_site}"
 
 
 @lru_cache(maxsize=1)

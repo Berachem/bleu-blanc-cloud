@@ -20,7 +20,14 @@ export interface MetaExport {
   date_campagne: string;
   date_export: string;
   version_methodo: string;
+  /**
+   * Organisations de l'observatoire seulement.
+   */
   nombre_organisations: number;
+  /**
+   * Fiches d'analyses sur demande (hors statistiques).
+   */
+  nombre_sur_demande: number;
   donnees_demonstration: boolean;
 }
 /**
@@ -32,7 +39,7 @@ export interface MetaExport {
 export interface EntreeIndex {
   slug: string;
   nom: string;
-  type: "commune" | "departement" | "region" | "autre";
+  type: "commune" | "departement" | "region" | "autre" | "sur_demande";
   departement: string | null;
   departement_nom: string | null;
   region: string | null;
@@ -52,7 +59,7 @@ export interface EntreeIndex {
 export interface OrganisationExport {
   slug: string;
   nom: string;
-  type: "commune" | "departement" | "region" | "autre";
+  type: "commune" | "departement" | "region" | "autre" | "sur_demande";
   departement: string | null;
   departement_nom: string | null;
   region: string | null;

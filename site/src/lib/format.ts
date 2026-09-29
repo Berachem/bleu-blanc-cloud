@@ -24,6 +24,7 @@ export const LIBELLES_TYPES: Record<string, string> = {
   departement: "Département",
   region: "Région",
   autre: "Autre organisation",
+  sur_demande: "Analyse sur demande",
 };
 
 export const LIBELLES_TYPES_SERVICE: Record<string, string> = {

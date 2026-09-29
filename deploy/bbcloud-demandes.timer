@@ -1,0 +1,12 @@
+[Unit]
+Description=Bleu Blanc Cloud — demandes d'analyse toutes les heures (à la demie)
+
+[Timer]
+# Décalé d'une demi-heure par rapport à la mise à jour automatique (toutes les heures pile)
+OnCalendar=*-*-* *:30:00
+RandomizedDelaySec=2min
+Persistent=true
+Unit=bbcloud-demandes.service
+
+[Install]
+WantedBy=timers.target

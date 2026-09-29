@@ -1,11 +1,12 @@
 ---
 // Recherche instantanée : l'index léger (/recherche.json) n'est chargé qu'à la première saisie.
+import { URL_DEMANDE_FORMULAIRE } from "../lib/demandes";
 interface Props {
   identifiant?: string;
 }
 const { identifiant = "recherche" } = Astro.props;
 ---
-<div class="recherche" data-recherche>
+<div class="recherche" data-recherche data-url-demande={URL_DEMANDE_FORMULAIRE}>
   <div class="champ">
     <label for={identifiant}>Rechercher une organisation</label>
     <input
@@ -60,7 +61,11 @@ const { identifiant = "recherche" } = Astro.props;
         const vide = document.createElement("li");
         vide.className = "texte-secondaire petit";
         vide.style.padding = "0.5rem";
-        vide.textContent = "Aucune organisation trouvée.";
+        vide.textContent = "Aucune organisation trouvée. ";
+        const demande = document.createElement("a");
+        demande.href = bloc.dataset.urlDemande ?? "/methodologie/";
+        demande.textContent = "Analyser mon site";
+        vide.append(demande);
         liste.append(vide);
         return;
       }

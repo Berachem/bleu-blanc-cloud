@@ -1,0 +1,18 @@
+---
+// Bouton « Analyser mon site » : ouvre un ticket Codeberg (formulaire, avec repli pré-rempli).
+import { URL_DEMANDE_FORMULAIRE, URL_DEMANDE_SIMPLE } from "../lib/demandes";
+interface Props {
+  secondaire?: boolean;
+}
+const { secondaire = false } = Astro.props;
+---
+<div class="demande-analyse">
+  <a class:list={["bouton", secondaire && "bouton--secondaire"]} href={URL_DEMANDE_FORMULAIRE}>
+    Analyser mon site
+  </a>
+  <p class="texte-secondaire petit">
+    Ouvre un ticket sur Codeberg (compte gratuit nécessaire). Analyse passive, résultat public,
+    en général en moins d'une heure.
+    Le formulaire ne s'affiche pas&nbsp;? <a href={URL_DEMANDE_SIMPLE}>Version simplifiée</a>.
+  </p>
+</div>

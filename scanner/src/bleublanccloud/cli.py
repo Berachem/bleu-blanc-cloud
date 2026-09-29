@@ -36,6 +36,10 @@ app_campagne = typer.Typer(help="Campagnes de scan.")
 app.add_typer(app_campagne, name="campagne")
 app_rapports = typer.Typer(help="Rapports rédigés par l'IA (Mistral).")
 app.add_typer(app_rapports, name="rapports")
+app_demandes = typer.Typer(
+    help="Analyses sur demande (tickets « Analyser mon site » sur Codeberg)."
+)
+app.add_typer(app_demandes, name="demandes")
 
 console = Console()
 console_erreur = Console(stderr=True)
@@ -499,6 +503,94 @@ def exporter(
         console.print(f"{rapport.fichiers_supprimes} ancien(s) fichier(s) supprimé(s).")
     for ignoree in rapport.ignorees:
         console.print(f"[yellow]Ignorée :[/] {ignoree}")
+
+
+@app_demandes.command("traiter")
+def demandes_traiter() -> None:
+    """Traite les tickets ouverts : validation, analyse, publication et réponse."""
+    from rich.markup import escape
+
+    from bleublanccloud.demandes.execution import traiter_demandes
+    from bleublanccloud.demandes.forge import ErreurForge
+    from bleublanccloud.verrou import verrou_exclusif
+
+    parametres = obtenir_parametres()
+    if parametres.codeberg_jeton is None:
+        console.print("[yellow]CODEBERG_JETON absent du fichier .env : aucune demande traitée.[/]")
+        return
+    with verrou_exclusif(parametres.verrou) as obtenu:
+        if not obtenu:
+            console.print(
+                "Une autre tâche Bleu Blanc Cloud (campagne, mise à jour) est en cours : "
+                "traitement reporté au prochain passage."
+            )
+            return
+        referentiels = referentiels_par_defaut()
+        with Base(parametres.base_sqlite) as base:
+            try:
+                bilan = asyncio.run(traiter_demandes(parametres, referentiels, base))
+            except ErreurForge as erreur:
+                console_erreur.print(f"[red]Codeberg injoignable : {escape(str(erreur))}[/]")
+                raise typer.Exit(code=1) from None
+    console.print(
+        f"{bilan.lues} demande(s) ouverte(s) · {len(bilan.traitees)} traitée(s) · "
+        f"{len(bilan.refusees)} refusée(s) · {len(bilan.erreurs)} en erreur"
+    )
+    for numero in bilan.traitees:
+        console.print(f"[green]✓[/] ticket #{numero} traité")
+    for numero, code in bilan.refusees:
+        console.print(f"[yellow]✗[/] ticket #{numero} refusé ({escape(code)})")
+    for numero, raison in bilan.erreurs:
+        console.print(f"[red]⚠[/] ticket #{numero} : {escape(raison)}")
+    if bilan.reponses_en_attente:
+        console.print(
+            f"[yellow]Réponses reportées au prochain passage : {bilan.reponses_en_attente}[/]"
+        )
+    if bilan.publication is False:
+        raise typer.Exit(code=1)
+
+
+@app_demandes.command("lister")
+def demandes_lister() -> None:
+    """Liste les demandes ouvertes et le verdict de validation (lecture seule, aucun scan)."""
+    from rich.markup import escape
+
+    from bleublanccloud.demandes.forge import ClientForge, ErreurForge
+    from bleublanccloud.demandes.tickets import Ticket, case_cochee, extraire_domaine
+    from bleublanccloud.demandes.validation import DomaineRefuse, valider_domaine
+
+    parametres = obtenir_parametres()
+    if parametres.codeberg_jeton is None:
+        console_erreur.print("[red]CODEBERG_JETON absent du fichier .env.[/]")
+        raise typer.Exit(code=1)
+    jeton = parametres.codeberg_jeton
+
+    async def lire() -> list[Ticket]:
+        async with ClientForge(parametres.depot_demandes, jeton, parametres.codeberg_api) as forge:
+            return [t for t in await forge.tickets_ouverts() if t.est_demande]
+
+    try:
+        tickets = asyncio.run(lire())
+    except ErreurForge as erreur:
+        console_erreur.print(f"[red]Codeberg injoignable : {escape(str(erreur))}[/]")
+        raise typer.Exit(code=1) from None
+    tableau = Table(title=f"Demandes ouvertes sur {parametres.depot_demandes}", expand=True)
+    tableau.add_column("Ticket", justify="right")
+    tableau.add_column("Compte")
+    tableau.add_column("Domaine validé")
+    tableau.add_column("Case cochée")
+    for ticket in tickets:
+        try:
+            domaine = valider_domaine(extraire_domaine(ticket))
+        except DomaineRefuse as refus:
+            domaine = f"refusé ({refus.code})"
+        tableau.add_row(
+            f"#{ticket.numero}",
+            escape(ticket.auteur),
+            escape(domaine),
+            "oui" if case_cochee(ticket) else "non",
+        )
+    console.print(tableau)
 
 
 @app.command()

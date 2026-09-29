@@ -33,6 +33,7 @@ from tenacity import (
 
 from bleublanccloud.configuration import Parametres
 from bleublanccloud.referentiels import Referentiels
+from bleublanccloud.sondes.reseau import TransportReseauPublic
 
 journal = logging.getLogger(__name__)
 
@@ -142,18 +143,18 @@ class ClientWebPoli:
             "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5",
             "Accept-Language": "fr-FR,fr;q=0.9",
         }
+        # Garde réseau : aucune connexion vers localhost ou un réseau privé (voir reseau.py)
         self._client = client or httpx.AsyncClient(
-            http2=True,
             headers=en_tetes,
             timeout=parametres.delai_expiration_s,
             follow_redirects=False,
+            transport=TransportReseauPublic(verify=True),
         )
         self._client_sans_verification = client_sans_verification or httpx.AsyncClient(
-            http2=True,
             headers=en_tetes,
             timeout=parametres.delai_expiration_s,
             follow_redirects=False,
-            verify=False,
+            transport=TransportReseauPublic(verify=False),
         )
         self._semaphore = asyncio.Semaphore(parametres.concurrence_max)
         self._verrous: dict[str, asyncio.Lock] = {}

@@ -44,6 +44,8 @@ def preparer_cibles(
     ignorees: list[str] = []
     for enregistree in organisations:
         organisation = enregistree.organisation
+        if organisation.type == "sur_demande":
+            continue  # analysée uniquement à la demande, hors observatoire
         if not organisation.site_web:
             ignorees.append(f"{organisation.nom} : aucun site web connu")
             continue

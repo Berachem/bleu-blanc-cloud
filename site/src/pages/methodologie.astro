@@ -1,5 +1,6 @@
 ---
 // Contenu publié directement depuis docs/methodologie.md (source unique, versionnée).
+import BoutonAnalyse from "../composants/BoutonAnalyse.astro";
 import Base from "../mises-en-page/Base.astro";
 import { Content, frontmatter } from "../../../docs/methodologie.md";
 ---
@@ -12,5 +13,13 @@ import { Content, frontmatter } from "../../../docs/methodologie.md";
       Version {frontmatter.version} du {frontmatter.date}
     </p>
     <Content />
+    <section class="section" aria-labelledby="titre-demande">
+      <h2 id="titre-demande">Faire analyser un site</h2>
+      <p>
+        Un site absent de l'observatoire&nbsp;? Demandez son analyse (règles détaillées dans la
+        section « Analyses sur demande » ci-dessus).
+      </p>
+      <BoutonAnalyse />
+    </section>
   </div>
 </Base>

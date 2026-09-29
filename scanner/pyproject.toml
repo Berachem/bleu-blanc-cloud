@@ -18,6 +18,7 @@ dependencies = [
     "PyYAML>=6.0",
     "tenacity>=9.0",
     "mistralai>=3.0,<4",
+    "idna>=3.7",
 ]
 
 [project.scripts]

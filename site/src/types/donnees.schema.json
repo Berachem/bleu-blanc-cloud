@@ -268,7 +268,8 @@
             "commune",
             "departement",
             "region",
-            "autre"
+            "autre",
+            "sur_demande"
           ],
           "title": "Type",
           "type": "string"
@@ -597,7 +598,14 @@
           "type": "string"
         },
         "nombre_organisations": {
+          "description": "Organisations de l'observatoire seulement.",
           "title": "Nombre Organisations",
+          "type": "integer"
+        },
+        "nombre_sur_demande": {
+          "default": 0,
+          "description": "Fiches d'analyses sur demande (hors statistiques).",
+          "title": "Nombre Sur Demande",
           "type": "integer"
         },
         "donnees_demonstration": {
@@ -611,6 +619,7 @@
         "date_export",
         "version_methodo",
         "nombre_organisations",
+        "nombre_sur_demande",
         "donnees_demonstration"
       ],
       "title": "MetaExport",
@@ -633,7 +642,8 @@
             "commune",
             "departement",
             "region",
-            "autre"
+            "autre",
+            "sur_demande"
           ],
           "title": "Type",
           "type": "string"

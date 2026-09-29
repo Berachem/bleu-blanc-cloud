@@ -684,6 +684,17 @@ th {
   }
 }
 
+.demande-analyse {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: start;
+  margin: 1rem 0;
+}
+.demande-analyse p {
+  margin: 0;
+  max-width: 60ch;
+}
+
 .champ {
   display: grid;
   gap: 0.3rem;

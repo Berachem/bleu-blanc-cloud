@@ -1,10 +1,12 @@
 ---
 import BadgeNote from "../composants/BadgeNote.astro";
+import BoutonAnalyse from "../composants/BoutonAnalyse.astro";
 import Base from "../mises-en-page/Base.astro";
-import { departements, index } from "../lib/donnees";
+import { departements, observatoire } from "../lib/donnees";
 import { LIBELLES_TYPES, nombre } from "../lib/format";
 
-const entrees = [...index()].sort((a, b) => b.score - a.score || a.nom.localeCompare(b.nom, "fr"));
+// Les analyses sur demande sont exclues des classements (accessibles par la recherche)
+const entrees = [...observatoire()].sort((a, b) => b.score - a.score || a.nom.localeCompare(b.nom, "fr"));
 const listeDepartements = departements()
   .filter((d) => d.nombre_organisations > 0)
   .sort((a, b) => a.code.localeCompare(b.code, "fr", { numeric: true }));
@@ -55,6 +57,13 @@ const parType = types.map((type) => {
       <p class="texte-secondaire petit" aria-live="polite" data-compteur>
         {entrees.length} organisation(s)
       </p>
+      <div class="carte" data-aucun-resultat hidden>
+        <p>
+          Aucune organisation ne correspond. Votre site n'est pas encore analysé&nbsp;? Vous
+          pouvez demander son analyse passive.
+        </p>
+        <BoutonAnalyse />
+      </div>
       <div class="tableau-defilant">
         <table data-tableau>
           <caption class="visuellement-cache">Organisations analysées, triées par score décroissant</caption>
@@ -133,6 +142,7 @@ const parType = types.map((type) => {
     const champDepartement = formulaire.elements.namedItem("departement") as HTMLSelectElement;
     const champType = formulaire.elements.namedItem("type") as HTMLSelectElement;
     const champTexte = formulaire.elements.namedItem("texte") as HTMLInputElement;
+    const aucunResultat = document.querySelector<HTMLElement>("[data-aucun-resultat]");
     champDepartement.value = parametres.get("departement") ?? "";
     champType.value = parametres.get("type") ?? "";
 
@@ -149,6 +159,7 @@ const parType = types.map((type) => {
         if (visible) visibles += 1;
       }
       compteur.textContent = `${visibles} organisation(s)`;
+      if (aucunResultat) aucunResultat.hidden = visibles > 0;
     };
     formulaire.addEventListener("input", filtrer);
     filtrer();

@@ -1,0 +1,35 @@
+# Modèle de ticket « Analyser mon site » (Forgejo / Codeberg).
+# Publié avec le site sur la branche « pages » par deploy/publier.sh : il est donc restauré
+# à chaque publication. Le robot reconnaît aussi les tickets dont le titre commence par
+# « [Analyse] » (repli par URL pré-remplie).
+name: Analyser mon site
+about: Demander l'analyse passive d'un nom de domaine par Bleu Blanc Cloud
+title: "[Analyse] "
+labels:
+  - analyse
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Bleu Blanc Cloud** mesure la dépendance numérique d'un site vis-à-vis de fournisseurs extra-européens (hébergement, messagerie, DNS, services tiers).
+
+        - 🔍 **Analyse passive uniquement** : enregistrements DNS et quelques pages publiques, comme le ferait n'importe quel visiteur. Aucun test d'intrusion, aucun formulaire soumis.
+        - 🌐 **Résultat public** : la fiche est publiée sur https://bleublanccloud.berachem.dev et la réponse (note, score, lien) est donnée dans ce ticket.
+        - ⏱️ **Délai habituel : moins d'une heure.** 10 analyses par jour au total, une par jour et par compte ; une analyse de moins de 7 jours est réutilisée.
+
+        N'indiquez aucune donnée personnelle dans ce ticket.
+  - type: input
+    id: domaine
+    attributes:
+      label: Domaine à analyser
+      description: "Le nom de domaine seul, sans chemin ni port."
+      placeholder: mairie-exemple.fr
+    validations:
+      required: true
+  - type: checkboxes
+    id: engagement
+    attributes:
+      label: Engagement
+      options:
+        - label: "Je suis responsable de ce site, ou il s'agit du site d'un organisme public"
+          required: true

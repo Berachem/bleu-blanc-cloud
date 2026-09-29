@@ -1,14 +1,16 @@
 ---
 import BadgeNote from "../composants/BadgeNote.astro";
+import BoutonAnalyse from "../composants/BoutonAnalyse.astro";
 import CarteFrance from "../composants/CarteFrance.astro";
 import CarteOrganisation from "../composants/CarteOrganisation.astro";
 import EtoilesEurope from "../composants/EtoilesEurope.astro";
 import Recherche from "../composants/Recherche.astro";
 import Base from "../mises-en-page/Base.astro";
-import { departements, index, meta, organisations } from "../lib/donnees";
+import { departements, meta, observatoire, organisations } from "../lib/donnees";
 import { date, nombre, pourcentage } from "../lib/format";
 
-const entrees = index();
+// Statistiques et derniers scans : observatoire seulement (hors analyses sur demande)
+const entrees = observatoire();
 const toutes = organisations();
 const total = entrees.length;
 const moyenne = total ? entrees.reduce((somme, e) => somme + e.score, 0) / total : 0;
@@ -36,6 +38,7 @@ const infos = meta();
           pistes vers des alternatives françaises et européennes.
         </p>
         <Recherche />
+        <BoutonAnalyse secondaire />
       </div>
       <div>
         <p class="texte-secondaire petit">

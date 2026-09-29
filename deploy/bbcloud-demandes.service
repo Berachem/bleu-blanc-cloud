@@ -1,0 +1,30 @@
+# Analyses sur demande : lecture des tickets Codeberg, analyse, publication, réponse.
+[Unit]
+Description=Bleu Blanc Cloud — traitement des demandes « Analyser mon site »
+Documentation=https://github.com/Berachem/bleu-blanc-cloud/blob/main/deploy/README.md
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=bbcloud
+Group=bbcloud
+WorkingDirectory=/opt/bleu-blanc-cloud
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=ASTRO_TELEMETRY_DISABLED=1
+ExecStart=/opt/bleu-blanc-cloud/deploy/demandes.sh
+SyslogIdentifier=bbcloud-demandes
+TimeoutStartSec=50min
+Nice=10
+IOSchedulingClass=idle
+# Durcissement
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/opt/bleu-blanc-cloud /home/bbcloud
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true

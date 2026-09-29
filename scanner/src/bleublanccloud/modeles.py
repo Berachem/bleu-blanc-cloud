@@ -37,7 +37,8 @@ Categorie = Literal[
 MotifExclusion = Literal["inconnu", "indisponible", "sans_objet"]
 """Raison pour laquelle une catégorie n'est pas évaluée."""
 
-TypeOrganisation = Literal["commune", "departement", "region", "autre"]
+TypeOrganisation = Literal["commune", "departement", "region", "autre", "sur_demande"]
+"""« sur_demande » : analyse demandée par un visiteur, hors observatoire (carte, classements)."""
 
 
 class ModeleStrict(BaseModel):
@@ -349,7 +350,10 @@ class MetaExport(ModeleStrict):
     date_campagne: datetime
     date_export: datetime
     version_methodo: str
-    nombre_organisations: int
+    nombre_organisations: int = Field(description="Organisations de l'observatoire seulement.")
+    nombre_sur_demande: int = Field(
+        default=0, description="Fiches d'analyses sur demande (hors statistiques)."
+    )
     donnees_demonstration: bool = False
 
 

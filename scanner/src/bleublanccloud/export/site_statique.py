@@ -166,7 +166,8 @@ def agreger_departements(
 ) -> list[DepartementExport]:
     par_departement: dict[str, list[EntreeIndex]] = {}
     for entree in entrees:
-        if entree.departement:
+        # Les analyses sur demande restent hors des statistiques de l'observatoire
+        if entree.departement and entree.type != "sur_demande":
             par_departement.setdefault(entree.departement, []).append(entree)
     resultat: list[DepartementExport] = []
     for code in sorted(set(par_departement) | set(noms)):
@@ -230,14 +231,17 @@ def ecrire_export(
             for a in referentiels.alternatives.values()
         ],
     )
-    dates = [o.date_scan for o in organisations]
+    observatoire = [o for o in organisations if o.type != "sur_demande"]
+    # La date de campagne ne dépend que de l'observatoire (les demandes arrivent chaque jour)
+    dates = [o.date_scan for o in observatoire] or [o.date_scan for o in organisations]
     _ecrire(
         dossier / "meta.json",
         MetaExport(
             date_campagne=date_campagne or (max(dates) if dates else datetime.now(UTC)),
             date_export=datetime.now(UTC),
             version_methodo=VERSION_METHODO,
-            nombre_organisations=len(organisations),
+            nombre_organisations=len(observatoire),
+            nombre_sur_demande=len(organisations) - len(observatoire),
             donnees_demonstration=donnees_demonstration,
         ),
     )

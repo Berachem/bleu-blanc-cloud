@@ -7,7 +7,15 @@ import contextlib
 import ssl
 from typing import Any
 
+import httpcore
 from pydantic import BaseModel
+
+from bleublanccloud.sondes.reseau import (
+    AdresseNonPublique,
+    ResolveurAdresses,
+    adresses_publiques,
+    resoudre_systeme,
+)
 
 
 class DonneesTls(BaseModel):
@@ -34,19 +42,47 @@ def lire_emetteur(certificat: dict[str, Any]) -> tuple[str | None, str | None]:
     return champs.get("organizationName"), champs.get("commonName")
 
 
-async def sonder_tls(hote: str, port: int = 443, delai_s: float = 10.0) -> DonneesTls:
+async def _connecter(
+    adresses: list[str], hote: str, port: int, contexte: ssl.SSLContext, delai_s: float
+) -> asyncio.StreamWriter:
+    """Ouvre la connexion TLS vers la première adresse joignable."""
+    derniere_erreur: BaseException | None = None
+    for adresse in adresses:
+        try:
+            _, ecrivain = await asyncio.wait_for(
+                asyncio.open_connection(adresse, port, ssl=contexte, server_hostname=hote),
+                timeout=delai_s,
+            )
+        except ssl.SSLError:
+            raise  # le serveur a répondu : inutile d'essayer une autre adresse
+        except (OSError, TimeoutError) as erreur:
+            derniere_erreur = erreur
+            continue
+        return ecrivain
+    assert derniere_erreur is not None
+    raise derniere_erreur
+
+
+async def sonder_tls(
+    hote: str,
+    port: int = 443,
+    delai_s: float = 10.0,
+    resoudre: ResolveurAdresses = resoudre_systeme,
+) -> DonneesTls:
     """Ouvre une connexion TLS (sans envoyer de requête) et lit le certificat présenté."""
     donnees = DonneesTls(hote=hote)
     contexte = ssl.create_default_context()
     try:
-        _, ecrivain = await asyncio.wait_for(
-            asyncio.open_connection(hote, port, ssl=contexte, server_hostname=hote),
-            timeout=delai_s,
-        )
+        # Garde réseau : connexion vers une adresse publique vérifiée, SNI sur le nom d'hôte
+        adresses = await adresses_publiques(hote, port, resoudre)
+        ecrivain = await _connecter(adresses, hote, port, contexte, delai_s)
+    except AdresseNonPublique:
+        donnees.erreur = "connexion TLS refusée : adresse non publique"
+        return donnees
     except ssl.SSLCertVerificationError as erreur:
         donnees.erreur = f"certificat non valide : {erreur.verify_message}"
         return donnees
-    except (OSError, TimeoutError, ssl.SSLError) as erreur:
+    except (OSError, TimeoutError, ssl.SSLError, httpcore.ConnectError) as erreur:
         donnees.erreur = f"connexion TLS impossible : {type(erreur).__name__}"
         return donnees
     try:

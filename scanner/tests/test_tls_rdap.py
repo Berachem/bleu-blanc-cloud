@@ -6,6 +6,7 @@ import json
 import socket
 
 import httpx
+import pytest
 
 from bleublanccloud.sondes.rdap import charger_amorcage, extraire_bureau, sonder_rdap
 from bleublanccloud.sondes.tls import DonneesTls, lire_emetteur, sonder_tls
@@ -40,18 +41,31 @@ def port_libre() -> int:
         return int(s.getsockname()[1])
 
 
-async def test_tls_connexion_refusee() -> None:
+async def test_tls_refuse_une_adresse_non_publique() -> None:
+    # Garde réseau : aucune connexion vers localhost, même pour lire un certificat
     donnees = await sonder_tls("127.0.0.1", port=port_libre(), delai_s=2)
+    assert donnees.erreur == "connexion TLS refusée : adresse non publique"
+
+
+async def _adresses_locales(hote: str, port: int, resoudre: object = None) -> list[str]:
+    return ["127.0.0.1"]
+
+
+async def test_tls_connexion_refusee(monkeypatch: pytest.MonkeyPatch) -> None:
+    # La garde est court-circuitée pour tester la gestion d'erreur sur une socket locale
+    monkeypatch.setattr("bleublanccloud.sondes.tls.adresses_publiques", _adresses_locales)
+    donnees = await sonder_tls("site.exemple.fr", port=port_libre(), delai_s=2)
     assert donnees.erreur is not None and "impossible" in donnees.erreur
 
 
-async def test_tls_delai_depasse() -> None:
+async def test_tls_delai_depasse(monkeypatch: pytest.MonkeyPatch) -> None:
     # Socket en écoute qui n'accepte jamais la négociation TLS : le délai doit s'appliquer.
+    monkeypatch.setattr("bleublanccloud.sondes.tls.adresses_publiques", _adresses_locales)
     with socket.socket() as ecoute:
         ecoute.bind(("127.0.0.1", 0))
         ecoute.listen(1)
         port = ecoute.getsockname()[1]
-        donnees = await sonder_tls("127.0.0.1", port=port, delai_s=0.2)
+        donnees = await sonder_tls("site.exemple.fr", port=port, delai_s=0.2)
     assert donnees.erreur is not None and "TimeoutError" in donnees.erreur
 
 

@@ -1,6 +1,7 @@
 ---
+import BoutonAnalyse from "../composants/BoutonAnalyse.astro";
+import { DEMANDES, SITE } from "../config";
 import Base from "../mises-en-page/Base.astro";
-import { SITE } from "../config";
 ---
 <Base
   titre="À propos"
@@ -39,6 +40,30 @@ import { SITE } from "../config";
       <a href={SITE.depot}>dépôt du projet</a>. Chaque score est reproductible et chaque point
       retiré est justifié par une preuve.
     </p>
+
+    <h2>Analyses sur demande</h2>
+    <p>
+      Tout visiteur peut demander l'analyse d'un domaine en ouvrant un ticket sur
+      <a href={`${DEMANDES.forge}/${DEMANDES.depot}`}>Codeberg</a> : le serveur du projet, qui
+      n'est joignable depuis Internet par aucun port, relit les tickets toutes les heures, lance
+      l'analyse passive habituelle et répond dans le ticket avec la note et le lien vers la fiche.
+    </p>
+    <ul>
+      <li>Réservé à votre propre site ou au site d'un organisme public (engagement à cocher).</li>
+      <li>
+        {DEMANDES.limiteJour} analyses par jour au total, une par jour et par compte ; une analyse
+        de moins de 7 jours est réutilisée.
+      </li>
+      <li>
+        Le résultat est public, mais ces fiches restent <strong>hors de l'observatoire</strong> :
+        ni carte, ni classements, ni statistiques.
+      </li>
+      <li>
+        Le contenu des tickets n'est jamais exécuté : seul le nom de domaine, strictement validé,
+        est utilisé ; les adresses locales ou privées sont refusées.
+      </li>
+    </ul>
+    <BoutonAnalyse secondaire />
 
     <h2>Cohérent avec son sujet</h2>
     <ul>

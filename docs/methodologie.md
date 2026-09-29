@@ -125,11 +125,23 @@ Pour chaque organisation, un rapport lisible par un décideur et un plan de migr
 - Aucun nom de personne, adresse e-mail ou numéro de téléphone n'est transmis.
 - Chaque texte généré porte la mention : « Rédigé par une IA (Mistral) à partir des constats techniques — peut contenir des erreurs ».
 
-## 8. Indépendance et droit de réponse
+## 8. Analyses sur demande
+
+Tout visiteur peut demander l'analyse d'un domaine avec le bouton « Analyser mon site », qui ouvre un **ticket sur Codeberg**. Le serveur du projet n'est joignable depuis Internet par aucun port : il relit les tickets toutes les heures via l'API de Codeberg, puis répond dans le ticket.
+
+- **Engagement** : la demande doit concerner votre propre site ou le site d'un organisme public (case obligatoire).
+- **Validation stricte** : seul un nom de domaine est accepté (ni chemin, ni port, ni adresse IP, ni nom local comme `localhost` ou `.local`) ; un domaine qui pointe vers une adresse locale ou privée est refusé. Le contenu du ticket n'est jamais exécuté : seul le domaine validé est utilisé.
+- **Retraits** : un domaine qui a demandé son retrait n'est jamais analysé.
+- **Limites** : 10 analyses acceptées par jour au total, une par jour et par compte Codeberg. Si le domaine a été analysé il y a moins de 7 jours, la fiche existante est réutilisée.
+- **Même méthode** : analyse passive, score et rapport IA identiques à ceux de l'observatoire.
+- **Hors observatoire** : ces fiches sont publiques et accessibles par leur lien et la recherche, mais **exclues de la carte, des classements et des statistiques**. Si le domaine appartient déjà à une organisation de l'observatoire, c'est sa fiche qui est mise à jour.
+- **Réponse** : note, score, lien vers la fiche et rappel des limites ; en cas de refus, la raison est expliquée. Une erreur technique est retentée automatiquement (3 tentatives au maximum).
+
+## 9. Indépendance et droit de réponse
 
 Bleu Blanc Cloud est un projet personnel et bénévole, **sans aucun lien avec l'État ni avec l'Union européenne**, et sans rémunération des fournisseurs cités. Toute organisation peut signaler une erreur, exercer un droit de réponse ou demander son retrait (réponse sous 30 jours).
 
-## 9. Historique des versions
+## 10. Historique des versions
 
 | Version | Date | Modifications |
 |---|---|---|
