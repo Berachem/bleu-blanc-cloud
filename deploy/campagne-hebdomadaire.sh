@@ -7,6 +7,8 @@ RACINE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$RACINE/scanner"
 
 echo "▶ Mise à jour du code (branche main)"
+# Dépôt privé : la clé de déploiement de ~/.ssh/config est utilisée, sans jamais rien demander.
+export GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=15"
 git -C "$RACINE" pull --ff-only --quiet || echo "⚠ git pull impossible : on continue avec la version locale"
 uv sync --frozen --quiet
 

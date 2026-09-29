@@ -28,7 +28,7 @@ Proxmox (chez toi)                                    Internet
 | Une clé API **Mistral** | <https://console.mistral.ai> → *API Keys* | pour les rapports IA |
 | Un jeton **IPinfo** gratuit (base IP → ASN) | <https://ipinfo.io/signup> | recommandé (sinon repli sur RIPEstat, plus lent) |
 
-> 💡 Si le dépôt GitHub `Berachem/bleu-blanc-cloud` est **privé**, rends-le public (le code est sous EUPL-1.2) ou remplace `DEPOT_CODE` par une URL contenant un jeton d'accès en lecture.
+> 💡 Le dépôt GitHub `Berachem/bleu-blanc-cloud` peut rester **privé** : l'installateur le détecte et configure une clé de déploiement en lecture seule (étape 2). Pense seulement à le passer en public avant d'ouvrir le site, car le site renvoie vers le code source.
 
 ---
 
@@ -78,23 +78,53 @@ pct reboot 120
 
 ## 2. Lancer l'installation automatique
 
+### 2.1 Déposer le script dans le conteneur
+
+Entre dans le conteneur en root (`pct enter 120` depuis l'hôte, ou la console du conteneur dans l'interface Proxmox), puis :
+
+**Dépôt public**
+
 ```bash
-pct enter 120                      # ou connexion SSH/console au conteneur, en root
 apt-get update && apt-get install -y curl
 curl -fsSLO https://raw.githubusercontent.com/Berachem/bleu-blanc-cloud/main/deploy/installer.sh
+```
+
+**Dépôt privé** — au choix :
+
+- **Avec un jeton GitHub temporaire** (le plus simple) : crée un [jeton « fine-grained »](https://github.com/settings/personal-access-tokens/new) limité au dépôt `bleu-blanc-cloud`, permission *Contents : Read-only*, expiration 1 jour, puis :
+  ```bash
+  apt-get update && apt-get install -y curl
+  read -rs -p "Jeton GitHub : " JETON && echo
+  curl -fsSL -H "Authorization: Bearer $JETON" -H "Accept: application/vnd.github.raw+json" \
+    https://api.github.com/repos/Berachem/bleu-blanc-cloud/contents/deploy/installer.sh -o installer.sh
+  unset JETON
+  ```
+  Supprime ensuite le jeton sur GitHub : il ne sert qu'à cette étape.
+- **Par copier-coller** : ouvre `deploy/installer.sh` sur GitHub, copie son contenu, puis dans le conteneur `nano installer.sh`, colle, enregistre (`Ctrl+O`, `Entrée`, `Ctrl+X`).
+
+### 2.2 Lancer l'installation
+
+```bash
 bash installer.sh
 ```
 
 Le script (idempotent, relançable sans risque) :
 
 - installe `git`, `sqlite3`, **Node.js 22 LTS** (binaire officiel, somme de contrôle vérifiée) et **uv** ;
-- crée l'utilisateur système `bbcloud` et clone le code dans `/opt/bleu-blanc-cloud` ;
+- crée l'utilisateur système `bbcloud` ;
+- **détecte si le dépôt est public ou privé** :
+  - public : clone en HTTPS ;
+  - privé : génère une **clé de déploiement GitHub en lecture seule**, l'affiche avec le lien direct vers *Settings → Deploy keys → Add deploy key* du dépôt, et **attend** que tu l'ajoutes (laisse « Allow write access » décoché), puis clone en SSH. La clé d'hôte de GitHub est épinglée (empreinte officielle vérifiée) ;
 - installe les dépendances Python et Node ;
 - crée `/opt/bleu-blanc-cloud/.env` à partir de `.env.example` (droits `600`) ;
 - génère une **clé SSH de publication** pour Codeberg et l'affiche ;
 - installe les services systemd, active la **sauvegarde quotidienne** et laisse le **timer de campagne désactivé** jusqu'à ta validation.
 
-> Option : `AVEC_CHROMIUM=1 bash installer.sh` installe Chromium pour que chaque publication vérifie automatiquement l'absence de requête externe et de cookie (≈ 300 Mo).
+Les mises à jour hebdomadaires du code (`git pull`) utilisent ensuite automatiquement la même clé de déploiement.
+
+> Options : `AVEC_CHROMIUM=1 bash installer.sh` installe Chromium pour que chaque publication vérifie automatiquement l'absence de requête externe et de cookie (≈ 300 Mo). `DEPOT_PRIVE=1` ou `DEPOT_PRIVE=0` force le mode si la détection automatique se trompe.
+>
+> Si tu passes plus tard le dépôt en public, rien à changer : l'accès par clé de déploiement continue de fonctionner (tu peux aussi relancer `bash installer.sh`, qui repassera en HTTPS).
 
 ---
 
@@ -217,6 +247,8 @@ systemctl list-timers 'bbcloud*'
 
 Codeberg → **+** → *Nouvelle migration* → *GitHub* → URL `https://github.com/Berachem/bleu-blanc-cloud` → coche **« Ce dépôt sera un miroir »**. Codeberg se synchronise ensuite automatiquement.
 
+Tant que le dépôt GitHub est privé, renseigne dans le formulaire de migration un jeton GitHub en lecture seule (champ du jeton d'accès), ou attends simplement le passage en public pour créer le miroir.
+
 ---
 
 ## 9. Avant d'ouvrir le site au public ✅
@@ -227,6 +259,7 @@ Codeberg → **+** → *Nouvelle migration* → *GitHub* → URL `https://github
 - [ ] **Campagne de test** (10 organisations) relue sur le site local.
 - [ ] **Première campagne complète** lancée puis publiée.
 - [ ] **Dogfooding** : `bbcloud scanner bleublanccloud.berachem.dev` donne A.
+- [ ] **Dépôt GitHub passé en public** : le site renvoie vers le code source, la méthodologie et les référentiels.
 
 Toute modification de ces fichiers se fait dans le dépôt GitHub (le conteneur récupère la dernière version chaque dimanche par `git pull`).
 
@@ -250,6 +283,8 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub (le conteneur 
 |---|---|
 | `referentiels maj` : « IPINFO_TOKEN absent » | normal sans jeton : le scanner interroge RIPEstat (plus lent). Ajoute `IPINFO_TOKEN` dans `.env`. |
 | Hébergeurs souvent « inconnus » | lancer `referentiels maj` ; compléter `fournisseurs.yaml` avec `referentiels inconnus`. |
+| `Permission denied (publickey)` sur **github.com** (dépôt privé) | la clé de déploiement n'est pas (ou plus) dans *Settings → Deploy keys* du dépôt. Clé à ajouter : `cat /home/bbcloud/.ssh/id_ed25519_github.pub`. Test : `su - bbcloud -c 'ssh -T git@github.com'` (réponse attendue : « successfully authenticated »). |
+| L'installateur choisit le mauvais mode (public/privé) | relancer avec `DEPOT_PRIVE=1 bash installer.sh` ou `DEPOT_PRIVE=0 bash installer.sh`. |
 | `Permission denied (publickey)` à la publication | la clé de déploiement Codeberg n'a pas l'accès en écriture, ou `DEPOT_PAGES` n'est pas en SSH. Test : `su - bbcloud -c 'ssh -T git@codeberg.org'`. |
 | Le site affiche encore une ancienne version / pas de HTTPS | vérifier le CNAME (« DNS only »), patienter quelques minutes, contrôler la branche `pages` du dépôt Codeberg. |
 | `npm run build` échoue par manque de mémoire | passer le conteneur à 3–4 Go de RAM. |
