@@ -1,0 +1,13 @@
+# Sauvegarde quotidienne de la base SQLite (sqlite3 .backup) vers le stockage Proxmox.
+[Unit]
+Description=Bleu Blanc Cloud — sauvegarde de la base SQLite
+
+[Service]
+Type=oneshot
+User=bbcloud
+Group=bbcloud
+WorkingDirectory=/opt/bleu-blanc-cloud
+EnvironmentFile=-/etc/bbcloud/sauvegarde.env
+ExecStart=/opt/bleu-blanc-cloud/deploy/sauvegarder.sh
+NoNewPrivileges=true
+PrivateTmp=true

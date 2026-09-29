@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bleu Blanc Cloud — souveraineté numérique des services publics</title>
+    <meta name="description" content="Observatoire indépendant et open source de la souveraineté numérique des organisations publiques françaises.">
+    <link rel="canonical" href="https://bleublanccloud.berachem.dev/">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="preload" href="/polices/Luciole-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <meta name="theme-color" content="#002395">
+    <meta name="color-scheme" content="light dark">
+    <meta name="referrer" content="no-referrer">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="Bleu Blanc Cloud">
+    <meta property="og:title" content="Bleu Blanc Cloud — souveraineté numérique des services publics">
+    <meta property="og:description" content="Observatoire indépendant et open source de la souveraineté numérique des organisations publiques françaises.">
+    <meta property="og:url" content="https://bleublanccloud.berachem.dev/">
+    <meta name="generator" content="Astro v7.3.5">
+  <style>@font-face{font-family:Luciole;src:url(/polices/Luciole-Regular.woff2)format("woff2");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:Luciole;src:url(/polices/Luciole-Bold.woff2)format("woff2");font-weight:700;font-style:normal;font-display:swap}:root{--bleu-france:#002395;--blanc:#fff;--rouge-france:#ed2939;--bleu-europe:#039;--jaune-europe:#fc0;--fond:#f5f7fb;--surface:#fff;--surface-2:#eef1f8;--bordure:#d5dbea;--texte:#1b1f3b;--texte-secondaire:#4a5070;--lien:#002395;--lien-survol:#3a4fc0;--focus:#fc0;--focus-contour:#1b1f3b;--note-a:#039;--note-b:#3a6bd6;--note-c:#fc0;--note-d:#f08a24;--note-e:#ed2939;--note-e-petit:#c41e3a;--note-inconnu:#8a90a8;--texte-sur-a:#fff;--texte-sur-b:#fff;--texte-sur-c:#1b1f3b;--texte-sur-d:#1b1f3b;--texte-sur-e:#fff;--carte-vide:#dfe3ee;--carte-contour:#fff;--ombre:0 1px 2px #1b1f3b14, 0 4px 16px #1b1f3b0f;--rayon:12px;--rayon-petit:6px;--largeur-max:72rem;--police:"Luciole", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;--police-code:ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;color-scheme:light dark}@media (prefers-color-scheme:dark){:root{--fond:#0d1128;--surface:#151a3a;--surface-2:#1c2248;--bordure:#2e3564;--texte:#eef0fa;--texte-secondaire:#b4bad6;--lien:#9db2ff;--lien-survol:#c5d1ff;--focus-contour:#fc0;--note-a:#2f5fd8;--note-b:#5b86e8;--note-e-petit:#ff6b7d;--carte-vide:#2a3058;--carte-contour:#0d1128;--ombre:0 1px 2px #0000004d, 0 4px 16px #00000040}}*,:before,:after{box-sizing:border-box}html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,:before,:after{transition:none!important;animation:none!important}}body{background:var(--fond);color:var(--texte);font-family:var(--police);flex-direction:column;min-height:100vh;margin:0;font-size:1.0625rem;line-height:1.6;display:flex}main{flex:1}h1,h2,h3,h4{text-wrap:balance;margin:1.6em 0 .6em;font-weight:700;line-height:1.25}h1{margin-top:.5em;font-size:clamp(1.75rem,1.2rem + 2.4vw,2.75rem)}h2{font-size:clamp(1.35rem,1.1rem + 1vw,1.8rem)}h3{font-size:1.2rem}p,ul,ol{margin:0 0 1em}a{color:var(--lien);text-underline-offset:.18em;text-decoration-thickness:.08em}a:hover{color:var(--lien-survol);text-decoration-thickness:.14em}:focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 5px var(--focus-contour);border-radius:2px}img,svg{max-width:100%}code,pre{font-family:var(--police-code);font-size:.875em}pre{background:var(--surface-2);border:1px solid var(--bordure);border-radius:var(--rayon-petit);white-space:pre-wrap;word-break:break-word;padding:.75rem 1rem;overflow-x:auto}table{border-collapse:collapse;width:100%}th,td{text-align:left;border-bottom:1px solid var(--bordure);vertical-align:top;padding:.6rem .75rem}th{color:var(--texte-secondaire);font-size:.9rem;font-weight:700}.visuellement-cache{clip:rect(0 0 0 0);white-space:nowrap;border:0;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;position:absolute!important}.evitement{z-index:10;background:var(--surface);border-radius:var(--rayon-petit);padding:.5rem 1rem;position:absolute;top:-3rem;left:1rem}.evitement:focus{top:1rem}.conteneur{width:min(100% - 2rem, var(--largeur-max));margin-inline:auto}.texte-secondaire{color:var(--texte-secondaire)}.petit{font-size:.9rem}.bandeau-tricolore{background:linear-gradient(to right, var(--bleu-france) 0 33.33%, var(--blanc) 33.33% 66.66%, var(--rouge-france) 66.66% 100%);height:6px;box-shadow:inset 0 -1px #1b1f3b1f}.entete{background:var(--surface);border-bottom:1px solid var(--bordure)}.entete .conteneur{flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem 1.5rem;padding-block:.75rem;display:flex}.logo{color:var(--texte);align-items:center;gap:.6rem;font-size:1.2rem;font-weight:700;text-decoration:none;display:inline-flex}.logo:hover{color:var(--texte)}.navigation ul{flex-wrap:wrap;gap:.25rem 1rem;margin:0;padding:0;list-style:none;display:flex}.navigation a{color:var(--texte);border-bottom:2px solid #0000;padding:.35rem .1rem;font-size:.975rem;text-decoration:none;display:inline-block}.navigation a:hover,.navigation a[aria-current=page]{border-bottom-color:var(--bleu-france);color:var(--texte)}@media (prefers-color-scheme:dark){.navigation a:hover,.navigation a[aria-current=page]{border-bottom-color:var(--lien)}}.pied{background:var(--surface);border-top:1px solid var(--bordure);margin-top:4rem;font-size:.925rem}.pied .conteneur{gap:1.5rem;padding-block:2rem;display:grid}@media (width>=48rem){.pied .conteneur{grid-template-columns:2fr 1fr 1fr}}.pied ul{margin:0;padding:0;list-style:none}.pied li{margin-bottom:.35rem}.alerte{border-left:4px solid var(--bleu-europe);background:var(--surface-2);border-radius:0 var(--rayon-petit) var(--rayon-petit) 0;margin:1rem 0;padding:.75rem 1rem}.alerte--attention{border-left-color:var(--note-d)}.alerte p:last-child{margin-bottom:0}.bandeau-demo{background:var(--jaune-europe);color:#1b1f3b;text-align:center;padding:.4rem 1rem;font-size:.9rem;font-weight:700}.accroche{background:var(--surface);border-bottom:1px solid var(--bordure);position:relative;overflow:hidden}.accroche .conteneur{gap:2rem;padding-block:2.5rem 3rem;display:grid;position:relative}@media (width>=60rem){.accroche .conteneur{grid-template-columns:3fr 2fr;align-items:center}}.accroche__texte p{color:var(--texte-secondaire);max-width:40rem;font-size:1.15rem}.etoiles{opacity:.16;pointer-events:none;width:min(34rem,80vw);position:absolute;top:50%;right:-4rem;transform:translateY(-50%)}@media (prefers-color-scheme:dark){.etoiles{opacity:.22}}.chiffres{grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:1rem;margin:2rem 0;padding:0;list-style:none;display:grid}.chiffre{background:var(--surface);border:1px solid var(--bordure);border-radius:var(--rayon);box-shadow:var(--ombre);padding:1rem 1.25rem}.chiffre__valeur{font-size:2rem;font-weight:700;line-height:1.1;display:block}.chiffre__libelle{color:var(--texte-secondaire);font-size:.925rem}.grille{grid-template-columns:repeat(auto-fill,minmax(min(100%,17rem),1fr));gap:1rem;padding:0;list-style:none;display:grid}.carte{background:var(--surface);border:1px solid var(--bordure);border-radius:var(--rayon);box-shadow:var(--ombre);padding:1.1rem 1.25rem}.carte-organisation{color:var(--texte);align-items:center;gap:1rem;height:100%;text-decoration:none;display:flex}.carte-organisation:hover{color:var(--texte);border-color:var(--lien)}.carte-organisation__nom{font-weight:700;display:block}.section{margin-block:3rem}.section>h2:first-child{margin-top:0}.badge{border-radius:var(--rayon-petit);flex:none;place-items:center;width:2rem;height:2rem;font-size:1.05rem;font-weight:700;line-height:1;display:inline-grid}.badge--grand{border-radius:var(--rayon);width:7rem;height:7rem;box-shadow:var(--ombre);font-size:4rem}.badge--moyen{width:3.25rem;height:3.25rem;font-size:1.8rem}.note-A{background:var(--note-a);color:var(--texte-sur-a)}.note-B{background:var(--note-b);color:var(--texte-sur-b)}.note-C{background:var(--note-c);color:var(--texte-sur-c)}.note-D{background:var(--note-d);color:var(--texte-sur-d)}.note-E{background:var(--note-e);color:var(--texte-sur-e)}.badge:not(.badge--grand,.badge--moyen).note-E{background:var(--note-e-petit)}.note-inconnu{background:var(--note-inconnu);color:#fff}.niveau{white-space:nowrap;border-radius:999px;padding:.1rem .55rem;font-size:.8rem;font-weight:700;display:inline-block}.niveau-A{background:var(--note-a);color:var(--texte-sur-a)}.niveau-B{background:var(--note-b);color:var(--texte-sur-b)}.niveau-C{background:var(--note-c);color:var(--texte-sur-c)}.niveau-D{background:var(--note-d);color:var(--texte-sur-d)}.niveau-inconnu{background:var(--surface-2);color:var(--texte-secondaire);border:1px solid var(--bordure)}.barres{gap:1rem;margin:0;padding:0;list-style:none;display:grid}.barre__entete{justify-content:space-between;gap:1rem;font-weight:700;display:flex}.barre__piste{background:var(--surface-2);border:1px solid var(--bordure);border-radius:999px;height:.75rem;margin:.35rem 0;overflow:hidden}.barre__remplissage{border-radius:999px;height:100%}.barre__explication{color:var(--texte-secondaire);margin:0;font-size:.925rem}.constats{gap:.5rem;margin:0;padding:0;list-style:none;display:grid}.constat{background:var(--surface);border:1px solid var(--bordure);border-radius:var(--rayon-petit)}.constat summary{cursor:pointer;flex-wrap:wrap;align-items:center;gap:.35rem .75rem;padding:.65rem .9rem;list-style-position:outside;display:flex}.constat summary::marker{color:var(--texte-secondaire)}.constat__valeur{word-break:break-word;font-weight:700}.constat__corps{padding:0 .9rem .9rem}.constat__positif{color:var(--texte);background:var(--surface-2);border:1px solid var(--bordure);border-radius:999px;padding:.05rem .5rem;font-size:.8rem;font-weight:700}.bouton{background:var(--bleu-france);color:#fff;border-radius:var(--rayon-petit);border:2px solid var(--bleu-france);align-items:center;gap:.5rem;padding:.65rem 1.1rem;font-weight:700;text-decoration:none;display:inline-flex}.bouton:hover{color:#fff;background:#03c}.bouton--secondaire{color:var(--lien);background:0 0;border-color:currentColor}.bouton--secondaire:hover{background:var(--surface-2);color:var(--lien)}@media (prefers-color-scheme:dark){.bouton{background:#3a5bd9;border-color:#3a5bd9}.bouton:hover{background:#5575ea}.bouton--secondaire{background:0 0;border-color:currentColor}}.champ{gap:.3rem;display:grid}.champ label{font-size:.95rem;font-weight:700}input[type=search],input[type=text],select{font:inherit;color:var(--texte);background:var(--surface);border:2px solid var(--bordure);border-radius:var(--rayon-petit);width:100%;min-height:2.75rem;padding:.6rem .8rem}input[type=search]:focus-visible,select:focus-visible{border-color:var(--lien)}.recherche{max-width:36rem;position:relative}.recherche__resultats{z-index:5;background:var(--surface);border:1px solid var(--bordure);border-radius:var(--rayon-petit);box-shadow:var(--ombre);margin:0;padding:.25rem;list-style:none;position:absolute;top:calc(100% + .25rem);left:0;right:0}.recherche__resultats:empty{display:none}.recherche__resultats a{border-radius:var(--rayon-petit);color:var(--texte);align-items:center;gap:.75rem;padding:.45rem .6rem;text-decoration:none;display:flex}.recherche__resultats a:hover,.recherche__resultats a:focus-visible{background:var(--surface-2)}.filtres{grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:1rem;margin-bottom:1.25rem;display:grid}.tableau-defilant{border:1px solid var(--bordure);border-radius:var(--rayon);background:var(--surface);overflow-x:auto}.tableau-defilant table{min-width:36rem}.tableau-defilant th button{font:inherit;color:inherit;cursor:pointer;background:0 0;border:0;padding:0;font-weight:700}.tableau-defilant th button:after{content:" ↕";opacity:.5}.tableau-defilant th[aria-sort=ascending] button:after{content:" ↑";opacity:1}.tableau-defilant th[aria-sort=descending] button:after{content:" ↓";opacity:1}.nombre{text-align:right;font-variant-numeric:tabular-nums}.carte-france{width:100%;max-width:40rem;height:auto;margin-inline:auto;display:block}.carte-france path{stroke:var(--carte-contour);stroke-width:.6px;stroke-linejoin:round;transition:opacity .15s}.carte-france a:hover path,.carte-france a:focus-visible path{opacity:.75;stroke:var(--texte);stroke-width:1.4px}.carte-france a:focus-visible{box-shadow:none;outline:none}.carte-france .vide{fill:var(--carte-vide)}.carte-france .remplissage-A{fill:var(--note-a)}.carte-france .remplissage-B{fill:var(--note-b)}.carte-france .remplissage-C{fill:var(--note-c)}.carte-france .remplissage-D{fill:var(--note-d)}.carte-france .remplissage-E{fill:var(--note-e)}.carte-france .cadre-om{fill:none;stroke:var(--bordure);stroke-width:1px;stroke-dasharray:3 3}.carte-france text{fill:var(--texte-secondaire);font-size:9px;font-family:var(--police)}.legende{flex-wrap:wrap;justify-content:center;gap:.5rem 1rem;margin:1rem 0 0;padding:0;font-size:.9rem;list-style:none;display:flex}.legende li{align-items:center;gap:.4rem;display:inline-flex}.legende .pastille{border:1px solid var(--bordure);border-radius:3px;width:1rem;height:1rem}.fiche-entete{align-items:center;gap:1.5rem;margin-top:1.5rem;display:grid}@media (width>=48rem){.fiche-entete{grid-template-columns:auto 1fr}}.fiche-entete h1{margin:0 0 .25rem}.score-global{font-size:1.4rem;font-weight:700}.meta-fiche{color:var(--texte-secondaire);flex-wrap:wrap;gap:.25rem 1.25rem;margin:.5rem 0 0;padding:0;font-size:.95rem;list-style:none;display:flex}.colonnes{gap:2rem;display:grid}@media (width>=60rem){.colonnes{grid-template-columns:3fr 2fr}}.mention-ia{border:1px dashed var(--bordure);border-radius:var(--rayon-petit);color:var(--texte-secondaire);padding:.5rem .75rem;font-size:.9rem}.gravite{border:1px solid var(--bordure);border-radius:999px;padding:.05rem .5rem;font-size:.8rem;font-weight:700}.gravite--elevee{background:var(--note-e-petit);border-color:var(--note-e-petit);color:#fff}.gravite--moyenne{background:var(--note-d);border-color:var(--note-d);color:#1b1f3b}@media (prefers-color-scheme:dark){.gravite--elevee{color:#1b1f3b}}.definitions{grid-template-columns:max-content 1fr;gap:.35rem 1rem;margin:0;display:grid}.definitions dt{color:var(--texte-secondaire)}.definitions dd{word-break:break-word;margin:0}.prose{max-width:48rem}.prose table{margin:1rem 0 1.5rem;display:block;overflow-x:auto}.prose blockquote{border-left:4px solid var(--rouge-france);background:var(--surface);border-radius:0 var(--rayon-petit) var(--rayon-petit) 0;margin:1.5rem 0;padding:.75rem 1rem}.prose blockquote p:last-child{margin-bottom:0}.fil-ariane ol{color:var(--texte-secondaire);flex-wrap:wrap;gap:.25rem;margin:1.5rem 0 0;padding:0;font-size:.9rem;list-style:none;display:flex}.fil-ariane li+li:before{content:"›";margin-right:.35rem}
+</style></head>
+  <body>
+    <a class="evitement" href="#contenu">Aller au contenu</a>
+    <div class="bandeau-tricolore" aria-hidden="true"></div>
+    <p class="bandeau-demo">
+          Données de démonstration fictives : aucune organisation réelle n'est présentée.
+        </p>
+    <header class="entete">
+      <div class="conteneur">
+        <a class="logo" href="/" aria-label="Bleu Blanc Cloud — accueil">
+          <svg width="40" height="28" viewBox="0 0 64 45" aria-hidden="true" focusable="false">
+  <defs>
+    <clipPath id="nuage-logo">
+      <path d="M16 44a15 15 0 0 1-2.2-29.8A19 19 0 0 1 50.5 12 16 16 0 0 1 48 44Z"></path>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#nuage-logo)">
+    <rect x="0" y="0" width="22" height="45" fill="#002395"></rect>
+    <rect x="22" y="0" width="20" height="45" fill="#ffffff"></rect>
+    <rect x="42" y="0" width="22" height="45" fill="#ED2939"></rect>
+  </g>
+  <path d="M16 44a15 15 0 0 1-2.2-29.8A19 19 0 0 1 50.5 12 16 16 0 0 1 48 44Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path>
+</svg>
+<span>Bleu Blanc Cloud</span>
+        </a>
+        <nav class="navigation" aria-label="Navigation principale">
+          <ul>
+            <li>
+                  <a href="/" aria-current="page">
+                    Accueil
+                  </a>
+                </li><li>
+                  <a href="/carte/">
+                    Carte
+                  </a>
+                </li><li>
+                  <a href="/classements/">
+                    Classements
+                  </a>
+                </li><li>
+                  <a href="/alternatives/">
+                    Alternatives
+                  </a>
+                </li><li>
+                  <a href="/methodologie/">
+                    Méthodologie
+                  </a>
+                </li><li>
+                  <a href="/a-propos/">
+                    À propos
+                  </a>
+                </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="contenu" tabindex="-1">
+      
+  <section class="accroche" aria-labelledby="titre-accueil">
+    <svg class="etoiles" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+  <polygon points="100.0,19.0 102.6,26.4 110.5,26.6 104.2,31.4 106.5,38.9 100.0,34.4 93.5,38.9 95.8,31.4 89.5,26.6 97.4,26.4" fill="#FFCC00"></polygon><polygon points="135.0,28.4 137.6,35.8 145.5,36.0 139.2,40.7 141.5,48.3 135.0,43.8 128.5,48.3 130.8,40.7 124.5,36.0 132.4,35.8" fill="#FFCC00"></polygon><polygon points="160.6,54.0 163.2,61.4 171.1,61.6 164.8,66.4 167.1,73.9 160.6,69.4 154.2,73.9 156.4,66.4 150.2,61.6 158.0,61.4" fill="#FFCC00"></polygon><polygon points="170.0,89.0 172.6,96.4 180.5,96.6 174.2,101.4 176.5,108.9 170.0,104.4 163.5,108.9 165.8,101.4 159.5,96.6 167.4,96.4" fill="#FFCC00"></polygon><polygon points="160.6,124.0 163.2,131.4 171.1,131.6 164.8,136.4 167.1,143.9 160.6,139.4 154.2,143.9 156.4,136.4 150.2,131.6 158.0,131.4" fill="#FFCC00"></polygon><polygon points="135.0,149.6 137.6,157.1 145.5,157.2 139.2,162.0 141.5,169.5 135.0,165.0 128.5,169.5 130.8,162.0 124.5,157.2 132.4,157.1" fill="#FFCC00"></polygon><polygon points="100.0,159.0 102.6,166.4 110.5,166.6 104.2,171.4 106.5,178.9 100.0,174.4 93.5,178.9 95.8,171.4 89.5,166.6 97.4,166.4" fill="#FFCC00"></polygon><polygon points="65.0,149.6 67.6,157.1 75.5,157.2 69.2,162.0 71.5,169.5 65.0,165.0 58.5,169.5 60.8,162.0 54.5,157.2 62.4,157.1" fill="#FFCC00"></polygon><polygon points="39.4,124.0 42.0,131.4 49.8,131.6 43.6,136.4 45.8,143.9 39.4,139.4 32.9,143.9 35.2,136.4 28.9,131.6 36.8,131.4" fill="#FFCC00"></polygon><polygon points="30.0,89.0 32.6,96.4 40.5,96.6 34.2,101.4 36.5,108.9 30.0,104.4 23.5,108.9 25.8,101.4 19.5,96.6 27.4,96.4" fill="#FFCC00"></polygon><polygon points="39.4,54.0 42.0,61.4 49.8,61.6 43.6,66.4 45.8,73.9 39.4,69.4 32.9,73.9 35.2,66.4 28.9,61.6 36.8,61.4" fill="#FFCC00"></polygon><polygon points="65.0,28.4 67.6,35.8 75.5,36.0 69.2,40.7 71.5,48.3 65.0,43.8 58.5,48.3 60.8,40.7 54.5,36.0 62.4,35.8" fill="#FFCC00"></polygon>
+</svg>
+    <div class="conteneur">
+      <div class="accroche__texte">
+        <h1 id="titre-accueil">Nos services publics dépendent-ils du cloud américain&nbsp;?</h1>
+        <p>
+          Bleu Blanc Cloud analyse, de façon passive et transparente, où sont hébergés les sites,
+          la messagerie et les services numériques des collectivités françaises, et propose des
+          pistes vers des alternatives françaises et européennes.
+        </p>
+        <div class="recherche" data-recherche>
+  <div class="champ">
+    <label for="recherche">Rechercher une organisation</label>
+    <input id="recherche" type="search" autocomplete="off" spellcheck="false" placeholder="Commune, département, domaine…" aria-describedby="recherche-aide" aria-controls="recherche-resultats">
+    <span id="recherche-aide" class="texte-secondaire petit">
+      Ou consultez <a href="/classements/">la liste complète</a>.
+    </span>
+  </div>
+  <ul id="recherche-resultats" class="recherche__resultats" aria-live="polite"></ul>
+</div>
+
+<script type="module">var e=e=>e.normalize(`NFD`).replace(/[̀-ͯ]/g,``).toLowerCase();for(let t of document.querySelectorAll(`[data-recherche]`)){let n=t.querySelector(`input`),r=t.querySelector(`ul`);if(!n||!r)continue;let i=null,a=()=>i??=fetch(`/recherche.json`).then(e=>e.json());n.addEventListener(`focus`,()=>void a(),{once:!0}),n.addEventListener(`input`,async()=>{let t=e(n.value.trim());if(r.replaceChildren(),t.length<2)return;let i=(await a()).filter(([,n,r,,,i])=>e(`${n} ${r} ${i}`).includes(t)).slice(0,8);if(i.length===0){let e=document.createElement(`li`);e.className=`texte-secondaire petit`,e.style.padding=`0.5rem`,e.textContent=`Aucune organisation trouvée.`,r.append(e);return}for(let[e,t,n,a,o]of i){let i=document.createElement(`li`),s=document.createElement(`a`);s.href=`/organisation/${e}/`;let c=document.createElement(`span`);c.className=`badge note-${a}`,c.textContent=a,c.setAttribute(`aria-hidden`,`true`);let l=document.createElement(`span`);l.textContent=`${t}${n?` · ${n}`:``} — ${o}/100 (note ${a})`,s.append(c,l),i.append(s),r.append(i)}}),n.addEventListener(`keydown`,e=>{e.key===`Escape`&&(n.value=``,r.replaceChildren())})}</script>
+      </div>
+      <div>
+        <p class="texte-secondaire petit">
+          Campagne du 27 septembre 2026 · méthodologie v1.0
+        </p>
+        <ul class="legende" aria-label="Répartition des notes">
+          <li>
+                <span class="badge note-A" role="img" aria-label="Note A sur une échelle de A (meilleure) à E" title="Note A sur une échelle de A (meilleure) à E">
+  A
+</span>
+                <span>7</span>
+              </li><li>
+                <span class="badge note-B" role="img" aria-label="Note B sur une échelle de A (meilleure) à E" title="Note B sur une échelle de A (meilleure) à E">
+  B
+</span>
+                <span>1</span>
+              </li><li>
+                <span class="badge note-C" role="img" aria-label="Note C sur une échelle de A (meilleure) à E" title="Note C sur une échelle de A (meilleure) à E">
+  C
+</span>
+                <span>2</span>
+              </li><li>
+                <span class="badge note-D" role="img" aria-label="Note D sur une échelle de A (meilleure) à E" title="Note D sur une échelle de A (meilleure) à E">
+  D
+</span>
+                <span>1</span>
+              </li><li>
+                <span class="badge note-E" role="img" aria-label="Note E sur une échelle de A (meilleure) à E" title="Note E sur une échelle de A (meilleure) à E">
+  E
+</span>
+                <span>3</span>
+              </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="conteneur">
+    <section class="section" aria-labelledby="titre-chiffres">
+      <h2 id="titre-chiffres" class="visuellement-cache">Chiffres clés</h2>
+      <ul class="chiffres">
+        <li class="chiffre">
+          <span class="chiffre__valeur">14</span>
+          <span class="chiffre__libelle">organisations analysées</span>
+        </li>
+        <li class="chiffre">
+          <span class="chiffre__valeur">71/100</span>
+          <span class="chiffre__libelle">score moyen</span>
+        </li>
+        <li class="chiffre">
+          <span class="chiffre__valeur">43 %</span>
+          <span class="chiffre__libelle">ont une messagerie soumise au Cloud Act</span>
+        </li>
+        <li class="chiffre">
+          <span class="chiffre__valeur">29 %</span>
+          <span class="chiffre__libelle">utilisent une mesure d'audience extra-européenne</span>
+        </li>
+        <li class="chiffre">
+          <span class="chiffre__valeur">50 %</span>
+          <span class="chiffre__libelle">obtiennent la note A</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="titre-carte">
+      <h2 id="titre-carte">Carte par département</h2>
+      <p class="texte-secondaire">
+        Couleur : note moyenne des organisations analysées dans le département.
+        <a href="/carte/">Voir la carte détaillée et son tableau</a>.
+      </p>
+      <figure class="carte-figure">
+  <svg class="carte-france" viewBox="0 0 600 650" role="group" aria-labelledby="titre-carte-france">
+    <title id="titre-carte-france">Note moyenne par département</title>
+    <path d="M383.9,284.7L385.2,279.8L389.9,264.9L394.5,266.9L398.5,264.7L400.4,267.5L404.6,268.6L404.2,270.7L407,272.2L408.5,276.3L410.8,276.2L410.4,278.3L413.6,278.6L417.6,275.2L420.4,275.9L421,278.7L426,278.6L427.8,277.3L430.8,272.7L433.9,269.7L438.1,272.4L435.6,277L436.6,278.6L432.9,279.5L430.3,282.1L431.7,282.9L429.9,285.8L427.3,288.3L425.4,287.2L424.6,289.7L425.7,297L423,309.8L421.1,309.8L420.8,313.5L418,315.2L417,313.2L409.8,304.5L410.2,303.2L406.9,300.5L403.8,305.9L402,307.1L397.3,304.8L389.9,305.4L389.4,301.3L387,299.4L385.7,300.2L383.3,296.6L383.1,289.2L384.9,286.3Z" class="vide">
+            <title>Ain (01) : aucune organisation analysée</title>
+          </path><path d="M321,69.1L323.1,67.9L324.8,68.7L327.4,67.4L332.5,68.6L334.2,66.6L336.8,68.2L340.6,65.7L344.9,66.9L347,68.5L350.4,66.8L350,69.7L356,70.4L359.5,71.6L359.1,74.1L360.4,74.9L358.8,81.5L360.1,83.1L358,86.4L355.8,87.7L355,90.1L352,91L354.2,93.4L353,97.1L353,102.8L352.6,105.7L348.7,102.9L344.8,103.3L344.8,105.8L341.8,106.2L338.4,108.3L338.9,113.6L342.4,116.9L337.6,117.3L336.7,119.4L338,121.4L336.3,124.3L339.4,123.9L335.9,130.4L334.2,130.9L332.5,134.5L328.5,133.3L328.1,130.1L327.2,131.3L325.9,128.9L320.7,124.8L321.5,123.5L320.6,120.3L317.2,119.5L320.2,117L315.4,113.7L313.3,115.4L313.3,113.3L315.4,113.7L315.9,110.1L313.7,108.8L314.6,106.8L317.2,106.4L318.4,101.5L320.6,100.6L318.4,99.4L318,97L319.7,93.7L318,90.8L318.9,86.3L316.7,81.8L317.6,81.4L317.6,77.3L320.5,71.6ZM314.6,115.4L314.6,115.4L314.6,115.4ZM316.3,113.3L316.3,113.3L316.3,113.3ZM314.1,114.1L314.1,114.1L314.1,114.1Z" class="vide">
+            <title>Aisne (02) : aucune organisation analysée</title>
+          </path><path d="M315.9,250.3L316.4,252.4L322.7,256.9L325,254.8L326.8,256.4L331.4,255.2L332.3,258.5L336.4,256.4L336.8,253.1L339.1,253.1L339.1,255.1L341.4,258L343.3,263.3L342.8,264.1L348.4,267.7L352,267.3L353.4,268.9L352.5,272.6L353,277.5L349.9,279.6L344.8,281.7L346.3,286.1L347.3,295.1L345.4,296.8L342.2,296.8L341.8,299.3L339.5,297.2L337.6,294L333,294.8L333,292.8L331.1,291.2L327.4,292.8L322.8,291.2L318.7,290.8L318.2,288.8L315.5,289.6L313.6,288.3L310.9,283.8L312.3,281.8L309,281L307.7,281.8L307.2,284.2L304,282.6L304,285.1L301.7,285.5L300.8,288.7L297.5,287.1L294.4,279.3L291.2,276.8L289.8,277.6L287.5,275.1L286.7,271.5L286.7,269.8L289.9,266.2L294.9,265L296.7,265.8L299.5,264.2L298.2,258.1L300.9,256.4L304.1,253.2L305.5,254.8L308.6,253.6L313.2,249.9Z" class="vide">
+            <title>Allier (03) : aucune organisation analysée</title>
+          </path><path d="M423.1,395.7L427.8,394.3L432.1,395.4L428.6,390.6L429.5,388.9L432.5,392.1L432.8,388.4L431.4,388L433.6,383.8L438.2,380.8L438.6,378.7L441.5,379.4L445,383.8L445.9,382.1L444.8,379.3L449.1,378.7L449.9,375.8L451.9,378.6L454.3,379.7L461,379.4L462.6,374.8L467.2,370.5L469.5,369.6L471.7,367L473.2,367.4L472.4,371.9L469.7,374.5L472.8,380.1L471.4,380.6L471.6,383.8L468.4,385.6L466.7,389.8L465.3,390.7L464.1,395.3L466.7,400.1L466.3,402.1L470.3,404.8L474.8,409.9L472.4,410.4L469,409.4L467.2,411.9L463.8,410.8L465.5,415.3L462.7,416.6L453.6,417L452.7,420.3L445.4,417L442.7,420.4L441.2,420L438,424.6L434,419.9L430.7,422L428.2,420.1L427.3,421.3L422.8,416.2L418.5,415.1L420.8,411.3L416.9,409.8L417.6,402.4L416.2,402.9L416.1,400L419.3,397.4L419.8,395.8Z" class="vide">
+            <title>Alpes-de-Haute-Provence (04) : aucune organisation analysée</title>
+          </path><path d="M444.2,342.1L447.5,342L448.6,344.8L453.3,345.4L453.2,343.8L456.9,341.5L459.2,342.3L460.9,347.1L463.7,347.4L464.8,349.8L464.5,353.5L469.3,356.5L471.6,355.6L475.5,357.4L474.7,359.5L478.3,365.5L474.5,365.3L473.2,367.4L471.7,367L469.5,369.6L467.2,370.5L462.6,374.8L461,379.4L454.3,379.7L451.9,378.6L449.9,375.8L449.1,378.7L444.8,379.3L445.9,382.1L445,383.8L441.5,379.4L438.6,378.7L438.2,380.8L433.6,383.8L431.4,388L432.8,388.4L432.5,392.1L429.5,388.9L428.6,390.6L432.1,395.4L427.8,394.3L423.1,395.7L422.9,390.8L421.5,391.2L420.9,387.6L415.2,387.3L412.2,382.5L414.6,382.9L413.5,378.8L419.2,380.3L422,378.1L419.1,375.8L420.9,372L420.8,369.6L423.6,370.3L426.5,369.4L426.8,366.5L427.6,363.2L431.4,363.5L433.7,361.7L432.7,360.6L436,358.4L436.9,359.6L439.7,357L444.4,357.6L446.7,356.3L448.6,357.1L448.9,352.1L447.3,348.9L442.1,348.3L443.3,342.9Z" class="vide">
+            <title>Hautes-Alpes (05) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=06" aria-label="Alpes-Maritimes (06) : score moyen 10/100 (note E), 1 organisation">
+            <path d="M481.2,431.3L481.2,431.3L481.2,431.3ZM480.2,431.8L480.2,431.8L480.2,431.8ZM471.6,383.8L476.1,388.1L476.2,390.2L482,392.3L483.9,392.2L487.9,395.7L490.3,395.2L491.3,396.7L493.7,397L497,394.8L501.7,394.1L504,392.7L503.7,396L505.7,398L503.5,401L503.7,404.2L500,406.1L500.1,408.5L497.8,409.9L499.1,415.2L492.6,418.8L490.3,421L487.9,421.1L486.6,423.6L483.7,424.2L483.4,427.9L479.7,429.7L476.8,429.9L475.5,433.6L473.5,432.1L474.7,426.7L469.8,425.7L468.3,423.7L467.6,419.3L463.7,419L462.7,416.6L465.5,415.3L463.8,410.8L467.2,411.9L469,409.4L472.4,410.4L474.8,409.9L470.3,404.8L466.3,402.1L466.7,400.1L464.1,395.3L465.3,390.7L466.7,389.8L468.4,385.6Z" class="remplissage-E">
+              <title>Alpes-Maritimes (06) : score moyen 10/100 (note E), 1 organisation</title>
+            </path>
+          </a><a href="/classements/?departement=2A" aria-label="Corse-du-Sud (2A) : score moyen 97/100 (note A), 1 organisation">
+            <path d="M549.8,519.9L549.8,519.9L549.8,519.9ZM584.3,535.3L584.3,535.3L584.3,535.3ZM545.8,492.2L545.8,492.2L545.8,492.2ZM580.3,548L580.3,548L580.3,548ZM583.9,535.8L583.9,535.8L583.9,535.8ZM580.7,546.7L580.7,546.7L580.7,546.7ZM578.7,546.5L578.7,546.5L578.7,546.5ZM583.4,536.6L583.4,536.6L583.4,536.6ZM584.3,529.2L584.3,529.2L584.3,529.2ZM583.5,531.3L583.5,531.3L583.5,531.3ZM547.3,491.3L559.4,495.3L561.5,497.6L567.6,499.6L568.9,504L571.5,505.1L573.3,509.9L575.8,509.3L577.4,516.5L576.6,519.1L581.1,520L583.9,518.1L584.9,523.4L584.4,529.6L583.3,535L580,537.3L580.7,540.1L578.4,542.4L578.7,546.5L574.6,545.2L573.1,545.7L573.9,542.7L568.8,540.7L563.7,539.8L559.5,536.8L559.7,533.1L562.6,532.1L564.4,529.5L558.4,528.7L557.8,527.1L555.3,528.1L553.8,527L557.9,523L558.6,518.4L557.5,516.4L550.6,518.1L549.4,514.9L551.9,514.4L552.2,512.3L555.5,510L553.7,506L551.8,506.6L548.1,503.9L548,501.5L546.4,500L552.2,497.9L551,495.5L546.5,494.2Z" class="remplissage-A">
+              <title>Corse-du-Sud (2A) : score moyen 97/100 (note A), 1 organisation</title>
+            </path>
+          </a><path d="M579.1,452.7L579.1,452.7L579.1,452.7ZM576.5,456.2L576.5,456.2L576.5,456.2ZM583.9,518.1L581.1,520L576.6,519.1L577.4,516.5L575.8,509.3L573.3,509.9L571.5,505.1L568.9,504L567.6,499.6L561.5,497.6L559.4,495.3L547.3,491.3L550.6,489.4L551.3,486L549.8,485.7L553.8,480.1L560.9,475.9L566.1,473.8L566,472.2L568.3,470.4L572.6,469.2L575.8,472.7L577.5,468.4L575.6,463.7L577.2,459L576.3,454.6L579.6,453.1L581.7,454.5L583.5,464.7L582.2,472.2L586.1,477.6L587.3,486.1L586.9,488.2L588.9,494.2L589.1,502.8L584,512.3Z" class="vide">
+            <title>Haute-Corse (2B) : aucune organisation analysée</title>
+          </path><path d="M373.4,337.7L378.6,336.8L378.5,333.5L384,330.5L386,334.1L386.2,344L388.6,347.6L387.8,350.5L389.7,354.5L387.5,361.1L385.2,363.6L385.9,370.5L383.1,374.7L381,389.1L381.1,392.3L375.3,388.4L373,388.4L373,391.3L371.1,391.3L370.6,388L366.8,390.1L364.9,392.6L360.6,390.2L360.1,388.6L356.8,389.9L356.8,385.8L357.7,385L354.8,382.1L352.9,375.6L350.5,373.2L349,365.8L351.8,364.6L352.2,361.3L356,360.9L355.9,358.8L361.1,358.3L363.4,353.4L367.1,352.9L366.6,349.7L369.4,349.2L368.5,347.6L370.3,344.7L372.6,344.6Z" class="vide">
+            <title>Ardèche (07) : aucune organisation analysée</title>
+          </path><path d="M359.5,71.6L362,70.8L367.2,72.7L370.2,71.8L372.3,69.8L375.7,68.9L376.4,63.5L380.2,60.2L382.7,60.1L382.4,63.8L380.7,65.1L381.6,66.7L379.6,71.2L381.7,71.6L383.5,74L381.8,76.5L382.3,80.2L387.5,80.1L391,82L393.6,85.6L397.5,85.5L402.4,89.9L397.3,94.1L396.4,92.9L393.8,93.4L392.1,91.4L390.1,96.8L391.8,99.2L391.5,104.1L389,106.2L390,109.5L386.5,111.6L385.6,110L383.5,112.5L377,111L374.4,111.9L372.6,108.7L367.9,110.4L365.2,107.6L362.6,107.2L358.2,103.2L353,102.8L353,97.1L354.2,93.4L352,91L355,90.1L355.8,87.7L358,86.4L360.1,83.1L358.8,81.5L360.4,74.9L359.1,74.1Z" class="vide">
+            <title>Ardennes (08) : aucune organisation analysée</title>
+          </path><path d="M260.8,448.7L262.3,451.5L261.7,453.6L266.1,456.1L271.4,457.4L272.8,463.2L272.6,471.8L268.3,472.5L271.1,479.1L275.5,478.3L279.9,481.3L279.8,483.3L274,484.1L272,486.1L269,486.1L267.5,488.1L264.1,488.4L261.7,487.6L262.2,485.9L256.3,485.4L254.4,483.4L251.5,483.7L249.4,486.5L246.2,479.9L238.3,480.2L234.5,476L228.7,475.4L225.8,473.3L224.5,468.3L227,465.9L230.9,465.2L232.4,462.8L231.5,459.5L233.5,457.9L234.5,455.5L237.5,454.7L240.8,457.3L241.3,458.9L244.7,456.9L241.3,455.2L241.9,453.2L247.2,452.1L247.8,450L244.4,449.2L246.9,445.9L251.6,452.2L255,448.5L258.4,449.8Z" class="vide">
+            <title>Ariège (09) : aucune organisation analysée</title>
+          </path><path d="M330,160.3L329.1,155.4L330.8,154.6L332.1,150.1L335.2,147.6L337.8,149.6L338.3,152.1L342.2,152.1L345.3,153.3L347.1,149.6L350.1,148.3L351.4,145.4L354,144.6L354.9,142.5L356.6,143.3L358.4,142.1L363.2,142L364.1,142.8L363.7,147.3L367.7,150.9L371.7,152.1L375.2,150.8L377,151.9L375.7,156.1L377.1,156.9L380.3,161.3L383.8,162.4L382.5,163.7L384.9,170.6L383.3,175.9L379.7,175.2L378.4,177.7L378.9,180.5L374.5,180.2L372.7,181.5L373.2,183.9L369.2,184.4L363.9,184.1L363.5,186.1L358.6,184.6L355.9,185.4L348.8,186.4L349.2,183.5L346.5,182.3L344.7,176.6L342.5,175L342.9,172.9L339.8,174.6L338.9,172.1L336.2,171.7L338,169.7L338,167.2L333.1,161.5L330.4,162.4Z" class="vide">
+            <title>Aube (10) : aucune organisation analysée</title>
+          </path><path d="M260.8,448.7L263.3,444.6L265.7,445L266.3,440.5L267.8,439.3L269.6,442.2L270.6,440.2L273,441.5L275,439.8L276.4,442.3L280.8,440.7L282.7,442.8L284.2,438.7L289.9,441.2L290.9,440L296.7,440.9L297.7,441.3L295.7,444.9L298.1,447.8L305.4,449.9L306.8,446.2L309.7,445.8L312.6,447L315,446.6L315,448.7L320.8,451.1L322.8,450.3L324.2,452.8L321.8,455.6L317,463.4L316,468.8L317,469.2L316.5,473.7L309.7,470.4L309.2,469.2L305.8,470.4L303.8,473.6L301.4,474.1L294.1,473.2L289.2,473.2L286.3,474.4L288.2,479.7L284.3,480.9L282.8,482.9L279.8,483.3L279.9,481.3L275.5,478.3L271.1,479.1L268.3,472.5L272.6,471.8L272.8,463.2L271.4,457.4L266.1,456.1L261.7,453.6L262.3,451.5Z" class="vide">
+            <title>Aude (11) : aucune organisation analysée</title>
+          </path><path d="M282.9,373.2L282.9,371.6L287.6,370.4L288.6,372.1L294.2,370.9L297.1,367.6L297.1,364.3L298.5,363.5L298.5,360.7L304.2,355L305.6,356.2L305.6,359.9L308.9,358.7L310.3,364L312.2,364.4L312.2,370.1L313.6,371.8L317.9,376.7L317.4,379.9L320.2,382.4L319.3,386.1L320.7,390.6L319.3,393.4L324.1,395.1L322.6,397.5L326.9,396.7L329.8,398.3L327.9,401.6L325,402.8L326.5,404.5L331.7,405.7L332.7,406.9L329.8,410.2L329.4,413L326,413.9L323.2,418.8L317.4,417.6L316.5,419.2L317,425.4L314.5,424.5L312.1,425.4L311.2,423.3L307.4,421.7L304,423.3L301.6,422.5L296.8,416.7L296.4,412.6L294,411.4L295.4,409.3L292.6,405.2L290.7,404.8L287.4,401.1L281.7,399.8L280.3,396.5L273.6,399.3L273.1,397.7L269.8,396L273.2,392.3L270.3,392.3L268.5,389.8L269.4,388.6L270.4,387.4L269,385.3L268.1,380.8L272.9,378.4L273.9,376.8L277.7,374.8L280.5,375.7Z" class="vide">
+            <title>Aveyron (12) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=13" aria-label="Bouches-du-Rhône (13) : score moyen 26/100 (note E), 1 organisation">
+            <path d="M413.4,453.3L413.4,453.3L413.4,453.3ZM412.9,452.5L412.9,452.5L412.9,452.5ZM422.6,453.9L422.6,453.9L422.6,453.9ZM409.4,447.7L409.4,447.7L409.4,447.7ZM410.9,451.4L410.9,451.4L410.9,451.4ZM411.9,451.7L411.9,451.7L411.9,451.7ZM410.3,447.7L410.3,447.7L410.3,447.7ZM410.7,444L410.7,444L410.7,444ZM391.8,443.3L391.8,443.3L391.8,443.3ZM385.3,411.9L390.1,412.2L395,414.5L398,419L403.8,422.1L409.1,421.5L414,424.6L421.2,425.6L426.9,421.8L429.3,423.7L428.9,425.4L425.1,426.3L423.8,430.9L426.2,431.6L425.4,435.7L428.5,439.7L424.6,440.3L425.3,445.2L428.2,446.7L424.9,449.3L424.5,452.6L420.7,453.1L419.1,450.7L410.9,451.4L412.3,449.3L411.7,445.6L409.2,442.8L406.4,444.9L398.7,445.1L395.6,439.5L393.7,439.1L389.9,441.3L390.9,444.9L386.5,444.2L382.7,444.3L378.3,442.3L380.2,441.1L378.2,438.6L365.2,438.5L365.2,436L371.8,432.6L374.7,430.1L372.7,428.9L375.1,424.8L377.4,423.9L380.8,425.1L380.3,423L382.2,419.7L381.6,414.8ZM401.3,434.4L398.4,434.1L397.4,432.1L396.5,437L398.5,437.4L399.5,441L402.9,440.5L405.7,437.6L405.6,435.9L402.8,437.7Z" class="remplissage-E">
+              <title>Bouches-du-Rhône (13) : score moyen 26/100 (note E), 1 organisation</title>
+            </path>
+          </a><path d="M187.5,131L187.5,131L187.5,131ZM163.2,102L164.6,100.4L169.8,100.3L173.1,102.1L182.2,103.8L189.5,104.5L195.9,107.6L200.7,107L204.2,105.5L208.6,102L212.6,100.1L215.2,100.2L216.3,105.1L215,106.7L218.4,108.5L215.7,110L218.7,112.6L219,117.1L217.5,121.5L219.6,122.8L218.6,127.3L217.4,126L215.6,127.6L212.5,126.7L209,128.6L206.4,127.7L205.4,129.7L201.9,131.2L198.3,134.3L193.6,131.7L190.9,131.6L190.4,133.6L187.5,130.6L179.1,132.7L174.2,134.9L171.9,136.5L167.6,134.2L163.7,134.8L159.9,131.7L165.8,127.1L164.6,125.8L168.6,124.4L170.9,121.2L171.2,115.1L169.5,114.2L171,111L169.7,109.3L167.9,111.7L166.2,110.8L162.1,106.9Z" class="vide">
+            <title>Calvados (14) : aucune organisation analysée</title>
+          </path><path d="M295,324.7L302.4,327.2L303.4,330L307.1,329.2L311.3,331.3L312.7,334.1L315.5,335.4L318.7,331.7L317.8,335.4L323,335.8L326.3,344.7L328.6,345.6L326.3,349.7L329.6,351.3L329.1,353.3L325.8,355.8L324.4,355.4L324,358.2L322.1,359.5L320.2,357L317.4,360.7L313.6,371.8L312.2,370.1L312.2,364.4L310.3,364L308.9,358.7L305.6,359.9L305.6,356.2L304.2,355L298.5,360.7L298.5,363.5L297.1,364.3L297.1,367.6L294.2,370.9L288.6,372.1L287.6,370.4L282.9,371.6L282.9,373.2L281.5,369.9L279.6,367.9L281.1,362.2L277.9,358L278.8,356.4L277,352.7L279.8,352.3L278.5,348.2L281.7,347L281.8,343.8L284.1,342.6L282.8,339.3L287.5,333.2L288.9,333.2L289.9,328.3L292.6,330L295.9,330L294.1,327.9Z" class="vide">
+            <title>Cantal (15) : aucune organisation analysée</title>
+          </path><path d="M192.8,294.5L195.2,293.4L195.8,290.1L198.1,290.2L200.9,287.5L205.1,288L207.8,290.2L215.6,290L214.7,288L217.1,286.4L218.4,288.9L223.9,288.6L226.3,286.3L229.5,286.8L228.9,291.2L233.4,293.8L233.8,296.7L230.6,298.7L228.7,298.2L229.1,300.7L227.1,305.9L224.8,305L221.4,309.8L219,313.9L216.2,315.4L216,319.5L213.1,322.7L208,324.1L205.5,329L206.3,333.1L202.5,335L200.5,337.8L197.7,336.9L195.8,338.8L195.4,336.4L190.8,335.4L191.3,332.9L189.5,332L184.4,331.4L183.6,327.3L186.5,325.4L185.2,323.3L186.7,320.9L183.5,318.7L184.5,317.1L180.9,313.7L179.7,309.9L180.3,307.1L179,305.8L187.4,303.7L187.8,305.4L191,304.7L191.4,296.9L193.2,297Z" class="vide">
+            <title>Charente (16) : aucune organisation analysée</title>
+          </path><path d="M153.2,293.9L153.2,293.9L153.2,293.9ZM139.7,278.5L144.3,278.7L147,280.1L147.8,282.6L145,282L140.6,278.9L137.9,278.8L136.6,276.7L139,275.6ZM151,290.6L151,290.6L151,290.6ZM153.8,273.5L158.5,271.3L161.7,270.6L160.2,273.4L161.5,273.9L165.3,272.5L168.4,274.6L168.2,277.9L170.4,279.7L172.2,282.6L176.7,284.4L177.1,286.1L180.7,285.9L181.6,287.5L185.3,288.1L188.9,290.3L192.8,294.5L193.2,297L191.4,296.9L191,304.7L187.8,305.4L187.4,303.7L179,305.8L180.3,307.1L179.7,309.9L180.9,313.7L184.5,317.1L183.5,318.7L186.7,320.9L185.2,323.3L186.5,325.4L183.6,327.3L184.4,331.4L189.5,332L191.3,332.9L190.8,335.4L195.4,336.4L195.8,338.8L193.7,343.7L191.9,342.4L189,344.3L185.3,342.9L184.4,341.3L180.8,339.5L179.8,340.2L178.5,336.9L179.1,333.7L173.1,331.8L172.3,330.5L165.7,330.2L162.8,323.5L155.8,315.4L156.3,313.3L152.3,311.1L147.8,307.6L148,303.1L152.3,302.1L151.5,298.8L152.9,299.3L155.5,294.1L154.2,291.5L156.1,291.2L153.2,284.1L149.2,281.9L150.2,279.5L154.5,276ZM147.8,299.4L147.4,297.7L142.6,293L142,287.6L145.9,291.1L148.2,291.2L148.5,294.9L150.2,297.5L150,300.7L148.1,301.9Z" class="vide">
+            <title>Charente-Maritime (17) : aucune organisation analysée</title>
+          </path><path d="M285.5,203.6L287.7,203.2L290.8,205.7L293.1,204.5L295.3,206.9L299.3,207.4L301.5,211.5L304.2,210.7L304.2,208.6L307.8,211.1L309.6,209.4L311.9,213.9L309.6,219.3L310.1,220.9L314.1,224.2L315.5,230.3L315.5,235.2L317.3,237.2L317.7,241.3L316.4,244.2L317.3,247.5L315.9,250.3L313.2,249.9L308.6,253.6L305.5,254.8L304.1,253.2L300.9,256.4L298.2,258.1L299.5,264.2L296.7,265.8L294.9,265L289.9,266.2L286.7,269.8L286.7,271.5L282.1,271.4L281.6,269L283.9,267.8L282.2,263.6L283.1,258.8L281.8,256.3L278.6,252.6L280.5,251.4L277.8,248.5L281.9,243.6L278.8,242.3L280.2,238.3L278.4,236.2L278,232.5L276.2,231.7L271.6,232.9L267.6,231.2L270.4,228.7L269.9,226.3L271.3,227.1L274,222.3L276.3,223.9L282.6,222L279.9,218.2L283.6,214.2L285.8,215.4L285.9,210.9L284.1,211.3L284.1,207.7L281.4,207.6L281,206Z" class="vide">
+            <title>Cher (18) : aucune organisation analysée</title>
+          </path><path d="M271.4,312.2L277.5,309L279.8,310.6L281.7,310.2L283,312.3L287.7,313.6L289.5,311.5L292.3,312.4L294.6,309.9L296,313.2L294.1,315.7L293.7,318.9L295.5,320.6L295,324.7L294.1,327.9L295.9,330L292.6,330L289.9,328.3L288.9,333.2L287.5,333.2L282.8,339.3L284.1,342.6L281.8,343.8L281.7,347L278.5,348.2L279.8,352.3L277,352.7L272.7,354.3L270.9,352.6L267.6,355.5L265.7,355.8L260.6,349.6L256.4,348.7L252.6,349.9L249.9,344.9L251.3,344.1L247.1,343.2L245.3,342L246.7,340.4L244.4,339.9L245.9,336.7L244.5,335.4L244.6,332.9L248.4,329.8L246.5,329.3L245.6,326L246.6,323.2L249.4,324.5L253.7,320L257.4,320.1L260.2,318.5L266.8,312.9L270,313.8Z" class="vide">
+            <title>Corrèze (19) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=21" aria-label="Côte-d'Or (21) : score moyen 86/100 (note A), 1 organisation">
+            <path d="M357.4,231.6L360.1,230L357.4,231.6ZM363.5,186.1L363.9,184.1L369.2,184.4L373.2,183.9L372.7,181.5L374.5,180.2L378.9,180.5L382,181.3L382.1,183.7L385.2,184.9L384.9,187.8L386.6,186.1L390.3,191.7L387.2,194.3L389,195L388.7,198.3L391.8,197.8L392.3,199.9L395.5,201.4L396.8,199.3L400.5,205.4L403.1,203.2L404.9,203.6L406.7,201.9L408.9,203.1L409.5,206.7L407.8,209.6L405.2,211.4L407.9,212.5L408.4,215.8L409.8,215.3L409.5,219.4L410.8,220.2L410,221L409.6,225.1L406.3,233L404.5,233.1L401.8,236L403.7,236.8L401.5,238.9L394.7,240.3L393.3,239.1L380.7,242.7L375.7,240.7L374.3,237.1L368.3,235.5L369.2,234.3L363.8,232.4L361,229.9L361.9,227.5L359.6,224.2L358.3,225.1L356.8,219.4L355.4,216.1L357.6,213.2L357.1,209.6L359.3,207.5L360.6,203L363.3,200.1L361.4,197.6L365,195.9L364.9,190.6L362.7,191.1Z" class="remplissage-A">
+              <title>Côte-d&#39;Or (21) : score moyen 86/100 (note A), 1 organisation</title>
+            </path>
+          </a><path d="M74.6,123.1L74.6,123.1L74.6,123.1ZM76,122L76,122L76,122ZM92.6,129.1L92.6,129.1L92.6,129.1ZM92.8,126.2L92.8,126.2L92.8,126.2ZM92.8,125.8L92.8,125.8L92.8,125.8ZM73.7,123.1L73.7,123.1L73.7,123.1ZM93.3,130.3L93.3,130.3L93.3,130.3ZM91,126.5L91,126.5L91,126.5ZM92.3,126.6L92.3,126.6L92.3,126.6ZM92.3,126.6L92.3,126.6L92.3,126.6ZM121.1,141.3L121.1,141.3L121.1,141.3ZM91.8,127L91.8,127L91.8,127ZM69.9,127.7L69.9,127.7L69.9,127.7ZM69.8,128.9L69.8,128.9L69.8,128.9ZM69.9,127.3L69.9,127.3L69.9,127.3ZM69.4,127.6L69.4,127.6L69.4,127.6ZM91,126.9L91,126.9L91,126.9ZM70.3,127.3L70.3,127.3L70.3,127.3ZM85.4,124.8L85.4,124.8L85.4,124.8ZM77,126.2L77,126.2L77,126.2ZM90.6,125.6L90.6,125.6L90.6,125.6ZM81.4,125.7L81.4,125.7L81.4,125.7ZM85,124.8L85,124.8L85,124.8ZM80.5,125.7L80.5,125.7L80.5,125.7ZM82.3,125.4L82.3,125.4L82.3,125.4ZM84.5,125.6L84.5,125.6L84.5,125.6ZM71.2,127.4L71.2,127.4L71.2,127.4ZM80.5,125.7L80.5,125.7L80.5,125.7ZM81,125.7L81,125.7L81,125.7ZM81.9,125.8L81.9,125.8L81.9,125.8ZM81,126.1L81,126.1L81,126.1ZM123.7,142.3L124.5,144L128,144.6L130,146.4L131.2,149.8L129.7,151.7L129.8,157.1L126.9,160.6L125.2,159.6L122.9,161.9L119.8,162.2L118.3,164.1L118.1,166.6L115.8,168.4L113.1,168.7L111.1,165.7L106.6,166.6L107,167.4L102.6,172.9L100.9,171.5L101.2,167.4L98.1,168L93,164.8L89.4,164.9L87.8,162.3L84.7,162.1L84.1,164.1L78.7,165.3L76.2,163.5L73.4,164.5L73.1,162.8L67.9,162L69.7,161.7L68.5,159.6L70.1,156.4L68.8,155.9L69.2,151L67.1,150.4L69.6,146.9L68,144.3L70.4,142.1L67.2,138.5L66.6,134.8L69.7,134.2L69.5,131.7L71,130.2L70.8,127.3L74,125.5L75.6,127.7L80.1,126L82.3,126.2L83.3,124.2L84.4,126.8L88.5,125.1L89.2,127.6L91.3,127.7L89.9,129.7L94.1,131.6L93.6,133.2L97.6,137.6L97.4,140.9L104.5,145.5L107.5,141.6L112.1,138.7L113.4,139.2L117.8,138.2L115.4,141L118.1,139.9L120.1,143.7L121.1,142.2Z" class="vide">
+            <title>Côtes-d&#39;Armor (22) : aucune organisation analysée</title>
+          </path><path d="M282.1,271.4L286.7,271.5L287.5,275.1L289.8,277.6L291.2,276.8L294.4,279.3L297.5,287.1L297.1,288.7L298.9,293.2L299.3,297.3L297.9,297.7L296.5,301L294.7,303L290.5,305L292.3,308.3L294.6,309.9L292.3,312.4L289.5,311.5L287.7,313.6L283,312.3L281.7,310.2L279.8,310.6L277.5,309L271.4,312.2L270.1,310.1L270.6,306.4L266.5,304.3L259.6,303L261.4,301L261,298.9L257.8,299.7L256,298L258.3,296.8L257.4,294.8L257.5,290.3L255.2,289L256.2,287.4L251.2,282.4L254.1,277.5L252.7,275.1L256.9,271L258.3,272.7L261,271.1L261.9,273.2L263.3,271.2L266.1,272L266.1,269.6L268.8,270.8L275.2,270.1L278.4,271.4Z" class="vide">
+            <title>Creuse (23) : aucune organisation analysée</title>
+          </path><path d="M221.4,309.8L222.3,311.5L225.1,311.2L226.9,312.9L225.9,315.7L228.2,318.2L230.6,315.4L231.5,316.7L236.6,316.4L238.8,320.5L242,321.4L240.1,323.4L245.6,326L246.5,329.3L248.4,329.8L244.6,332.9L244.5,335.4L245.9,336.7L244.4,339.9L246.7,340.4L245.3,342L247.1,343.2L251.3,344.1L249.9,344.9L252.6,349.9L251.2,350.7L252.5,357.6L249.1,360L249.1,361.7L246.7,362.4L247.6,364.1L246.2,366.9L240.4,369.7L240.4,371.3L237.5,374.5L233.3,370.7L227.6,373L228.6,369.4L225.8,368.5L220.6,368.7L217.8,367.4L210.7,370.1L208.3,368.7L208.4,365.9L206.2,363.4L205.3,359.6L207.3,358.5L204.5,358L201.6,359.5L196.4,359.3L194.1,357.6L196.1,354.4L194.8,352.3L197.9,345.9L197,343L193.7,343.7L195.8,338.8L197.7,336.9L200.5,337.8L202.5,335L206.3,333.1L205.5,329L208,324.1L213.1,322.7L216,319.5L216.2,315.4L219,313.9Z" class="vide">
+            <title>Dordogne (24) : aucune organisation analysée</title>
+          </path><path d="M459.6,203.5L462.3,203.8L465.1,206.5L463.4,207.4L464.9,210.6L463.7,215.2L469.1,214.5L469.6,216.1L465.7,218.7L465.4,222L462,225.5L460.8,228L458.1,229.4L456.4,231.9L457.4,232.7L453.9,236.1L449.4,237.9L446.8,240.1L448.3,242.1L446.8,249.9L441.5,253.8L434.9,260.6L436.3,261.4L432.6,258.7L434.8,256.1L433.3,254.2L438.6,249.9L436.2,246.7L432.9,244.3L431.1,244.8L428.6,238L419.9,235.4L421.7,234.1L420.7,232.1L422.9,229.2L421.4,226L418.6,224.8L418.1,222.4L425.7,219.3L426.5,217.6L430.1,217.9L432.3,215.7L438,213.1L441.8,207.6L445.8,207L449.9,208L451.1,205.1L453.4,205.8L455.1,203.3L458.3,205.2Z" class="vide">
+            <title>Doubs (25) : aucune organisation analysée</title>
+          </path><path d="M386,334.1L389.2,334.1L393.4,331.5L396.2,332.7L396.7,334.7L399.5,333.8L398.6,336.7L401,336.6L400.6,339.5L401.6,343.6L400.7,344.8L405,347.6L409.7,348.2L412.5,345.3L414,350.6L413,362L419.7,363.9L420.7,365.5L426.8,366.5L426.5,369.4L423.6,370.3L420.8,369.6L420.9,372L419.1,375.8L422,378.1L419.2,380.3L413.5,378.8L414.6,382.9L412.2,382.5L415.2,387.3L420.9,387.6L421.5,391.2L422.9,390.8L423.1,395.7L419.8,395.8L419.3,397.4L416.1,400L411.3,398.1L411.2,395.2L405,395L401.6,393.9L401.5,391L397.7,389.9L387.8,394.2L387.2,390.2L385.8,389L381,389.1L383.1,374.7L385.9,370.5L385.2,363.6L387.5,361.1L389.7,354.5L387.8,350.5L388.6,347.6L386.2,344ZM391,386.8L391,390.1L394.9,390.8L396.2,386.7L398.1,385.8L394.2,382.6Z" class="vide">
+            <title>Drôme (26) : aucune organisation analysée</title>
+          </path><path d="M215.2,100.2L216.9,99.4L222.6,97.1L228.1,101.8L232.5,101.1L238,103.3L237.9,106.2L241.3,111.2L243.5,109.6L242.7,108.3L246.1,107.6L248.3,105.6L250.9,105.7L252.3,101.2L256.3,99.6L262.3,100.6L263.5,102.6L267.4,102.7L269.1,105.2L269.9,111.8L268.2,110.5L266.8,112.5L266,113.7L265,118.2L263.2,121.1L257.1,123L259.2,128.8L257,129.9L257.3,132.8L253.8,134.8L254.2,137.7L252.4,138.9L248.5,139.2L244.6,137L244.5,139.1L241.4,140.6L235.7,140.9L233,143.7L230,141.6L231.8,139.6L230.1,137.1L225.8,134.1L225.9,131.6L218.9,131L217.7,129.7L218.6,127.3L219.6,122.8L217.5,121.5L219,117.1L218.7,112.6L215.7,110L218.4,108.5L215,106.7L216.3,105.1Z" class="vide">
+            <title>Eure (27) : aucune organisation analysée</title>
+          </path><path d="M233,143.7L235.7,140.9L241.4,140.6L244.5,139.1L244.6,137L248.5,139.2L252.4,138.9L254.2,137.7L253.8,134.8L257.3,132.8L257,129.9L259.2,128.8L262.1,133.3L262,139L263.3,139.9L261.5,142.3L266.2,148.9L269.3,151L269.7,155.9L273.6,157.6L274.5,156.4L276.6,161.8L275.7,165L277,166.3L275.7,167.9L276,172.8L274.3,172.4L272,177.7L269.3,177.2L267.5,178.4L262.7,177.9L261.7,180.4L258.6,180.3L258.6,183.2L255.5,181.5L255.5,183.1L253.2,184.7L247,183.3L245.3,180L243.6,179.6L243.2,177.1L239.6,177L239.7,174.2L233.4,175.6L236.2,173.2L231.8,170.3L233.2,169.5L230.2,164.5L231.6,162.1L235.2,161.4L237.4,159L237.5,154.9L238.5,152L233.4,147Z" class="vide">
+            <title>Eure-et-Loir (28) : aucune organisation analysée</title>
+          </path><path d="M49.3,186.2L49.3,186.2L49.3,186.2ZM54.7,129.6L54.7,129.6L54.7,129.6ZM51,187.2L51,187.2L51,187.2ZM48.8,186.6L48.8,186.6L48.8,186.6ZM48.6,183.3L48.6,183.3L48.6,183.3ZM19,166.1L19,166.1L19,166.1ZM49.2,187.4L49.2,187.4L49.2,187.4ZM57.1,183.6L57.1,183.6L57.1,183.6ZM15,143.5L15,143.5L15,143.5ZM30.1,134.7L30.1,134.7L30.1,134.7ZM52,131L52,131L52,131ZM43.2,178.7L43.2,178.7L43.2,178.7ZM43.2,179.1L43.2,179.1L43.2,179.1ZM43.2,178.7L43.2,178.7L43.2,178.7ZM38.4,163.9L38.4,163.9L38.4,163.9ZM32,151.8L32,151.8L32,151.8ZM32.4,151.8L32.4,151.8L32.4,151.8ZM17.1,145.4L17.1,145.4L17.1,145.4ZM16.4,143.7L16.4,143.7L16.4,143.7ZM23.4,143.5L23.4,143.5L23.4,143.5ZM30.8,135.6L30.8,135.6L30.8,135.6ZM20.3,148.6L20.3,148.6L20.3,148.6ZM19.1,146.8L19.1,146.8L19.1,146.8ZM17.4,146.6L17.4,146.6L17.4,146.6ZM17.1,145L17.1,145L17.1,145ZM19.2,146.4L19.2,146.4L19.2,146.4ZM57.1,132.7L57.1,132.7L57.1,132.7ZM32.7,135L32.7,135L32.7,135ZM33.2,133.8L33.2,133.8L33.2,133.8ZM32.9,133L32.9,133L32.9,133ZM31.9,133.7L31.9,133.7L31.9,133.7ZM39,133.5L39,133.5L39,133.5ZM41.9,153.9L41.9,153.9L41.9,153.9ZM66.6,134.8L67.2,138.5L70.4,142.1L68,144.3L69.6,146.9L67.1,150.4L69.2,151L68.8,155.9L70.1,156.4L68.5,159.6L69.7,161.7L67.9,162L62.9,163.2L61.4,165.5L62.6,166.5L64.3,172.8L67.4,172.6L70.3,175.3L72.6,174.3L73.3,176.8L72.6,180.4L69.3,182.2L68.1,180.9L67.3,185.3L61.5,184.4L60.3,183.1L55.4,183.1L51.9,176.6L50.8,179L48.5,179.6L45.5,178.1L41.6,181.8L35.4,180.9L37,178.5L35.7,173.5L33.7,170.4L30.8,168.5L23,166.1L24.5,164.6L37.5,163.4L39.6,164.8L41.2,162.5L40.2,158.7L34.7,155.7L33.3,156L31.2,159.5L31.3,154.2L28.8,152.7L34.9,152.9L36.6,153.9L43,152.4L39.9,152.1L42.2,150.7L35.6,150.9L37.6,147.8L36.4,146.9L29.5,149.9L27,148.4L23.3,149.7L24,146.9L23.3,144.8L25,141.6L24.2,139.9L26.3,136.8L33.5,135.5L33.7,133.5L39,133.5L41.4,131.7L42,133.8L45.6,133.3L47.5,131.5L51.1,131.4L55.5,130.5L55.6,134.6L57.1,133.1L59.5,136.2L59.2,133.7L60.8,131L62,131.9L66.8,132.7ZM11.6,142.4L10.9,141L13.6,140.1L14.4,141ZM12.3,140L12.3,140L12.3,140ZM24.4,138.3L24.4,138.3L24.4,138.3Z" class="vide">
+            <title>Finistère (29) : aucune organisation analysée</title>
+          </path><path d="M329.8,398.3L332.2,400.8L339.8,401.5L340.3,398.2L341.7,397.4L347,400.6L349.8,400.6L352.2,398.9L353,389.5L350.1,385.9L353,385.4L354.8,382.1L357.7,385L356.8,385.8L356.8,389.9L360.1,388.6L360.6,390.2L364.9,392.6L366.8,390.1L370.6,388L371.1,391.3L373,391.3L373,388.4L375.3,388.4L381.1,392.3L382.1,395.2L384.1,396.8L383.7,401.7L389.5,406.9L388.2,409L385.3,411.9L381.6,414.8L382.2,419.7L380.3,423L380.8,425.1L377.4,423.9L375.1,424.8L372.7,428.9L374.7,430.1L371.8,432.6L365.2,436L365.2,438.5L361.3,437.3L359.8,433.2L358.8,431.2L361.7,431.1L363.6,427.4L361.1,422.6L352.4,416.1L351.9,414.1L348.5,415.4L348.5,412.1L346.6,410.1L342.3,410.9L341.8,413L339.9,412.6L338,415.9L336.1,416.3L334.2,414.2L332.3,415.9L331.8,413L329.4,413L329.8,410.2L332.7,406.9L331.7,405.7L326.5,404.5L325,402.8L327.9,401.6Z" class="vide">
+            <title>Gard (30) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=31" aria-label="Haute-Garonne (31) : score moyen 100/100 (note A), 1 organisation">
+            <path d="M231.1,419L238.8,417.5L242.1,420L247.9,417.7L245.1,416L248,415.7L248,413.6L251.3,414.9L255.7,412.1L257,418.3L259.4,419.2L259.4,421.6L261.7,424.1L262.6,427L261.2,429L266.9,431.6L268.8,434.9L273.1,437.4L275.5,437L275,439.8L273,441.5L270.6,440.2L269.6,442.2L267.8,439.3L266.3,440.5L265.7,445L263.3,444.6L260.8,448.7L258.4,449.8L255,448.5L251.6,452.2L246.9,445.9L244.4,449.2L247.8,450L247.2,452.1L241.9,453.2L241.3,455.2L244.7,456.9L241.3,458.9L240.8,457.3L237.5,454.7L234.5,455.5L233.5,457.9L231.5,459.5L232.4,462.8L230.9,465.2L227,465.9L224.5,468.3L225.8,473.3L219.5,471.1L217.6,472.2L217,475.5L218.3,480.9L210,479.8L209.1,478.1L210.3,470L214.2,470.5L217.3,465.7L215.9,461.1L213,463.1L214.1,459L209.3,455.6L214.3,451.2L213.9,449.6L217.4,446L216.4,445.6L218.8,444.8L223.3,439.6L229.1,440.6L232.4,442.7L232.5,440.7L234.5,437.9L233.6,437L235.6,433L240.9,431.5L238.6,427.3L234.8,425.6L235.8,424L232.5,421.4Z" class="remplissage-A">
+              <title>Haute-Garonne (31) : score moyen 100/100 (note A), 1 organisation</title>
+            </path>
+          </a><path d="M196.1,406.8L200.4,405.3L205.2,406.7L211,404.9L211.5,403.2L215.3,403.4L217.2,402.2L219.5,405.5L222.9,403.2L223.8,405.2L226.3,403.7L226.2,407.4L223.7,409.7L224.1,411.4L228,411.5L230.2,416.5L228.7,418.5L231.1,419L232.5,421.4L235.8,424L234.8,425.6L238.6,427.3L240.9,431.5L235.6,433L233.6,437L234.5,437.9L232.5,440.7L232.4,442.7L229.1,440.6L223.3,439.6L218.8,444.8L216.4,445.6L209.7,443.7L205.3,443.6L203.5,440.6L198.6,441.7L197.3,438L196.5,433.4L194.1,433.3L191.4,427.9L188,429.4L184.7,428.5L182.3,428.8L180.5,425.4L182.4,425.1L182.1,421.8L184.5,420.3L183.3,416.1L184.7,416.2L183.4,411.6L185.4,409.2L188.3,409.8L191.3,406.6L193.1,408.3L191.6,409.9L194.9,411.7Z" class="vide">
+            <title>Gers (32) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=33" aria-label="Gironde (33) : score moyen 70/100 (note B), 2 organisations">
+            <path d="M144.4,370.1L144.4,370.1L144.4,370.1ZM153.1,367.2L153.1,367.2L153.1,367.2ZM153.1,367.6L153.1,367.6L153.1,367.6ZM147.1,364.5L147.1,364.5L147.1,364.5ZM147.1,364.5L147.1,364.5L147.1,364.5ZM155.8,315.4L162.8,323.5L165.7,330.2L172.3,330.5L173.1,331.8L179.1,333.7L178.5,336.9L179.8,340.2L180.8,339.5L184.4,341.3L185.3,342.9L189,344.3L191.9,342.4L193.7,343.7L197,343L197.9,345.9L194.8,352.3L196.1,354.4L194.1,357.6L196.4,359.3L201.6,359.5L204.5,358L207.3,358.5L205.3,359.6L206.2,363.4L203.3,363.3L198.5,367.2L201.7,368.9L200.2,371.3L195.4,374.8L193.3,378L193.2,382.1L194.5,384.2L190.2,386.5L191.9,390.7L187.5,393L184.3,390.4L184.2,394L182.2,394.4L177.5,393.4L178.2,389.3L175.9,387.1L172.6,385.8L172.2,384.5L168,382.3L168.6,379.9L162.4,379.6L159.5,380.7L156.8,379.3L152.4,380.3L154.5,376.7L150.4,374.1L149.4,375.6L143.6,377.4L143.3,372.9L146.5,366.5L147.9,367.4L154,367.7L152.3,364.3L147.8,360L143.6,368L147.1,347.3L150,327.8L150.4,320.8L153,315.6Z" class="remplissage-B">
+              <title>Gironde (33) : score moyen 70/100 (note B), 2 organisations</title>
+            </path>
+          </a><path d="M335.4,449.8L335.4,449.8L335.4,449.8ZM329.4,413L331.8,413L332.3,415.9L334.2,414.2L336.1,416.3L338,415.9L339.9,412.6L341.8,413L342.3,410.9L346.6,410.1L348.5,412.1L348.5,415.4L351.9,414.1L352.4,416.1L361.1,422.6L363.6,427.4L361.7,431.1L358.8,431.2L359.8,433.2L356,433.3L349.3,437L347.4,439.5L341.6,442.4L335.4,449.4L332.4,448.2L328.6,449.5L324.2,452.8L322.8,450.3L320.8,451.1L315,448.7L315,446.6L312.6,447L309.7,445.8L306.8,446.2L305.4,449.9L298.1,447.8L295.7,444.9L297.7,441.3L296.7,440.9L301,438.4L300.6,434.7L298.7,432.7L300.1,427.4L303,428.2L304.4,429.8L311.2,427.4L312.1,425.4L314.5,424.5L317,425.4L316.5,419.2L317.4,417.6L323.2,418.8L326,413.9Z" class="vide">
+            <title>Hérault (34) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=35" aria-label="Ille-et-Vilaine (35) : score moyen 68/100 (note C), 1 organisation">
+            <path d="M122.5,140.2L122.5,140.2L122.5,140.2ZM134.6,137.3L134.6,137.3L134.6,137.3ZM130.2,137.4L130.2,137.4L130.2,137.4ZM123.7,142.3L122.5,140.6L126,140.4L128,144.6L124.5,144ZM125.7,138.4L125.7,138.4L125.7,138.4ZM130,146.4L127.3,140.9L130.1,137.8L134.1,137.7L133.1,140.5L136.4,143.1L144.4,142.4L145.9,145.7L147,150.3L150.9,152.2L155,149.5L156,147.5L162.4,149.9L161.7,155.2L162.8,160.2L160.4,163.7L161.5,167.5L162.7,179L159.1,179.2L157.7,180.4L156.1,185.6L154.2,188.8L153.6,190.8L149.2,189.3L148.9,187.7L144.9,187L145.3,188.7L139.3,190.8L137.8,193.6L133.8,194.2L130.2,193.1L126.1,194.9L125.7,193.7L121,197.1L120,191.7L122.8,191L120.2,189.6L123.5,186.6L123.2,183.7L121.8,185.2L121.1,183.1L122.5,180.8L120.6,177L115.3,176.2L116.8,173L115.8,168.4L118.1,166.6L118.3,164.1L119.8,162.2L122.9,161.9L125.2,159.6L126.9,160.6L129.8,157.1L129.7,151.7L131.2,149.8Z" class="remplissage-C">
+              <title>Ille-et-Vilaine (35) : score moyen 68/100 (note C), 1 organisation</title>
+            </path>
+          </a><path d="M250.5,227.6L255.1,224.8L258.7,225.7L258.3,224L261,222.9L263.7,224.1L265.5,222.9L267.7,225.4L269.9,226.3L270.4,228.7L267.6,231.2L271.6,232.9L276.2,231.7L278,232.5L278.4,236.2L280.2,238.3L278.8,242.3L281.9,243.6L277.8,248.5L280.5,251.4L278.6,252.6L281.8,256.3L283.1,258.8L282.2,263.6L283.9,267.8L281.6,269L282.1,271.4L278.4,271.4L275.2,270.1L268.8,270.8L266.1,269.6L266.1,272L263.3,271.2L261.9,273.2L261,271.1L258.3,272.7L256.9,271L252.7,275.1L250.5,272.1L249.1,273.7L245.4,274.1L243.6,272.8L245.1,270L242.8,269.1L242.9,266.2L241.1,264.2L237.9,264.1L233.9,260.7L233,259.1L234.5,255L232.3,252.1L235,252.6L237.7,251.8L236.9,248.9L238.3,246.5L239.4,239.2L240.8,236.8L244.9,235.6L246.7,237.3L251.8,231.3Z" class="vide">
+            <title>Indre (36) : aucune organisation analysée</title>
+          </path><path d="M223.9,198.3L228.8,198.4L232.3,199.7L233.1,204.3L235.4,202.3L239.8,203.6L241.6,206.5L240.2,208.1L243.2,212.7L241.7,219.6L244.3,222.9L246.6,221.8L248.8,223.9L250.5,227.6L251.8,231.3L246.7,237.3L244.9,235.6L240.8,236.8L239.4,239.2L238.3,246.5L236.9,248.9L237.7,251.8L235,252.6L232.3,252.1L230.1,249.6L230.1,247.5L226.2,243.3L225.8,239.2L220.9,237L222.2,239.9L218.6,239.8L215.8,241.4L213.1,240L211.3,240.8L211,234.3L204.9,229.9L202.6,230.3L201.8,227.8L202.9,220.9L206.3,214L208.8,207.2L207.9,206.7L209.4,202.7L215.6,204.5L214.4,202L216.6,202.5L218.4,201L223,199.9Z" class="vide">
+            <title>Indre-et-Loire (37) : aucune organisation analysée</title>
+          </path><path d="M418,315.2L420,319.7L423,323.3L423,325.3L429.6,326.7L430.4,323.4L432.2,321.7L433.7,323.7L438.9,324.7L440.9,328.3L441,331.2L438.7,332.9L438.8,335.4L440.3,338.6L444.2,342.1L443.3,342.9L442.1,348.3L447.3,348.9L448.9,352.1L448.6,357.1L446.7,356.3L444.4,357.6L439.7,357L436.9,359.6L436,358.4L432.7,360.6L433.7,361.7L431.4,363.5L427.6,363.2L426.8,366.5L420.7,365.5L419.7,363.9L413,362L414,350.6L412.5,345.3L409.7,348.2L405,347.6L400.7,344.8L401.6,343.6L400.6,339.5L401,336.6L398.6,336.7L399.5,333.8L396.7,334.7L396.2,332.7L393.4,331.5L389.2,334.1L386,334.1L384,330.5L383.9,325.2L388.5,321L384.7,317.8L387.9,317.7L393.4,315.6L399.3,310.9L396,307.3L397.3,304.8L402,307.1L403.8,305.9L406.9,300.5L410.2,303.2L409.8,304.5L417,313.2Z" class="vide">
+            <title>Isère (38) : aucune organisation analysée</title>
+          </path><path d="M408.9,246L408.9,246L408.9,246ZM409.4,246L409.4,246L409.4,246ZM410.8,220.2L413.2,223L418.1,222.4L418.6,224.8L421.4,226L422.9,229.2L420.7,232.1L421.7,234.1L419.9,235.4L428.6,238L431.1,244.8L432.9,244.3L436.2,246.7L438.6,249.9L433.3,254.2L434.8,256.1L432.6,258.7L436.3,261.4L436.8,262.2L433.8,266.8L433.9,269.7L430.8,272.7L427.8,277.3L426,278.6L421,278.7L420.4,275.9L417.6,275.2L413.6,278.6L410.4,278.3L410.8,276.2L408.5,276.3L407,272.2L404.2,270.7L404.6,268.6L408.2,267.3L408.6,265.6L406.3,264.5L406.2,261.2L409.3,257.9L405.9,252.6L406.8,250.6L404.5,248.2L409.4,246.8L406.6,243.6L404.3,244.1L403.3,241.3L402,241.7L401.5,238.9L403.7,236.8L401.8,236L404.5,233.1L406.3,233L409.6,225.1L410,221Z" class="vide">
+            <title>Jura (39) : aucune organisation analysée</title>
+          </path><path d="M182.3,428.8L177.8,430.6L175.5,429.7L173.5,430.5L173.6,428L169.2,430.7L164.9,429.7L161.9,430.3L160.6,428.2L156.7,430.1L151.4,429.8L151.3,431.9L146.5,431.2L144.1,429.5L139.2,431.6L133.9,431.4L131.1,429.1L129.7,429.5L132.9,423.1L133.6,420.3L140.2,395.6L143.6,377.4L149.4,375.6L150.4,374.1L154.5,376.7L152.4,380.3L156.8,379.3L159.5,380.7L162.4,379.6L168.6,379.9L168,382.3L172.2,384.5L172.6,385.8L175.9,387.1L178.2,389.3L177.5,393.4L182.2,394.4L184.2,394L184.3,390.4L187.5,393L187.8,397.1L193.1,397.3L198.7,399.1L195.1,405.9L196.1,406.8L194.9,411.7L191.6,409.9L193.1,408.3L191.3,406.6L188.3,409.8L185.4,409.2L183.4,411.6L184.7,416.2L183.3,416.1L184.5,420.3L182.1,421.8L182.4,425.1L180.5,425.4Z" class="vide">
+            <title>Landes (40) : aucune organisation analysée</title>
+          </path><path d="M233.4,175.6L239.7,174.2L239.6,177L243.2,177.1L243.6,179.6L245.3,180L247,183.3L253.2,184.7L255.5,183.1L255.5,181.5L258.6,183.2L260.4,182.8L259,186L261.1,188.9L258.9,192.2L259.7,195L265.9,197.2L266.7,201.3L270.8,201.4L274.3,200.2L274.3,201.4L279.3,200.2L284.6,200.7L285.5,203.6L281,206L281.4,207.6L284.1,207.7L284.1,211.3L285.9,210.9L285.8,215.4L283.6,214.2L279.9,218.2L282.6,222L276.3,223.9L274,222.3L271.3,227.1L269.9,226.3L267.7,225.4L265.5,222.9L263.7,224.1L261,222.9L258.3,224L258.7,225.7L255.1,224.8L250.5,227.6L248.8,223.9L246.6,221.8L244.3,222.9L241.7,219.6L243.2,212.7L240.2,208.1L241.6,206.5L239.8,203.6L235.4,202.3L233.1,204.3L232.3,199.7L228.8,198.4L223.9,198.3L222.6,197.4L224.4,195L228.1,193.1L230.4,189.9L229.6,187.8L233.2,184.2L232.4,182.1L233.3,179.7L231.6,177.2Z" class="vide">
+            <title>Loir-et-Cher (41) : aucune organisation analysée</title>
+          </path><path d="M349.9,279.6L349.4,282.8L352.7,283.6L353.2,285.7L357.7,284L358.7,285.2L362.3,285.1L364.7,286.3L368.3,284.2L368.7,282.6L370.6,285.4L370.2,287L366.5,287.1L366.1,290.4L363.4,292L365.7,293.6L363.4,295.3L367.2,298.9L366.7,300.2L369.5,302.6L369.2,309.5L368.3,312.8L370.7,315.6L374,318.8L378.2,318.8L380.1,323.6L382.5,323.2L383.9,325.2L384,330.5L378.5,333.5L378.6,336.8L373.4,337.7L371.5,335.7L368.3,335.7L368.7,332L367.7,330.4L364.9,331.3L363,329.3L360.2,330.9L356.1,331.4L355.1,333.1L353.7,330.6L350,331.5L350,329L352.7,327L353.6,323.7L351.7,318.8L347,316L345.1,312.7L345.1,310.7L341.8,307L344.1,301.7L341.8,299.3L342.2,296.8L345.4,296.8L347.3,295.1L346.3,286.1L344.8,281.7Z" class="vide">
+            <title>Loire (42) : aucune organisation analysée</title>
+          </path><path d="M350,331.5L353.7,330.6L355.1,333.1L356.1,331.4L360.2,330.9L363,329.3L364.9,331.3L367.7,330.4L368.7,332L368.3,335.7L371.5,335.7L373.4,337.7L372.6,344.6L370.3,344.7L368.5,347.6L369.4,349.2L366.6,349.7L367.1,352.9L363.4,353.4L361.1,358.3L355.9,358.8L356,360.9L352.2,361.3L351.8,364.6L349,365.8L345.2,362.6L344.2,360.6L341.4,361.4L340.9,358.6L338.5,358.6L338.1,360.6L334.3,362.7L332.4,359.8L331,354.9L329.1,353.3L329.6,351.3L326.3,349.7L328.6,345.6L326.3,344.7L323,335.8L317.8,335.4L318.7,331.7L321.5,332.1L324.3,329.6L334.6,328.3L337.4,329.1L339.3,332.4L341.6,329.9L345.3,331.9L346.2,329.5Z" class="vide">
+            <title>Haute-Loire (43) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=44" aria-label="Loire-Atlantique (44) : score moyen 90/100 (note A), 1 organisation">
+            <path d="M100.1,208.3L100.1,208.3L100.1,208.3ZM106.5,206.3L111.9,205.9L113,203.1L114.7,204.4L120.7,202.4L121,197.1L125.7,193.7L126.1,194.9L130.2,193.1L133.8,194.2L137.8,193.6L139.3,190.8L145.3,188.7L144.9,187L148.9,187.7L149.2,189.3L153.6,190.8L153,193.2L155.7,194.2L156,197.1L157.6,200L162.4,201.9L160.1,203L160.4,206.3L163.5,207.3L164.1,213.5L162.7,214.2L155.5,214.2L150.5,215.2L148.2,217.1L150.4,217.2L152,220.6L154.7,221.2L154.5,225.7L152.1,226.8L151.6,229.2L154.7,229.3L156.4,231.5L155.4,233.1L150.6,229.5L149.6,232.3L146.9,231.8L146.6,236.7L142.9,238.1L142.4,231.9L139.5,233.4L139.5,235.1L141.4,240.9L138.2,241.5L132.8,240L131.6,237.5L128.5,236.9L126.3,235.5L123.4,231.2L120.9,227.4L114.3,224.9L116.2,223.8L117.3,220.6L116.2,216.4L111.9,219L109.4,216.4L107.6,217.1L102.7,215.1L104.2,213.1L102.6,210.2L105.5,208.3L107.3,208.4Z" class="remplissage-A">
+              <title>Loire-Atlantique (44) : score moyen 90/100 (note A), 1 organisation</title>
+            </path>
+          </a><path d="M312.3,173.5L315.9,175.1L316.3,178.4L319.4,180.8L319.4,184.1L315,188.6L315.4,194.7L309.6,195.9L308.7,198.4L311.9,200.4L312.8,202.5L312.3,204.9L313.7,207L308.7,208.2L309.6,209.4L307.8,211.1L304.2,208.6L304.2,210.7L301.5,211.5L299.3,207.4L295.3,206.9L293.1,204.5L290.8,205.7L287.7,203.2L285.5,203.6L284.6,200.7L279.3,200.2L274.3,201.4L274.3,200.2L270.8,201.4L266.7,201.3L265.9,197.2L259.7,195L258.9,192.2L261.1,188.9L259,186L260.4,182.8L258.6,183.2L258.6,180.3L261.7,180.4L262.7,177.9L267.5,178.4L269.3,177.2L272,177.7L274.3,172.4L276,172.8L275.7,167.9L277,166.3L283.2,165.5L285,163.1L288.1,165.2L289.4,163.5L292,164.4L292.9,167.7L296,168.9L296,173.8L293.7,175L301.3,174.7L302.1,175.9L307.5,173L307,175.1Z" class="vide">
+            <title>Loiret (45) : aucune organisation analysée</title>
+          </path><path d="M252.6,349.9L256.4,348.7L260.6,349.6L265.7,355.8L267.6,355.5L270.9,352.6L272.7,354.3L277,352.7L278.8,356.4L277.9,358L281.1,362.2L279.6,367.9L281.5,369.9L282.9,373.2L280.5,375.7L277.7,374.8L273.9,376.8L272.9,378.4L268.1,380.8L269,385.3L270.4,387.4L269.4,388.6L262.3,390.1L259.4,392.6L257,390.9L257.5,393.7L255.5,394.9L252.8,391.2L252.3,393.2L248.9,394.8L245.1,393.9L246.1,390.7L242.3,392.2L238.1,388.8L236.7,385.9L235.4,382.6L234.6,376.9L237.5,374.5L240.4,371.3L240.4,369.7L246.2,366.9L247.6,364.1L246.7,362.4L249.1,361.7L249.1,360L252.5,357.6L251.2,350.7Z" class="vide">
+            <title>Lot (46) : aucune organisation analysée</title>
+          </path><path d="M206.2,363.4L208.4,365.9L208.3,368.7L210.7,370.1L217.8,367.4L220.6,368.7L225.8,368.5L228.6,369.4L227.6,373L233.3,370.7L237.5,374.5L234.6,376.9L235.4,382.6L236.7,385.9L232,386.6L230.6,385.4L228.6,388.6L231.8,391.5L229.8,396.4L227.9,395.9L229.3,399.3L225,398.7L222.9,403.2L219.5,405.5L217.2,402.2L215.3,403.4L211.5,403.2L211,404.9L205.2,406.7L200.4,405.3L196.1,406.8L195.1,405.9L198.7,399.1L193.1,397.3L187.8,397.1L187.5,393L191.9,390.7L190.2,386.5L194.5,384.2L193.2,382.1L193.3,378L195.4,374.8L200.2,371.3L201.7,368.9L198.5,367.2L203.3,363.3Z" class="vide">
+            <title>Lot-et-Garonne (47) : aucune organisation analysée</title>
+          </path><path d="M329.1,353.3L331,354.9L332.4,359.8L334.3,362.7L338.1,360.6L338.5,358.6L340.9,358.6L341.4,361.4L344.2,360.6L345.2,362.6L349,365.8L350.5,373.2L352.9,375.6L354.8,382.1L353,385.4L350.1,385.9L353,389.5L352.2,398.9L349.8,400.6L347,400.6L341.7,397.4L340.3,398.2L339.8,401.5L332.2,400.8L329.8,398.3L326.9,396.7L322.6,397.5L324.1,395.1L319.3,393.4L320.7,390.6L319.3,386.1L320.2,382.4L317.4,379.9L317.9,376.7L313.6,371.8L317.4,360.7L320.2,357L322.1,359.5L324,358.2L324.4,355.4L325.8,355.8Z" class="vide">
+            <title>Lozère (48) : aucune organisation analysée</title>
+          </path><path d="M172.7,193.8L172.7,193.8L172.7,193.8ZM153.6,190.8L154.2,188.8L155.9,190.5L163.4,192.1L165.7,190.6L169.2,192.8L170.1,192.1L173.1,193.8L177.6,194.5L180.7,193.8L181.3,191.8L183.9,193.5L186.6,193.2L186.9,195.7L191.8,196.7L193,200L196.5,200.6L196.6,199.4L200.6,200.3L202.3,202.4L206.2,204.2L207.7,202.2L209.4,202.7L207.9,206.7L208.8,207.2L206.3,214L202.9,220.9L201.8,227.8L200.5,226.9L196.2,230.8L195.3,232.9L192.6,232.3L192.7,230.3L184,230.8L184,232.4L177.6,232.5L176.1,235.7L168.9,235L164.8,236.4L160.8,233.8L160.3,235L155.4,233.1L156.4,231.5L154.7,229.3L151.6,229.2L152.1,226.8L154.5,225.7L154.7,221.2L152,220.6L150.4,217.2L148.2,217.1L150.5,215.2L155.5,214.2L162.7,214.2L164.1,213.5L163.5,207.3L160.4,206.3L160.1,203L162.4,201.9L157.6,200L156,197.1L155.7,194.2L153,193.2Z" class="vide">
+            <title>Maine-et-Loire (49) : aucune organisation analysée</title>
+          </path><path d="M159.6,88.7L159.6,88.7L159.6,88.7ZM135.2,127.5L135.2,127.5L135.2,127.5ZM146.6,142.1L146.6,142.1L146.6,142.1ZM135.6,127.9L135.6,127.9L135.6,127.9ZM137.8,128L137.8,128L137.8,128ZM163.2,102L162.1,106.9L166.2,110.8L167.9,111.7L169.7,109.3L171,111L169.5,114.2L171.2,115.1L170.9,121.2L168.6,124.4L164.6,125.8L165.8,127.1L159.9,131.7L163.7,134.8L167.6,134.2L171.9,136.5L171.4,137.7L175.6,140.7L173.8,141.9L174.6,144L173.6,147.6L170.3,150.7L166.8,149.7L165,151.3L162.4,149.9L156,147.5L155,149.5L150.9,152.2L147,150.3L145.9,145.7L144.4,142.4L148.7,142.6L151.9,141.6L151.6,139.1L148.9,140.2L146.8,138.8L144.4,135L144.2,129.7L146.1,119.5L144.8,120.7L144.2,115.3L145.2,113.3L142.6,105.4L138.6,99.4L137.7,99.7L136.9,91.9L135.7,90.2L137.1,88.6L137,83.7L134.1,82.3L134.2,79.4L138.4,81.7L143.5,82.9L145.6,84.6L149.9,84.1L153,82.2L159,82.9L160,87.9L156.9,89.4L156.8,91.4L161.2,98.2L161.1,100.7Z" class="vide">
+            <title>Manche (50) : aucune organisation analysée</title>
+          </path><path d="M353,102.8L358.2,103.2L362.6,107.2L365.2,107.6L367.9,110.4L372.6,108.7L374.4,111.9L377,111L383.5,112.5L385.6,110L386.5,111.6L387.9,113.2L386.2,114.9L388.5,118.9L390,126.7L385.7,130.9L386.7,134.1L384.9,135.4L388.6,139.8L388.6,143.1L386,142.7L384.3,144L381.6,143.7L380.8,144.9L383.4,145.3L383.5,146.9L380.9,148.6L381.4,151.8L377,151.9L375.2,150.8L371.7,152.1L367.7,150.9L363.7,147.3L364.1,142.8L363.2,142L358.4,142.1L356.6,143.3L354.9,142.5L354,144.6L351.4,145.4L350.1,148.3L347.1,149.6L345.3,153.3L342.2,152.1L338.3,152.1L337.8,149.6L335.2,147.6L334.3,146L331.2,146.8L332.1,140.7L329.4,139.5L332.5,134.5L334.2,130.9L335.9,130.4L339.4,123.9L336.3,124.3L338,121.4L336.7,119.4L337.6,117.3L342.4,116.9L338.9,113.6L338.4,108.3L341.8,106.2L344.8,105.8L344.8,103.3L348.7,102.9L352.6,105.7Z" class="vide">
+            <title>Marne (51) : aucune organisation analysée</title>
+          </path><path d="M377,151.9L381.4,151.8L380.9,148.6L383.5,146.9L383.4,145.3L380.8,144.9L381.6,143.7L384.3,144L386,142.7L388.6,143.1L389.2,146.3L391.3,145.9L391.8,147.9L395,149.9L400.7,152.2L404.3,154.5L407.1,157.3L405.4,162.3L407.6,161L411.7,165.3L414.4,165.6L417.2,170.1L413.9,175.9L416.1,176.2L419.3,179L420.8,183.4L422,181.7L423.5,184.6L421.4,188.7L419.2,188.8L417,190.5L416.2,193.8L417.2,195L416.8,198.7L413.3,199.2L411.9,197.6L410.6,199.3L406.1,199.5L404.9,203.6L403.1,203.2L400.5,205.4L396.8,199.3L395.5,201.4L392.3,199.9L391.8,197.8L388.7,198.3L389,195L387.2,194.3L390.3,191.7L386.6,186.1L384.9,187.8L385.2,184.9L382.1,183.7L382,181.3L378.9,180.5L378.4,177.7L379.7,175.2L383.3,175.9L384.9,170.6L382.5,163.7L383.8,162.4L380.3,161.3L377.1,156.9L375.7,156.1Z" class="vide">
+            <title>Haute-Marne (52) : aucune organisation analysée</title>
+          </path><path d="M162.4,149.9L165,151.3L166.8,149.7L170.3,150.7L173.3,152.9L173.7,154.6L176.8,152.7L178.1,154.4L181.7,152.9L183.5,150.9L187.9,151.1L189.2,152.4L190.6,150.4L192.3,151.3L194.6,148.1L197.2,150.3L195.8,151.4L197,154.4L200.5,154.9L200,158.6L196.3,160.9L196.7,163.8L195.7,165.4L196.5,168.7L192.4,170.9L193,176.7L188.6,177.3L190.2,181.9L189.2,183.5L185.6,184.6L187.2,187.5L184.1,189L186.2,190.7L186.6,193.2L183.9,193.5L181.3,191.8L180.7,193.8L177.6,194.5L173.1,193.8L170.1,192.1L169.2,192.8L165.7,190.6L163.4,192.1L155.9,190.5L154.2,188.8L156.1,185.6L157.7,180.4L159.1,179.2L162.7,179L161.5,167.5L160.4,163.7L162.8,160.2L161.7,155.2ZM172.7,193.8L172.7,193.8L172.7,193.8Z" class="vide">
+            <title>Mayenne (53) : aucune organisation analysée</title>
+          </path><path d="M404.9,101.3L404.9,101.3L404.9,101.3ZM403.5,97.2L403.5,97.2L403.5,97.2ZM405.2,96.8L408.1,94.6L410.3,95.8L411.1,93.7L418.4,93.5L420.7,96.2L422.5,97.4L421.7,101.1L423.1,103.5L422.8,105.2L425.4,106.7L426.4,110.8L424.8,113.3L426.6,114.4L424.9,115.7L425.4,117.8L422.8,117.9L424.2,121.5L427.3,123L427.4,125.1L430.1,125.8L430.6,127.4L437.6,127.9L438.1,129.1L436.4,132.1L439.2,134.4L439.2,135.6L442.3,135.1L443.2,136.3L447.2,136.9L448.6,138.9L450.8,139.2L455.8,142.7L458.4,143.8L461,142.8L465.1,145.9L467,148.3L468.8,149.4L462.8,152.2L460.3,155.1L459.4,154.4L457.3,156.9L451.1,155.2L450.1,152.8L444.5,156.7L439.7,156.9L438.3,155.3L436.6,157L432.6,157.2L431.4,160.1L427,159.9L425.7,160.7L423.4,156.7L423.2,152.7L417.9,152.8L418.3,150L416,147.6L418.6,146.3L416.7,143.1L417.5,141L415.7,138.6L417.3,136.1L418,130.7L416.7,129.1L420,126.2L418.3,125L420.3,121.6L418.5,120.9L418.9,118L416.7,118.1L414.7,109.6L416.3,107.9L415,106.7L415.4,104.2L413.5,101L411.3,99.8L406.6,101.6L405.3,100.4Z" class="vide">
+            <title>Meurthe-et-Moselle (54) : aucune organisation analysée</title>
+          </path><path d="M386.5,111.6L390,109.5L389,106.2L391.5,104.1L391.8,99.2L390.1,96.8L392.1,91.4L393.8,93.4L396.4,92.9L397.3,94.1L402.4,89.9L403.3,91.1L405.2,96.8L405.3,100.4L406.6,101.6L411.3,99.8L413.5,101L415.4,104.2L415,106.7L416.3,107.9L414.7,109.6L416.7,118.1L418.9,118L418.5,120.9L420.3,121.6L418.3,125L420,126.2L416.7,129.1L418,130.7L417.3,136.1L415.7,138.6L417.5,141L416.7,143.1L418.6,146.3L416,147.6L418.3,150L417.9,152.8L416.2,154.9L414.9,154.2L412.7,155.9L407.1,157.3L404.3,154.5L400.7,152.2L395,149.9L391.8,147.9L391.3,145.9L389.2,146.3L388.6,143.1L388.6,139.8L384.9,135.4L386.7,134.1L385.7,130.9L390,126.7L388.5,118.9L386.2,114.9L387.9,113.2ZM404.9,101.3L404.9,101.3L404.9,101.3ZM403.5,97.2L403.5,97.2L403.5,97.2Z" class="vide">
+            <title>Meuse (55) : aucune organisation analysée</title>
+          </path><path d="M85.3,206.8L85.3,206.8L85.3,206.8ZM70.6,194.2L70.6,194.2L70.6,194.2ZM85.7,208.1L85.7,208.1L85.7,208.1ZM78.1,213.3L78.1,213.3L78.1,213.3ZM86.9,210.2L86.9,210.2L86.9,210.2ZM89.9,211.3L89.9,211.3L89.9,211.3ZM76.2,207.8L79.7,209.3L82.7,212L82.5,214L76.4,211.1ZM87.8,209.5L87.8,209.5L87.8,209.5ZM76.2,207.8L76.2,207.8L76.2,207.8ZM101.9,201.5L101.9,201.5L101.9,201.5ZM81.7,189.8L81.7,189.8L81.7,189.8ZM91.7,199.1L91.7,199.1L91.7,199.1ZM93.6,198L93.6,198L93.6,198ZM96.7,198.7L96.7,198.7L96.7,198.7ZM94.5,198.9L94.5,198.9L94.5,198.9ZM95.9,197L95.9,197L95.9,197ZM95,197.7L95,197.7L95,197.7ZM90,198.6L90,198.6L90,198.6ZM90.5,198.2L90.5,198.2L90.5,198.2ZM96.8,197.9L96.8,197.9L96.8,197.9ZM90.4,198.6L90.4,198.6L90.4,198.6ZM94.4,199.3L94.4,199.3L94.4,199.3ZM95.1,196.5L95.1,196.5L95.1,196.5ZM92.4,196.3L92.4,196.3L92.4,196.3ZM92.2,199.6L92.2,199.6L92.2,199.6ZM89.2,197.7L89.2,197.7L89.2,197.7ZM93.7,197.2L93.7,197.2L93.7,197.2ZM94,199.3L94,199.3L94,199.3ZM93.1,199.2L93.1,199.2L93.1,199.2ZM92.2,199.2L92.2,199.2L92.2,199.2ZM89.2,197.7L89.2,197.7L89.2,197.7ZM94.2,196.4L94.2,196.4L94.2,196.4ZM96.3,198.6L96.3,198.6L96.3,198.6ZM90.9,198.7L90.9,198.7L90.9,198.7ZM95.4,197.8L95.4,197.8L95.4,197.8ZM89.6,197.7L89.6,197.7L89.6,197.7ZM91.4,198.3L91.4,198.3L91.4,198.3ZM97.2,197.5L97.2,197.5L97.2,197.5ZM81.3,189.3L81.3,189.3L81.3,189.3ZM80.7,191.3L80.7,191.3L80.7,191.3ZM80.3,190.9L80.3,190.9L80.3,190.9ZM79.8,190.8L79.8,190.8L79.8,190.8ZM67.9,162L73.1,162.8L73.4,164.5L76.2,163.5L78.7,165.3L84.1,164.1L84.7,162.1L87.8,162.3L89.4,164.9L93,164.8L98.1,168L101.2,167.4L100.9,171.5L102.6,172.9L107,167.4L106.6,166.6L111.1,165.7L113.1,168.7L115.8,168.4L116.8,173L115.3,176.2L120.6,177L122.5,180.8L121.1,183.1L121.8,185.2L123.2,183.7L123.5,186.6L120.2,189.6L122.8,191L120,191.7L121,197.1L120.7,202.4L114.7,204.4L113,203.1L111.9,205.9L106.5,206.3L105.3,203.8L106.7,203.1L101.9,201.1L94.1,203.4L91.9,202.4L90.4,198.6L93.9,200.5L96.6,200.3L98.1,198L96.1,194.9L90.5,197.4L88.8,196.4L89,199.3L85.1,197.4L83.3,198.1L81.6,196.3L81.3,200L82.4,203.3L81.1,203.2L80.8,195.4L78.8,192L82.6,189.4L80.5,188L78.7,193.2L75.9,189.7L73.7,189.1L76.2,185.6L72.3,189.4L70.1,189.6L67.3,185.3L68.1,180.9L69.3,182.2L72.6,180.4L73.3,176.8L72.6,174.3L70.3,175.3L67.4,172.6L64.3,172.8L62.6,166.5L61.4,165.5L62.9,163.2Z" class="vide">
+            <title>Morbihan (56) : aucune organisation analysée</title>
+          </path><path d="M486,118.1L484.1,123.6L482.4,124.9L479.3,123.4L475,124.9L473.6,123.3L467.4,122L465.9,118L464.7,120.5L464.1,124.6L462.3,124.7L461.2,128.5L464.7,129.5L464.9,132.4L468,133.5L470,130.5L475.1,134.7L473.1,138.9L475,140.9L472.3,147.2L470.1,148.5L467,148.3L465.1,145.9L461,142.8L458.4,143.8L455.8,142.7L450.8,139.2L448.6,138.9L447.2,136.9L443.2,136.3L442.3,135.1L439.2,135.6L439.2,134.4L436.4,132.1L438.1,129.1L437.6,127.9L430.6,127.4L430.1,125.8L427.4,125.1L427.3,123L424.2,121.5L422.8,117.9L425.4,117.8L424.9,115.7L426.6,114.4L424.8,113.3L426.4,110.8L425.4,106.7L422.8,105.2L423.1,103.5L421.7,101.1L422.5,97.4L420.7,96.2L423.7,96.1L423.8,97.8L428.6,98.4L430.2,95.5L434,94.9L438,97.6L440.6,96.3L445,99.3L446.9,102.5L445.6,103.4L449.3,108.2L452.6,113.7L456.1,114L456,110.7L459.8,110.1L462.5,111.6L464.9,115.6L466.1,113.5L468.4,115.4L473.2,115.2L475.6,111.7L480.4,111.9L481.9,115.9Z" class="vide">
+            <title>Moselle (57) : aucune organisation analysée</title>
+          </path><path d="M309.6,209.4L308.7,208.2L313.7,207L315.4,207.4L318.6,205.8L320.8,209.8L323.5,211.5L327.1,211.5L329.3,210.2L333.4,210.6L334.3,209L336.5,210.6L336.5,212.6L340.6,213.8L341.9,215.9L344.6,215.8L346,217.5L346.9,214.6L348.7,215.8L347.8,218.3L350.9,216.6L351.9,219.8L354.1,221L356.8,219.4L358.3,225.1L359.6,224.2L361.9,227.5L361,229.9L360.1,230L357.4,231.6L355.2,231.7L354.8,234.1L355.7,235.3L354.4,239.4L354.9,244.3L357.2,246.8L354.9,248L355.4,250.9L351.8,251.7L350.9,253.4L345.5,255.5L343.2,252.6L339.1,253.1L336.8,253.1L336.4,256.4L332.3,258.5L331.4,255.2L326.8,256.4L325,254.8L322.7,256.9L316.4,252.4L315.9,250.3L317.3,247.5L316.4,244.2L317.7,241.3L317.3,237.2L315.5,235.2L315.5,230.3L314.1,224.2L310.1,220.9L309.6,219.3L311.9,213.9Z" class="vide">
+            <title>Nièvre (58) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=59" aria-label="Nord (59) : score moyen 27/100 (note E), 1 organisation">
+            <path d="M315.8,60.5L317.1,62.1L314.6,63ZM281.5,12.4L291.5,9.6L292.8,10.4L298.7,8L299.5,12.9L301.6,16.2L300.3,17.9L301.5,23.6L304.5,23.6L307,28.5L311.2,30.2L312.5,27.3L315.4,25.7L320,25.3L323.4,31.8L324.3,35.5L324.7,39.2L328.1,41.6L333.2,40L332.8,42L336.6,41.6L338.7,44.8L338.7,49.8L340,52.2L341.3,49.7L345.5,49.7L347.7,50.9L351.9,49.2L354.9,52L355.8,54.9L356.6,52.8L358.8,54.8L356.7,57.3L355.5,61.9L358,61.8L359.4,65.1L356.8,66.3L356,70.4L350,69.7L350.4,66.8L347,68.5L344.9,66.9L340.6,65.7L336.8,68.2L334.2,66.6L332.5,68.6L327.4,67.4L324.8,68.7L323.1,67.9L321,69.1L318,66.7L320.1,59.3L319.7,57.2L321.4,56.8L320.1,54.8L316.3,54L317.5,51.9L315,49L313.7,47L317.1,45.3L315.4,44.5L315.4,42.5L313.3,40.4L310.3,40.8L310.3,39.2L307.4,39.2L307,36.7L309.1,32.6L306.5,31.8L305.7,35.5L304.4,33.9L301.5,34.7L294.3,32.6L291,27.6L293.5,26L289.3,25.6L286.4,23.5L284,14.8Z" class="remplissage-E">
+              <title>Nord (59) : score moyen 27/100 (note E), 1 organisation</title>
+            </path>
+          </a><path d="M316.3,113.3L316.3,113.3L316.3,113.3ZM314.1,114.1L314.1,114.1L314.1,114.1ZM314.6,115.4L314.6,115.4L314.6,115.4ZM270.3,83.1L272.4,86L275.9,85.2L279.3,85.7L280.6,87.3L283.6,86.1L289.6,87L291.8,89.1L294.3,89.1L300.8,91.6L301.6,93.6L302.9,90.8L306.8,91.6L307.2,88.8L311.5,85.9L315.4,87.5L318.9,86.3L318,90.8L319.7,93.7L318,97L318.4,99.4L320.6,100.6L318.4,101.5L317.2,106.4L314.6,106.8L313.7,108.8L315.9,110.1L315.4,113.7L313.3,113.3L313.3,115.4L315.4,113.7L320.2,117L317.2,119.5L316.7,121.1L309.8,121.9L307.6,120.7L303.7,122.3L301.1,120.3L299.3,121.5L294.1,117.8L291.1,117.7L288.9,115.3L285.4,117.3L281.1,114L277.6,116L273.3,116.7L268.5,115.8L266.8,112.5L268.2,110.5L269.9,111.8L269.1,105.2L267.4,102.7L270.1,97L267.5,97L266.8,89.2L267.7,84.3Z" class="vide">
+            <title>Oise (60) : aucune organisation analysée</title>
+          </path><path d="M171.9,136.5L174.2,134.9L179.1,132.7L187.5,130.6L190.4,133.6L190.9,131.6L193.6,131.7L198.3,134.3L201.9,131.2L205.4,129.7L206.4,127.7L209,128.6L212.5,126.7L215.6,127.6L217.4,126L218.6,127.3L217.7,129.7L218.9,131L225.9,131.6L225.8,134.1L230.1,137.1L231.8,139.6L230,141.6L233,143.7L233.4,147L238.5,152L237.5,154.9L237.4,159L235.2,161.4L231.6,162.1L230.2,164.5L233.2,169.5L231.8,170.3L230,171L227.5,166.9L222.2,167.1L220.9,164.2L216.6,162L215.5,155L212.5,153.3L204.8,157.5L204.3,159.1L202.2,157.8L200,158.6L200.5,154.9L197,154.4L195.8,151.4L197.2,150.3L194.6,148.1L192.3,151.3L190.6,150.4L189.2,152.4L187.9,151.1L183.5,150.9L181.7,152.9L178.1,154.4L176.8,152.7L173.7,154.6L173.3,152.9L170.3,150.7L173.6,147.6L174.6,144L173.8,141.9L175.6,140.7L171.4,137.7ZM187.5,131L187.5,131L187.5,131Z" class="vide">
+            <title>Orne (61) : aucune organisation analysée</title>
+          </path><path d="M281.5,12.4L284,14.8L286.4,23.5L289.3,25.6L293.5,26L291,27.6L294.3,32.6L301.5,34.7L304.4,33.9L305.7,35.5L306.5,31.8L309.1,32.6L307,36.7L307.4,39.2L310.3,39.2L310.3,40.8L313.3,40.4L315.4,42.5L315.4,44.5L317.1,45.3L313.7,47L315,49L317.5,51.9L316.3,54L320.1,54.8L321.4,56.8L319.7,57.2L320.1,59.3L318,66.7L312.4,66.7L309.9,68.3L309.4,65L306,67.5L306.9,64.6L303.9,62.1L304.3,64.6L299.6,63.3L299.6,61.7L295,62.1L294.1,64.5L292,63.3L292.4,60.8L296.3,58.4L294.6,56.3L290.3,55.9L289,57.5L281.4,57.4L281.4,55.4L275.9,52.5L271.7,49.1L266.6,50.7L265.8,49.4L262.4,46.5L263.8,38.7L263.1,29.7L264.9,24.4L264.2,19.9L266.7,19.1L269.3,16.3L274.3,14.3ZM315.8,60.5L314.6,63L317.1,62.1Z" class="vide">
+            <title>Pas-de-Calais (62) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=63" aria-label="Puy-de-Dôme (63) : score moyen 100/100 (note A), 1 organisation">
+            <path d="M297.5,287.1L300.8,288.7L301.7,285.5L304,285.1L304,282.6L307.2,284.2L307.7,281.8L309,281L312.3,281.8L310.9,283.8L313.6,288.3L315.5,289.6L318.2,288.8L318.7,290.8L322.8,291.2L327.4,292.8L331.1,291.2L333,292.8L333,294.8L337.6,294L339.5,297.2L341.8,299.3L344.1,301.7L341.8,307L345.1,310.7L345.1,312.7L347,316L351.7,318.8L353.6,323.7L352.7,327L350,329L350,331.5L346.2,329.5L345.3,331.9L341.6,329.9L339.3,332.4L337.4,329.1L334.6,328.3L324.3,329.6L321.5,332.1L318.7,331.7L315.5,335.4L312.7,334.1L311.3,331.3L307.1,329.2L303.4,330L302.4,327.2L295,324.7L295.5,320.6L293.7,318.9L294.1,315.7L296,313.2L294.6,309.9L292.3,308.3L290.5,305L294.7,303L296.5,301L297.9,297.7L299.3,297.3L298.9,293.2L297.1,288.7Z" class="remplissage-A">
+              <title>Puy-de-Dôme (63) : score moyen 100/100 (note A), 1 organisation</title>
+            </path>
+          </a><path d="M182.3,428.8L184.7,428.5L188,429.4L190.2,436.1L189.2,436L189.6,438.9L191.6,437.3L191.4,441.4L192.8,442.7L190.3,443.8L190.7,447.1L188.1,452.4L186.2,451.9L185.1,454.7L183.1,455.4L183.4,459.2L180,459.8L178.4,462.2L178.8,465.5L176.8,466.7L177.6,470.4L174.1,473.1L169.3,471.3L166.7,473.6L165.4,470.7L162.1,467.7L160.7,467.2L159.4,463L151.6,463L148.8,460.9L146.4,460.3L139.8,456.7L136.9,456.1L138.5,453.3L135.5,454.8L134.9,458.1L131.5,457.1L130.7,454.1L132.7,452.2L134.6,445.3L129.4,443L127,442.9L124.9,444.8L124.6,441.9L120.2,442L118.1,437.8L123.4,436.9L126.5,434.2L129.7,429.5L131.1,429.1L133.9,431.4L139.2,431.6L144.1,429.5L146.5,431.2L151.3,431.9L151.4,429.8L156.7,430.1L160.6,428.2L161.9,430.3L164.9,429.7L169.2,430.7L173.6,428L173.5,430.5L175.5,429.7L177.8,430.6ZM187,442.1L188.4,445L189,442.2ZM186.8,448.2L186.9,444.5L185.4,446.5Z" class="vide">
+            <title>Pyrénées-Atlantiques (64) : aucune organisation analysée</title>
+          </path><path d="M186.8,448.2L185.4,446.5L186.9,444.5ZM187,442.1L189,442.2L188.4,445ZM188,429.4L191.4,427.9L194.1,433.3L196.5,433.4L197.3,438L198.6,441.7L203.5,440.6L205.3,443.6L209.7,443.7L216.4,445.6L217.4,446L213.9,449.6L214.3,451.2L209.3,455.6L214.1,459L213,463.1L215.9,461.1L217.3,465.7L214.2,470.5L210.3,470L209.1,478.1L210,479.8L207.5,480.5L205.1,478.8L202.1,481.2L200.7,478.7L197.4,477.3L189.4,480.3L187.5,479.4L183.3,473.5L182.8,474.3L177.6,470.4L176.8,466.7L178.8,465.5L178.4,462.2L180,459.8L183.4,459.2L183.1,455.4L185.1,454.7L186.2,451.9L188.1,452.4L190.7,447.1L190.3,443.8L192.8,442.7L191.4,441.4L191.6,437.3L189.6,438.9L189.2,436L190.2,436.1Z" class="vide">
+            <title>Hautes-Pyrénées (65) : aucune organisation analysée</title>
+          </path><path d="M279.8,483.3L282.8,482.9L284.3,480.9L288.2,479.7L286.3,474.4L289.2,473.2L294.1,473.2L301.4,474.1L303.8,473.6L305.8,470.4L309.2,469.2L309.7,470.4L316.5,473.7L316,484.7L317,490.9L320.4,492.1L321.9,496.6L318,497L316,494.6L311.1,495.4L308.2,495.4L306.2,497.4L304.2,497L300.3,499.4L300.8,501.9L295.9,501.1L292.9,501.9L290,499L283.6,496.1L278.2,497.6L276.2,500.5L273.3,500.9L271.3,499.2L269.9,495.1L268.4,495.5L265,493L261.6,492.9L262.6,488.8L264.1,488.4L267.5,488.1L269,486.1L272,486.1L274,484.1ZM271.4,494.3L271.4,494.3L271.4,494.3Z" class="vide">
+            <title>Pyrénées-Orientales (66) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=67" aria-label="Bas-Rhin (67) : score moyen 96/100 (note A), 1 organisation">
+            <path d="M486,118.1L490.8,118.2L492,116.9L494.7,118.4L496.8,117.1L502.2,120.4L508.4,121.6L505.2,125.5L504.2,130.5L499.6,133.7L498.9,136.6L495.2,140.5L493.6,143.5L494.3,147.9L493.1,149.3L491.6,154.7L492.3,158.7L490.7,160.5L490,164.6L486.8,170.9L482.7,168.7L483,166.2L478,164.1L475.2,160.9L472.1,160.7L471.6,159.1L467.6,158.9L468.8,149.4L467,148.3L470.1,148.5L472.3,147.2L475,140.9L473.1,138.9L475.1,134.7L470,130.5L468,133.5L464.9,132.4L464.7,129.5L461.2,128.5L462.3,124.7L464.1,124.6L464.7,120.5L465.9,118L467.4,122L473.6,123.3L475,124.9L479.3,123.4L482.4,124.9L484.1,123.6Z" class="remplissage-A">
+              <title>Bas-Rhin (67) : score moyen 96/100 (note A), 1 organisation</title>
+            </path>
+          </a><path d="M472.1,160.7L475.2,160.9L478,164.1L483,166.2L482.7,168.7L486.8,170.9L486.7,175.4L489.1,179L486.7,184.4L486.1,189.8L487.2,192.2L486.1,196.8L489,200.3L486,203.3L486.6,206.2L481.9,210.1L476.6,210.8L473.8,209.7L474.1,207.3L471.8,206.6L472.2,205.3L469.8,201.3L467.6,201.9L467,199.4L468.2,196.5L466.7,193.3L460.8,191.2L460.2,189.1L462.8,187.4L461.8,185L463.3,178.7L465.4,177.4L468.2,171.1L467.3,170.8L469.6,164.5Z" class="vide">
+            <title>Haut-Rhin (68) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=69" aria-label="Rhône (69) : score moyen 82/100 (note B), 1 organisation">
+            <path d="M368.7,282.6L369.6,278L374.6,279.6L375.1,278.3L377.9,279.9L379.2,277.4L381,279L382.1,284.3L383.9,284.7L384.9,286.3L383.1,289.2L383.3,296.6L385.7,300.2L387,299.4L389.4,301.3L389.9,305.4L397.3,304.8L396,307.3L399.3,310.9L393.4,315.6L387.9,317.7L384.7,317.8L388.5,321L383.9,325.2L382.5,323.2L380.1,323.6L378.2,318.8L374,318.8L370.7,315.6L368.3,312.8L369.2,309.5L369.5,302.6L366.7,300.2L367.2,298.9L363.4,295.3L365.7,293.6L363.4,292L366.1,290.4L366.5,287.1L370.2,287L370.6,285.4Z" class="remplissage-B">
+              <title>Rhône (69) : score moyen 82/100 (note B), 1 organisation</title>
+            </path>
+          </a><path d="M423.5,184.6L425.6,181.6L427.9,182.8L429.5,180.2L432.6,178.9L434.1,182.9L436.8,183.6L441.6,181.8L444.3,182.9L446.3,186.1L450.6,182.6L452.4,184.6L457.9,187.6L459.3,189.6L456.9,193.4L458.1,200.3L459.6,203.5L458.3,205.2L455.1,203.3L453.4,205.8L451.1,205.1L449.9,208L445.8,207L441.8,207.6L438,213.1L432.3,215.7L430.1,217.9L426.5,217.6L425.7,219.3L418.1,222.4L413.2,223L410.8,220.2L409.5,219.4L409.8,215.3L408.4,215.8L407.9,212.5L405.2,211.4L407.8,209.6L409.5,206.7L408.9,203.1L406.7,201.9L404.9,203.6L406.1,199.5L410.6,199.3L411.9,197.6L413.3,199.2L416.8,198.7L417.2,195L416.2,193.8L417,190.5L419.2,188.8L421.4,188.7Z" class="vide">
+            <title>Haute-Saône (70) : aucune organisation analysée</title>
+          </path><path d="M357.4,231.6L360.1,230L361,229.9L363.8,232.4L369.2,234.3L368.3,235.5L374.3,237.1L375.7,240.7L380.7,242.7L393.3,239.1L394.7,240.3L401.5,238.9L402,241.7L403.3,241.3L404.3,244.1L406.6,243.6L409.4,246.8L404.5,248.2L406.8,250.6L405.9,252.6L409.3,257.9L406.2,261.2L406.3,264.5L408.6,265.6L408.2,267.3L404.6,268.6L400.4,267.5L398.5,264.7L394.5,266.9L389.9,264.9L385.2,279.8L383.9,284.7L382.1,284.3L381,279L379.2,277.4L377.9,279.9L375.1,278.3L374.6,279.6L369.6,278L368.7,282.6L368.3,284.2L364.7,286.3L362.3,285.1L358.7,285.2L357.7,284L353.2,285.7L352.7,283.6L349.4,282.8L349.9,279.6L353,277.5L352.5,272.6L353.4,268.9L352,267.3L348.4,267.7L342.8,264.1L343.3,263.3L341.4,258L339.1,255.1L339.1,253.1L343.2,252.6L345.5,255.5L350.9,253.4L351.8,251.7L355.4,250.9L354.9,248L357.2,246.8L354.9,244.3L354.4,239.4L355.7,235.3L354.8,234.1L355.2,231.7ZM409.4,246L409.4,246L409.4,246ZM408.9,246L408.9,246L408.9,246Z" class="vide">
+            <title>Saône-et-Loire (71) : aucune organisation analysée</title>
+          </path><path d="M200,158.6L202.2,157.8L204.3,159.1L204.8,157.5L212.5,153.3L215.5,155L216.6,162L220.9,164.2L222.2,167.1L227.5,166.9L230,171L231.8,170.3L236.2,173.2L233.4,175.6L231.6,177.2L233.3,179.7L232.4,182.1L233.2,184.2L229.6,187.8L230.4,189.9L228.1,193.1L224.4,195L222.6,197.4L223.9,198.3L223,199.9L218.4,201L216.6,202.5L214.4,202L215.6,204.5L209.4,202.7L207.7,202.2L206.2,204.2L202.3,202.4L200.6,200.3L196.6,199.4L196.5,200.6L193,200L191.8,196.7L186.9,195.7L186.6,193.2L186.2,190.7L184.1,189L187.2,187.5L185.6,184.6L189.2,183.5L190.2,181.9L188.6,177.3L193,176.7L192.4,170.9L196.5,168.7L195.7,165.4L196.7,163.8L196.3,160.9Z" class="vide">
+            <title>Sarthe (72) : aucune organisation analysée</title>
+          </path><path d="M464,304.4L464.6,307.2L469.4,311.5L472.2,311.7L471.5,314.6L472.6,319.1L476.9,321.3L477.5,322.9L480.3,324.4L479.5,326.9L477.3,329.1L478.9,333.1L476.3,335.7L472.1,335.9L471.7,338L469.4,338.5L467.6,341L464.3,339.2L459.2,342.3L456.9,341.5L453.2,343.8L453.3,345.4L448.6,344.8L447.5,342L444.2,342.1L440.3,338.6L438.8,335.4L438.7,332.9L441,331.2L440.9,328.3L438.9,324.7L433.7,323.7L432.2,321.7L430.4,323.4L429.6,326.7L423,325.3L423,323.3L420,319.7L418,315.2L420.8,313.5L421.1,309.8L423,309.8L425.7,297L426.7,296.9L427.3,302.6L429.2,304.2L431.1,303.7L431.6,306.2L434.5,307.7L439.1,306.7L440.6,309.9L445.7,309.7L446.9,305.6L449.1,303.4L450.8,298.8L452.1,297.6L454.4,298.3L453.6,299.9L456.1,303.9L458.4,303.4L460.9,307.4Z" class="vide">
+            <title>Savoie (73) : aucune organisation analysée</title>
+          </path><path d="M464,304.4L460.9,307.4L458.4,303.4L456.1,303.9L453.6,299.9L454.4,298.3L452.1,297.6L450.8,298.8L449.1,303.4L446.9,305.6L445.7,309.7L440.6,309.9L439.1,306.7L434.5,307.7L431.6,306.2L431.1,303.7L429.2,304.2L427.3,302.6L426.7,296.9L425.7,297L424.6,289.7L425.4,287.2L427.3,288.3L429.9,285.8L434,284.4L436.8,285.1L443,279.9L440.6,276.8L442.3,273L444.5,271.7L445.5,272.9L452.3,270.1L458.2,269L462.8,269.6L461.5,272.2L465.4,276.1L462.8,280.3L463,284L467.2,284.6L466.9,289.1L468.3,287.8L471.7,291.3L473.3,295.7L471.1,298.7L466.6,301.4L464.7,301.1Z" class="vide">
+            <title>Haute-Savoie (74) : aucune organisation analysée</title>
+          </path><path d="M289.6,136.1L285.7,134.1L289.2,131.6L291.9,131.7L292.7,134.5Z" class="vide">
+            <title>Paris (75) : aucune organisation analysée</title>
+          </path><path d="M256.1,65.2L258.6,65.7L263.7,72.3L267.9,75.3L268.7,79.8L270.3,83.1L267.7,84.3L266.8,89.2L267.5,97L270.1,97L267.4,102.7L263.5,102.6L262.3,100.6L256.3,99.6L252.3,101.2L250.9,105.7L248.3,105.6L246.1,107.6L242.7,108.3L243.5,109.6L241.3,111.2L237.9,106.2L238,103.3L232.5,101.1L228.1,101.8L222.6,97.1L216.9,99.4L208.8,97.9L207.2,94.6L212.7,84.1L217.1,82.6L226.3,76.8L234,75.4L240.5,73.1L243.1,73.5L249.6,70.4Z" class="vide">
+            <title>Seine-Maritime (76) : aucune organisation analysée</title>
+          </path><path d="M298.8,143.6L299.2,137L298.4,132.5L299.7,130.1L298,125.6L299.3,121.5L301.1,120.3L303.7,122.3L307.6,120.7L309.8,121.9L316.7,121.1L317.2,119.5L320.6,120.3L321.5,123.5L320.7,124.8L325.9,128.9L327.2,131.3L328.1,130.1L328.5,133.3L332.5,134.5L329.4,139.5L332.1,140.7L331.2,146.8L334.3,146L335.2,147.6L332.1,150.1L330.8,154.6L329.1,155.4L330,160.3L328.2,161.6L319.4,161.6L316.3,162.4L315,165.3L316.3,168.6L312.3,173.5L307,175.1L307.5,173L302.1,175.9L301.3,174.7L293.7,175L296,173.8L296,168.9L292.9,167.7L292,164.4L293.4,161.9L296.5,159.5L296.1,157.5L295.7,151.7L297.4,148.1L297.5,145.2Z" class="vide">
+            <title>Seine-et-Marne (77) : aucune organisation analysée</title>
+          </path><path d="M263.2,121.1L265,121.1L267.5,123.2L271.5,121.6L272.3,124.9L274.1,123.3L278.4,125.8L280.6,125L285.3,128.7L284.9,131.2L283.6,132L283.1,136.1L285.7,138.6L283,139.8L278.1,146.2L279.4,147.5L278.1,150.7L275,150.3L274.5,156.4L273.6,157.6L269.7,155.9L269.3,151L266.2,148.9L261.5,142.3L263.3,139.9L262,139L262.1,133.3L259.2,128.8L257.1,123Z" class="vide">
+            <title>Yvelines (78) : aucune organisation analysée</title>
+          </path><path d="M164.8,236.4L168.9,235L176.1,235.7L177.6,232.5L184,232.4L184,230.8L192.7,230.3L192.6,232.3L195.3,232.9L196,237.4L198.5,242L197.6,243.6L200.2,244.9L197,246.8L200,251.9L196.1,257.8L198.4,256.7L199.3,258.4L196.3,265.6L197.6,266.1L197,270.6L200.9,276L203.3,273.7L204.6,274.9L204.5,277.8L202.7,278.1L203,280.2L201.6,282.6L203.4,284.3L206.1,284.4L205.1,288L200.9,287.5L198.1,290.2L195.8,290.1L195.2,293.4L192.8,294.5L188.9,290.3L185.3,288.1L181.6,287.5L180.7,285.9L177.1,286.1L176.7,284.4L172.2,282.6L170.4,279.7L168.2,277.9L168.4,274.6L172.1,274.4L176.8,270.5L174.2,268.8L173.5,262.6L174.9,262.3L173.1,252.4L170.5,248.6L171.6,245.7L169.4,244.8L167.7,242.3L167.4,239Z" class="vide">
+            <title>Deux-Sèvres (79) : aucune organisation analysée</title>
+          </path><path d="M256.1,65.2L258.7,62.8L259.6,59.2L262.2,57.2L263.9,58.8L266.9,59.3L261.9,53.1L262.4,48.6L265.8,49.4L266.6,50.7L271.7,49.1L275.9,52.5L281.4,55.4L281.4,57.4L289,57.5L290.3,55.9L294.6,56.3L296.3,58.4L292.4,60.8L292,63.3L294.1,64.5L295,62.1L299.6,61.7L299.6,63.3L304.3,64.6L303.9,62.1L306.9,64.6L306,67.5L309.4,65L309.9,68.3L312.4,66.7L318,66.7L321,69.1L320.5,71.6L317.6,77.3L317.6,81.4L316.7,81.8L318.9,86.3L315.4,87.5L311.5,85.9L307.2,88.8L306.8,91.6L302.9,90.8L301.6,93.6L300.8,91.6L294.3,89.1L291.8,89.1L289.6,87L283.6,86.1L280.6,87.3L279.3,85.7L275.9,85.2L272.4,86L270.3,83.1L268.7,79.8L267.9,75.3L263.7,72.3L258.6,65.7Z" class="vide">
+            <title>Somme (80) : aucune organisation analysée</title>
+          </path><path d="M273.6,399.3L280.3,396.5L281.7,399.8L287.4,401.1L290.7,404.8L292.6,405.2L295.4,409.3L294,411.4L296.4,412.6L296.8,416.7L301.6,422.5L304,423.3L307.4,421.7L311.2,423.3L312.1,425.4L311.2,427.4L304.4,429.8L303,428.2L300.1,427.4L298.7,432.7L300.6,434.7L301,438.4L296.7,440.9L290.9,440L289.9,441.2L284.2,438.7L282.7,442.8L280.8,440.7L276.4,442.3L275,439.8L275.5,437L273.1,437.4L268.8,434.9L266.9,431.6L261.2,429L262.6,427L261.7,424.1L259.4,421.6L259.4,419.2L257,418.3L255.7,412.1L256.2,409.7L258.6,410.1L262,405.3L260.2,401.2L265.4,402.1L268.3,399.6Z" class="vide">
+            <title>Tarn (81) : aucune organisation analysée</title>
+          </path><path d="M236.7,385.9L238.1,388.8L242.3,392.2L246.1,390.7L245.1,393.9L248.9,394.8L252.3,393.2L252.8,391.2L255.5,394.9L257.5,393.7L257,390.9L259.4,392.6L262.3,390.1L269.4,388.6L268.5,389.8L270.3,392.3L273.2,392.3L269.8,396L273.1,397.7L273.6,399.3L268.3,399.6L265.4,402.1L260.2,401.2L262,405.3L258.6,410.1L256.2,409.7L255.7,412.1L251.3,414.9L248,413.6L248,415.7L245.1,416L247.9,417.7L242.1,420L238.8,417.5L231.1,419L228.7,418.5L230.2,416.5L228,411.5L224.1,411.4L223.7,409.7L226.2,407.4L226.3,403.7L223.8,405.2L222.9,403.2L225,398.7L229.3,399.3L227.9,395.9L229.8,396.4L231.8,391.5L228.6,388.6L230.6,385.4L232,386.6Z" class="vide">
+            <title>Tarn-et-Garonne (82) : aucune organisation analysée</title>
+          </path><path d="M455,462.5L455,462.5L455,462.5ZM456.4,460.8L456.4,460.8L456.4,460.8ZM444.3,460.8L444.3,460.8L444.3,460.8ZM428,455.7L428,455.7L428,455.7ZM455,462L455,462L455,462ZM453.5,461.3L453.5,461.3L453.5,461.3ZM428.6,458.2L428.6,458.2L428.6,458.2ZM448.6,460.7L447.3,463.2L445.3,462ZM429.6,458.5L429.6,458.5L429.6,458.5ZM434.8,455.9L434.8,455.9L434.8,455.9ZM429.6,458.9L429.6,458.9L429.6,458.9ZM426.9,421.8L427.3,421.3L428.2,420.1L430.7,422L434,419.9L438,424.6L441.2,420L442.7,420.4L445.4,417L452.7,420.3L453.6,417L462.7,416.6L463.7,419L467.6,419.3L468.3,423.7L469.8,425.7L474.7,426.7L473.5,432.1L475.5,433.6L472.8,437.5L467.5,438.1L467.2,441.4L462.1,445.7L465.9,445.6L466.1,449.7L463.8,452.2L461.3,450.7L460.4,452L453.2,453.9L453.3,456.8L448.9,454.9L446.5,455.4L444.6,457.6L439.3,457.8L438.8,456.6L433.4,456.8L432.6,459.7L430.1,458.5L430.5,456.5L429,454.9L425.6,454.6L424.5,452.6L424.9,449.3L428.2,446.7L425.3,445.2L424.6,440.3L428.5,439.7L425.4,435.7L426.2,431.6L423.8,430.9L425.1,426.3L428.9,425.4L429.3,423.7Z" class="vide">
+            <title>Var (83) : aucune organisation analysée</title>
+          </path><path d="M391,386.8L394.2,382.6L398.1,385.8L396.2,386.7L394.9,390.8L391,390.1ZM381.1,392.3L381,389.1L385.8,389L387.2,390.2L387.8,394.2L397.7,389.9L401.5,391L401.6,393.9L405,395L411.2,395.2L411.3,398.1L416.1,400L416.2,402.9L417.6,402.4L416.9,409.8L420.8,411.3L418.5,415.1L422.8,416.2L427.3,421.3L426.9,421.8L421.2,425.6L414,424.6L409.1,421.5L403.8,422.1L398,419L395,414.5L390.1,412.2L385.3,411.9L388.2,409L389.5,406.9L383.7,401.7L384.1,396.8L382.1,395.2Z" class="vide">
+            <title>Vaucluse (84) : aucune organisation analysée</title>
+          </path><path d="M109.5,248.3L108.5,249.5L106.3,248.1L106.9,246.9ZM155.4,233.1L160.3,235L160.8,233.8L164.8,236.4L167.4,239L167.7,242.3L169.4,244.8L171.6,245.7L170.5,248.6L173.1,252.4L174.9,262.3L173.5,262.6L174.2,268.8L176.8,270.5L172.1,274.4L168.4,274.6L165.3,272.5L161.5,273.9L160.2,273.4L161.7,270.6L158.5,271.3L153.8,273.5L151,273.4L150.4,275.8L145.2,271L140.6,271.2L139.4,267.8L134,266.3L129.6,262.3L127.8,261.8L126.4,255.2L123.5,250.5L118.9,244.9L116.3,242.6L116.1,238.5L119.9,235.5L121.5,232.3L123.4,231.2L126.3,235.5L128.5,236.9L131.6,237.5L132.8,240L138.2,241.5L141.4,240.9L139.5,235.1L139.5,233.4L142.4,231.9L142.9,238.1L146.6,236.7L146.9,231.8L149.6,232.3L150.6,229.5ZM114.5,235.2L112.3,234.6L110.7,230.8L113.8,231.8Z" class="vide">
+            <title>Vendée (85) : aucune organisation analysée</title>
+          </path><path d="M195.3,232.9L196.2,230.8L200.5,226.9L201.8,227.8L202.6,230.3L204.9,229.9L211,234.3L211.3,240.8L213.1,240L215.8,241.4L218.6,239.8L222.2,239.9L220.9,237L225.8,239.2L226.2,243.3L230.1,247.5L230.1,249.6L232.3,252.1L234.5,255L233,259.1L233.9,260.7L237.9,264.1L241.1,264.2L242.9,266.2L242.8,269.1L245.1,270L243.6,272.8L241.7,274.8L238.6,273.9L236.6,278.4L232.9,278.3L230.6,281.5L228.7,282.2L230,284.3L229.5,286.8L226.3,286.3L223.9,288.6L218.4,288.9L217.1,286.4L214.7,288L215.6,290L207.8,290.2L205.1,288L206.1,284.4L203.4,284.3L201.6,282.6L203,280.2L202.7,278.1L204.5,277.8L204.6,274.9L203.3,273.7L200.9,276L197,270.6L197.6,266.1L196.3,265.6L199.3,258.4L198.4,256.7L196.1,257.8L200,251.9L197,246.8L200.2,244.9L197.6,243.6L198.5,242L196,237.4Z" class="vide">
+            <title>Vienne (86) : aucune organisation analysée</title>
+          </path><path d="M229.5,286.8L230,284.3L228.7,282.2L230.6,281.5L232.9,278.3L236.6,278.4L238.6,273.9L241.7,274.8L243.6,272.8L245.4,274.1L249.1,273.7L250.5,272.1L252.7,275.1L254.1,277.5L251.2,282.4L256.2,287.4L255.2,289L257.5,290.3L257.4,294.8L258.3,296.8L256,298L257.8,299.7L261,298.9L261.4,301L259.6,303L266.5,304.3L270.6,306.4L270.1,310.1L271.4,312.2L270,313.8L266.8,312.9L260.2,318.5L257.4,320.1L253.7,320L249.4,324.5L246.6,323.2L245.6,326L240.1,323.4L242,321.4L238.8,320.5L236.6,316.4L231.5,316.7L230.6,315.4L228.2,318.2L225.9,315.7L226.9,312.9L225.1,311.2L222.3,311.5L221.4,309.8L224.8,305L227.1,305.9L229.1,300.7L228.7,298.2L230.6,298.7L233.8,296.7L233.4,293.8L228.9,291.2Z" class="vide">
+            <title>Haute-Vienne (87) : aucune organisation analysée</title>
+          </path><path d="M407.1,157.3L412.7,155.9L414.9,154.2L416.2,154.9L417.9,152.8L423.2,152.7L423.4,156.7L425.7,160.7L427,159.9L431.4,160.1L432.6,157.2L436.6,157L438.3,155.3L439.7,156.9L444.5,156.7L450.1,152.8L451.1,155.2L457.3,156.9L459.4,154.4L460.3,155.1L462.8,152.2L468.8,149.4L467.6,158.9L471.6,159.1L472.1,160.7L469.6,164.5L467.3,170.8L468.2,171.1L465.4,177.4L463.3,178.7L461.8,185L462.8,187.4L460.2,189.1L459.3,189.6L457.9,187.6L452.4,184.6L450.6,182.6L446.3,186.1L444.3,182.9L441.6,181.8L436.8,183.6L434.1,182.9L432.6,178.9L429.5,180.2L427.9,182.8L425.6,181.6L423.5,184.6L422,181.7L420.8,183.4L419.3,179L416.1,176.2L413.9,175.9L417.2,170.1L414.4,165.6L411.7,165.3L407.6,161L405.4,162.3Z" class="vide">
+            <title>Vosges (88) : aucune organisation analysée</title>
+          </path><path d="M312.3,173.5L316.3,168.6L315,165.3L316.3,162.4L319.4,161.6L328.2,161.6L330,160.3L330.4,162.4L333.1,161.5L338,167.2L338,169.7L336.2,171.7L338.9,172.1L339.8,174.6L342.9,172.9L342.5,175L344.7,176.6L346.5,182.3L349.2,183.5L348.8,186.4L355.9,185.4L358.6,184.6L363.5,186.1L362.7,191.1L364.9,190.6L365,195.9L361.4,197.6L363.3,200.1L360.6,203L359.3,207.5L357.1,209.6L357.6,213.2L355.4,216.1L356.8,219.4L354.1,221L351.9,219.8L350.9,216.6L347.8,218.3L348.7,215.8L346.9,214.6L346,217.5L344.6,215.8L341.9,215.9L340.6,213.8L336.5,212.6L336.5,210.6L334.3,209L333.4,210.6L329.3,210.2L327.1,211.5L323.5,211.5L320.8,209.8L318.6,205.8L315.4,207.4L313.7,207L312.3,204.9L312.8,202.5L311.9,200.4L308.7,198.4L309.6,195.9L315.4,194.7L315,188.6L319.4,184.1L319.4,180.8L316.3,178.4L315.9,175.1Z" class="vide">
+            <title>Yonne (89) : aucune organisation analysée</title>
+          </path><path d="M459.3,189.6L460.2,189.1L460.8,191.2L466.7,193.3L468.2,196.5L467,199.4L467.6,201.9L469.8,201.3L472.2,205.3L471.8,206.6L466.5,207.2L467,209.3L464.9,210.6L463.4,207.4L465.1,206.5L462.3,203.8L459.6,203.5L458.1,200.3L456.9,193.4Z" class="vide">
+            <title>Territoire de Belfort (90) : aucune organisation analysée</title>
+          </path><path d="M285.7,138.6L289.2,141L289.2,140.2L291.3,141.9L296.2,141.1L298.8,143.6L297.5,145.2L297.4,148.1L295.7,151.7L296.1,157.5L296.5,159.5L293.4,161.9L292,164.4L289.4,163.5L288.1,165.2L285,163.1L283.2,165.5L277,166.3L275.7,165L276.6,161.8L274.5,156.4L275,150.3L278.1,150.7L279.4,147.5L278.1,146.2L283,139.8Z" class="vide">
+            <title>Essonne (91) : aucune organisation analysée</title>
+          </path><path d="M288.4,128.8L289.7,129.2L289.2,131.6L285.7,134.1L289.6,136.1L289.2,140.2L289.2,141L285.7,138.6L283.1,136.1L283.6,132L284.9,131.2Z" class="vide">
+            <title>Hauts-de-Seine (92) : aucune organisation analysée</title>
+          </path><path d="M298,125.6L299.7,130.1L298.4,132.5L299.2,137L296.2,134.1L292.7,134.5L291.9,131.7L289.2,131.6L289.7,129.2L288.4,128.8L291,127.6L294.5,128.4Z" class="vide">
+            <title>Seine-Saint-Denis (93) : aucune organisation analysée</title>
+          </path><path d="M289.6,136.1L292.7,134.5L296.2,134.1L299.2,137L298.8,143.6L296.2,141.1L291.3,141.9L289.2,140.2Z" class="vide">
+            <title>Val-de-Marne (94) : aucune organisation analysée</title>
+          </path><path d="M299.3,121.5L298,125.6L294.5,128.4L291,127.6L288.4,128.8L284.9,131.2L285.3,128.7L280.6,125L278.4,125.8L274.1,123.3L272.3,124.9L271.5,121.6L267.5,123.2L265,121.1L263.2,121.1L265,118.2L266,113.7L266.8,112.5L268.5,115.8L273.3,116.7L277.6,116L281.1,114L285.4,117.3L288.9,115.3L291.1,117.7L294.1,117.8Z" class="vide">
+            <title>Val-d&#39;Oise (95) : aucune organisation analysée</title>
+          </path><a href="/classements/?departement=971" aria-label="Guadeloupe (971) : score moyen 65/100 (note C), 1 organisation">
+            <path d="M31.6,595.3L31.6,595.3L31.6,595.3ZM47.2,624L47.2,624L47.2,624ZM44.2,623.4L44.2,623.4L44.2,623.4ZM87,595.3L87,595.3L87,595.3ZM95.8,579.7L95.8,579.7L95.8,579.7ZM32.6,578.5L32.6,578.5L32.6,578.5ZM48.1,624L48.1,624L48.1,624ZM48.1,622.1L48.1,622.1L48.1,622.1ZM48.1,620.9L48.1,620.9L48.1,620.9ZM50.1,620.9L50.1,620.9L50.1,620.9ZM88,594.7L88,594.7L88,594.7ZM70.5,614L72.4,609.1L77.3,610.9L80.2,617.8L74.4,620.9L70.5,619.6ZM48.1,579.7L48.1,579.7L48.1,579.7ZM54,579.7L54,579.7L54,579.7ZM52,584.7L52,584.7L52,584.7ZM51,585.4L51,585.4L51,585.4ZM54.9,579.7L54.9,579.7L54.9,579.7ZM51,584.7L51,584.7L51,584.7ZM51,584.7L51,584.7L51,584.7ZM52,586.6L52,587.2L51,587.9L48.1,592.8L51,605.3L46.2,610.9L39.4,614L33.5,604.7L32.6,594.7L30.6,588.5L32.6,579.7L45.2,583.5L46.2,586.6ZM51,587.9L52,587.2L52,586.6L55.9,577.2L53,570.4L57.9,566L62.7,569.7L63.7,577.9L65.6,580.4L72.4,581.6L77.3,586.6L58.8,592.8L53,591ZM53,591.6L53,591.6L53,591.6ZM55.9,592.8L55.9,592.8L55.9,592.8Z" class="remplissage-C">
+              <title>Guadeloupe (971) : score moyen 65/100 (note C), 1 organisation</title>
+            </path>
+          </a><path d="M198.6,624L198.6,624L198.6,624ZM179.6,617.9L179.6,617.9L179.6,617.9ZM204,619.7L204,619.7L204,619.7ZM202.7,620.5L202.7,620.5L202.7,620.5ZM202.7,621.4L202.7,621.4L202.7,621.4ZM186.4,613.6L186.4,613.6L186.4,613.6ZM202.7,603.2L202.7,603.2L202.7,603.2ZM185,576.4L185,576.4L185,576.4ZM198.6,617.1L198.6,617.1L198.6,617.1ZM200,598L200,598L200,598ZM201.3,596.3L201.3,596.3L201.3,596.3ZM200,597.2L200,597.2L200,597.2ZM201.3,595.4L201.3,595.4L201.3,595.4ZM200,598L200,598L200,598ZM180.9,605L180.9,605L180.9,605ZM174.1,605.8L174.1,605.8L174.1,605.8ZM187.7,578.1L187.7,578.1L187.7,578.1ZM197.2,580.7L197.2,580.7L197.2,580.7ZM191.8,583.3L191.8,583.3L191.8,583.3ZM198.6,578.1L198.6,578.1L198.6,578.1ZM198.6,578.1L195.9,582.5L190.4,584.2L194.5,588.5L191.8,592.9L201.3,601.5L205.4,613.6L200,623.1L198.6,617.1L182.3,613.6L176.8,616.2L172.8,607.6L180.9,599.8L174.1,598.9L166,592.9L163.2,581.6L157.8,574.7L163.2,566L170,566.9L179.6,570.3L187.7,579.9ZM197.2,588.5L197.2,588.5L197.2,588.5ZM197.2,595.4L197.2,595.4L197.2,595.4ZM197.2,588.5L197.2,588.5L197.2,588.5ZM194.5,588.5L194.5,588.5L194.5,588.5ZM195.9,588.5L195.9,588.5L195.9,588.5ZM197.2,590.3L197.2,590.3L197.2,590.3Z" class="vide">
+            <title>Martinique (972) : aucune organisation analysée</title>
+          </path><path d="M287.5,566L287.5,566L287.5,566ZM314.5,579.7L314.5,579.7L314.5,579.7ZM314.2,579.1L314.2,579.1L314.2,579.1ZM293.9,568.9L296.3,569.2L297.1,569L299.3,569.8L300.3,570.4L302.2,570.6L303.8,571.9L307.4,575.5L308.5,576.2L311.7,579.2L312.5,578.6L313.8,580.1L315.1,581.2L318.6,583.2L319.6,583.2L320.5,584.1L321.3,587.2L322,587.7L322,588.8L323.1,590.7L322.8,593L320.9,594.4L320.5,595.7L319.4,597.1L318.6,597.4L318.6,598.3L317.7,598.6L317.5,599.8L316,602L313.6,606L312.7,606.2L312.7,607L311.7,607.8L312.1,608.6L311.2,610.9L309.8,613.1L308.9,615.3L308.5,615.6L308.9,616.5L308.5,617.5L307.6,618.2L306.8,619.8L304,621.1L302.9,622.8L301.6,623.1L299.7,622.2L297.5,622.4L297.8,621.7L295.6,620.3L293.9,621.8L292.8,621.8L289.6,620.9L290,620.2L289.2,619.8L287.3,620.9L287,621.6L286.6,621.3L286.4,622.4L285.3,622.8L284.3,622.6L283.8,623.9L283.2,624L282.5,623L281.4,623.4L279.1,622.6L277.8,622.4L276.9,620.6L277.4,620.4L278,618.8L278.7,618.8L280,617.4L281.4,614.3L281.9,613.7L282.5,612.4L282.5,611.1L282.9,610.2L282.5,608.9L282.5,607.7L282.1,607.7L284,605L284.3,605L284.7,603.7L285.3,603.1L285.5,600.9L285.8,600.2L284.2,599L283.6,597.2L282.5,597.1L282.3,596.2L281.7,596.1L280.4,593.7L279.9,593.1L280.2,591.5L279.3,591L279.3,588.3L278.5,588.1L278.5,586.4L278.4,585.5L278.9,584.2L278.5,582.4L278.2,582.1L278,579.9L278.9,576.6L279.5,576.2L281,573.7L282.5,572.7L283.6,571.2L285.1,569.6L285.3,567.3L286,566L288.7,566.3L292,568.2ZM308,573.3L308,573.3L308,573.3ZM308,573.3L308,573.3L308,573.3Z" class="vide">
+            <title>Guyane (973) : aucune organisation analysée</title>
+          </path><path d="M422.7,623.2L422.7,623.2L422.7,623.2ZM390.6,592.9L385.6,584.8L393,579.9L393,571.7L398,572.5L410.4,566L431.4,570.9L436.3,576.6L437.6,583.1L451.2,600.3L447.5,610.1L448.7,617.5L446.2,621.5L427.7,624L411.6,619.1L405.4,613.4L399.2,611.7L394.3,606L393,598.7Z" class="vide">
+            <title>La Réunion (974) : aucune organisation analysée</title>
+          </path><path d="M519.9,566L519.9,566L519.9,566ZM518.1,568.4L518.1,568.4L518.1,568.4ZM534.9,624L534.9,624L534.9,624ZM549.9,607.4L549.9,607.4L549.9,607.4ZM523.7,584.9L523.7,584.9L523.7,584.9ZM527.4,599.1L527.4,599.1L527.4,599.1ZM548,621.6L548,621.6L548,621.6ZM538.7,620.4L538.7,619.3L538.7,620.4L538.7,619.3ZM534.9,611L534.9,611L534.9,611ZM544.3,613.3L544.3,613.3L544.3,613.3ZM546.2,611L546.2,611L546.2,611ZM546.2,609.8L546.2,609.8L546.2,609.8ZM546.2,608.6L546.2,608.6L546.2,608.6ZM533.1,579L533.1,579L533.1,579ZM540.5,577.8L540.5,577.8L540.5,577.8ZM533.1,579L533.1,579L533.1,579ZM544.3,608.6L544.3,608.6L544.3,608.6ZM531.2,570.7L531.2,570.7L531.2,570.7ZM521.8,570.7L521.8,570.7L521.8,570.7ZM519.9,570.7L519.9,570.7L519.9,570.7ZM533.1,573.1L533.1,573.1L533.1,573.1ZM531.2,573.1L531.2,573.1L531.2,573.1ZM519.9,570.7L519.9,570.7L519.9,570.7ZM533.1,579L546.2,580.2L549.9,588.5L546.2,592L544.3,608.6L546.2,611L538.7,620.4L538.7,619.3L538.7,620.4L538.7,619.3L538.7,620.4L533.1,620.4L523.7,607.4L534.9,613.3L534.9,607.4L527.4,599.1L529.3,586.1L519.9,582.6L527.4,570.7ZM555.5,589.7L555.5,589.7L555.5,589.7ZM549.9,593.2L549.9,593.2L549.9,593.2ZM555.5,588.5L555.5,588.5L555.5,588.5ZM546.2,592L546.2,592L546.2,592ZM555.5,587.3L555.5,587.3L555.5,587.3Z" class="vide">
+            <title>Mayotte (976) : aucune organisation analysée</title>
+          </path>
+    <g aria-hidden="true">
+          <rect class="cadre-om" x="8" y="562" width="110.4" height="80" rx="4"></rect>
+          <text x="63.2" y="638" text-anchor="middle">
+            Guadeloupe
+          </text>
+        </g><g aria-hidden="true">
+          <rect class="cadre-om" x="126.4" y="562" width="110.4" height="80" rx="4"></rect>
+          <text x="181.60000000000002" y="638" text-anchor="middle">
+            Martinique
+          </text>
+        </g><g aria-hidden="true">
+          <rect class="cadre-om" x="244.8" y="562" width="110.4" height="80" rx="4"></rect>
+          <text x="300" y="638" text-anchor="middle">
+            Guyane
+          </text>
+        </g><g aria-hidden="true">
+          <rect class="cadre-om" x="363.20000000000005" y="562" width="110.4" height="80" rx="4"></rect>
+          <text x="418.40000000000003" y="638" text-anchor="middle">
+            La Réunion
+          </text>
+        </g><g aria-hidden="true">
+          <rect class="cadre-om" x="481.6" y="562" width="110.4" height="80" rx="4"></rect>
+          <text x="536.8000000000001" y="638" text-anchor="middle">
+            Mayotte
+          </text>
+        </g>
+  </svg>
+  <figcaption>
+    <ul class="legende" aria-label="Légende : note moyenne du département">
+      <li>
+            <span class="pastille note-A" aria-hidden="true"></span>
+            Note moyenne A
+          </li><li>
+            <span class="pastille note-B" aria-hidden="true"></span>
+            Note moyenne B
+          </li><li>
+            <span class="pastille note-C" aria-hidden="true"></span>
+            Note moyenne C
+          </li><li>
+            <span class="pastille note-D" aria-hidden="true"></span>
+            Note moyenne D
+          </li><li>
+            <span class="pastille note-E" aria-hidden="true"></span>
+            Note moyenne E
+          </li>
+      <li><span class="pastille" style="background: var(--carte-vide)" aria-hidden="true"></span>Aucune donnée</li>
+    </ul>
+  </figcaption>
+</figure>
+    </section>
+
+    <section class="section" aria-labelledby="titre-recents">
+      <h2 id="titre-recents">Derniers scans</h2>
+      <ul class="grille">
+        <li><a class="carte carte-organisation" href="/organisation/exempleville-demo/">
+  <span class="badge note-A badge--moyen" role="img" aria-label="Note A sur une échelle de A (meilleure) à E" title="Note A sur une échelle de A (meilleure) à E">
+  A
+</span>
+  <span>
+    <span class="carte-organisation__nom">Commune d&#39;Exempleville</span>
+    <span class="texte-secondaire petit">
+      Commune
+       · Gironde · 100/100
+    </span>
+  </span>
+</a></li><li><a class="carte carte-organisation" href="/organisation/demoville-demo/">
+  <span class="badge note-E badge--moyen" role="img" aria-label="Note E sur une échelle de A (meilleure) à E" title="Note E sur une échelle de A (meilleure) à E">
+  E
+</span>
+  <span>
+    <span class="carte-organisation__nom">Commune de Démoville</span>
+    <span class="texte-secondaire petit">
+      Commune
+       · Nord · 27/100
+    </span>
+  </span>
+</a></li><li><a class="carte carte-organisation" href="/organisation/fictif-sur-mer-demo/">
+  <span class="badge note-E badge--moyen" role="img" aria-label="Note E sur une échelle de A (meilleure) à E" title="Note E sur une échelle de A (meilleure) à E">
+  E
+</span>
+  <span>
+    <span class="carte-organisation__nom">Commune de Fictif-sur-Mer</span>
+    <span class="texte-secondaire petit">
+      Commune
+       · Bouches-du-Rhône · 26/100
+    </span>
+  </span>
+</a></li><li><a class="carte carte-organisation" href="/organisation/testbourg-demo/">
+  <span class="badge note-A badge--moyen" role="img" aria-label="Note A sur une échelle de A (meilleure) à E" title="Note A sur une échelle de A (meilleure) à E">
+  A
+</span>
+  <span>
+    <span class="carte-organisation__nom">Commune de Testbourg</span>
+    <span class="texte-secondaire petit">
+      Commune
+       · Bas-Rhin · 96/100
+    </span>
+  </span>
+</a></li><li><a class="carte carte-organisation" href="/organisation/maquette-les-bains-demo/">
+  <span class="badge note-A badge--moyen" role="img" aria-label="Note A sur une échelle de A (meilleure) à E" title="Note A sur une échelle de A (meilleure) à E">
+  A
+</span>
+  <span>
+    <span class="carte-organisation__nom">Commune de Maquette-les-Bains</span>
+    <span class="texte-secondaire petit">
+      Commune
+       · Puy-de-Dôme · 100/100
+    </span>
+  </span>
+</a></li><li><a class="carte carte-organisation" href="/organisation/echantillon-la-foret-demo/">
+  <span class="badge note-C badge--moyen" role="img" aria-label="Note C sur une échelle de A (meilleure) à E" title="Note C sur une échelle de A (meilleure) à E">
+  C
+</span>
+  <span>
+    <span class="carte-organisation__nom">Commune d&#39;Échantillon-la-Forêt</span>
+    <span class="texte-secondaire petit">
+      Commune
+       · Ille-et-Vilaine · 68/100
+    </span>
+  </span>
+</a></li>
+      </ul>
+      <p><a class="bouton bouton--secondaire" href="/classements/">Toutes les organisations</a></p>
+    </section>
+
+    <section class="section" aria-labelledby="titre-limites">
+      <h2 id="titre-limites">Ce que mesure (et ne mesure pas) le score</h2>
+      <div class="grille">
+        <div class="carte">
+          <h3>Une analyse passive</h3>
+          <p>
+            Seules les informations publiques sont consultées : enregistrements DNS, adresses IP,
+            quelques pages du site. Aucun formulaire n'est soumis, aucune faille n'est testée.
+          </p>
+        </div>
+        <div class="carte">
+          <h3>Une empreinte externe</h3>
+          <p>
+            Le score ne dit rien des logiciels internes ni des contrats. Il indique une
+            <strong>dépendance</strong> visible, pas une faute : ce sont des pistes de réflexion.
+          </p>
+        </div>
+        <div class="carte">
+          <h3>Une méthode ouverte</h3>
+          <p>
+            Chaque point retiré est justifié par une preuve. La <a href="/methodologie/">méthodologie</a>
+            et le code sont publics et versionnés.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+    </main>
+    <footer class="pied">
+      <div class="conteneur">
+        <div>
+          <p>
+            <strong>Bleu Blanc Cloud</strong> est un projet personnel, indépendant et open source.
+            Il n'a <strong>aucun lien avec l'État ni avec l'Union européenne</strong>.
+          </p>
+          <p class="texte-secondaire">
+            Le score ne reflète que l'empreinte externe et visible publiquement des organisations,
+            pas leurs outils internes. Il est indicatif.
+          </p>
+        </div>
+        <div>
+          <h2 class="petit">Comprendre</h2>
+          <ul>
+            <li><a href="/methodologie/">Méthodologie</a></li>
+            <li><a href="/alternatives/">Alternatives européennes</a></li>
+            <li><a href="/a-propos/">À propos</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="petit">Le projet</h2>
+          <ul>
+            <li><a href="/retrait/">Retrait et droit de réponse</a></li>
+            <li><a href="/mentions-legales/">Mentions légales</a></li>
+            <li><a href="https://github.com/Berachem/bleu-blanc-cloud">Code source (EUPL-1.2)</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

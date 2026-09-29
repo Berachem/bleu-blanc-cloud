@@ -1,0 +1,10 @@
+[Unit]
+Description=Bleu Blanc Cloud — sauvegarde quotidienne à 2 h
+
+[Timer]
+OnCalendar=*-*-* 02:00:00 Europe/Paris
+Persistent=true
+Unit=bbcloud-sauvegarde.service
+
+[Install]
+WantedBy=timers.target

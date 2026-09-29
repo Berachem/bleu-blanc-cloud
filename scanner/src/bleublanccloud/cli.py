@@ -477,6 +477,16 @@ def exporter(
 
 
 @app.command()
+def publier() -> None:
+    """Export des données, construction du site et publication sur Codeberg Pages."""
+    import subprocess
+
+    script = RACINE_PROJET / "deploy" / "publier.sh"
+    resultat = subprocess.run(["bash", str(script)], check=False)
+    raise typer.Exit(code=resultat.returncode)
+
+
+@app.command()
 def demo(
     vers: Annotated[
         Path, typer.Option("--vers", help="Dossier de sortie des données fictives.")

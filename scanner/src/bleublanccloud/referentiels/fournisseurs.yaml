@@ -276,6 +276,16 @@
     - "https://bgp.tools/as/200325"
   a_verifier: true
 
+- id: desec
+  nom: deSEC (association)
+  pays_siege: DE
+  soumis_cloud_act: false
+  motifs_domaines: ["desec.io", "desec.org"]
+  categories: [dns]
+  sources:
+    - "https://desec.io/"
+  a_verifier: true
+
 - id: nameshield
   nom: Nameshield
   pays_siege: FR

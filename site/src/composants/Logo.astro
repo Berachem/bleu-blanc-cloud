@@ -5,7 +5,11 @@ interface Props {
   avecTexte?: boolean;
 }
 const { taille = 40, avecTexte = true } = Astro.props;
-const id = `nuage-${Math.random().toString(36).slice(2, 8)}`;
+interface PropsId {
+  identifiant?: string;
+}
+const { identifiant = "nuage-logo" } = Astro.props as PropsId;
+const id = identifiant;
 ---
 <svg
   width={taille}
