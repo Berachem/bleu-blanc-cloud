@@ -1,0 +1,11 @@
+[
+  {"nom": "Mairie - Exempleville", "pivot": "[{\"type_service_local\": \"mairie\", \"code_insee_commune\": [\"33999\"]}]",
+   "site_internet": "[{\"libelle\": \"\", \"valeur\": \"https://www.exempleville.fr\"}]", "code_insee_commune": "33999"},
+  {"nom": "Mairie annexe - Exempleville quartier nord", "pivot": "[{\"type_service_local\": \"mairie\", \"code_insee_commune\": [\"33999\"]}]",
+   "site_internet": "[{\"libelle\": \"\", \"valeur\": \"https://annexe.exempleville.fr\"}]", "code_insee_commune": "33999"},
+  {"nom": "Mairie - Saint-Démo-sur-Mer", "pivot": [{"type_service_local": "mairie", "code_insee_commune": ["13999"]}],
+   "site_internet": [{"libelle": "Site officiel", "valeur": "saint-demo.example"}], "code_insee_commune": "13999"},
+  {"nom": "Mairie - Sans-Site", "pivot": "[{\"type_service_local\": \"mairie\"}]", "site_internet": null, "code_insee_commune": "59999"},
+  {"nom": "Mairie - Petite-Commune", "pivot": "[{\"type_service_local\": \"mairie\"}]",
+   "site_internet": "[{\"valeur\": \"https://petite-commune.fr\"}]", "code_insee_commune": "33998"}
+]

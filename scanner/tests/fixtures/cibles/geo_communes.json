@@ -1,0 +1,8 @@
+[
+  {"nom": "Exempleville", "code": "33999", "population": 48200, "codeDepartement": "33", "codeRegion": "75"},
+  {"nom": "Petite-Commune", "code": "33998", "population": 820, "codeDepartement": "33", "codeRegion": "75"},
+  {"nom": "Saint-Démo-sur-Mer", "code": "13999", "population": 23400, "codeDepartement": "13", "codeRegion": "93"},
+  {"nom": "Sans-Site", "code": "59999", "population": 15000, "codeDepartement": "59", "codeRegion": "32"},
+  {"nom": "Chef-Lieu-Fictif", "code": "33997", "population": 9000, "codeDepartement": "33", "codeRegion": "75"},
+  {"nom": "Commune-Sans-Population", "code": "13998", "codeDepartement": "13", "codeRegion": "93"}
+]

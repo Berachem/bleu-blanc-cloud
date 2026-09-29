@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import httpx
 import typer
@@ -30,6 +30,10 @@ app = typer.Typer(
 )
 app_referentiels = typer.Typer(help="Référentiels : fournisseurs, plages IP, base ASN.")
 app.add_typer(app_referentiels, name="referentiels")
+app_cibles = typer.Typer(help="Organisations à analyser (import, liste, ajout manuel).")
+app.add_typer(app_cibles, name="cibles")
+app_campagne = typer.Typer(help="Campagnes de scan.")
+app.add_typer(app_campagne, name="campagne")
 
 console = Console()
 console_erreur = Console(stderr=True)
@@ -189,6 +193,177 @@ def scanner(
 
 
 # --------------------------------------------------------------------------- #
+# Cibles
+# --------------------------------------------------------------------------- #
+
+
+@app_cibles.command("importer")
+def cibles_importer(
+    population_min: Annotated[
+        int, typer.Option("--population-min", help="Population minimale des communes.")
+    ] = 10_000,
+    types: Annotated[
+        str, typer.Option("--types", help="Types à importer, séparés par des virgules.")
+    ] = "commune,departement,region",
+) -> None:
+    """Importe communes, départements et régions (API Annuaire + geo.api.gouv.fr)."""
+    from bleublanccloud.cibles.importation import (
+        construire_organisations,
+        enregistrer_import,
+        telecharger_donnees,
+    )
+
+    parametres = obtenir_parametres()
+    liste_types = [t.strip() for t in types.split(",") if t.strip()]
+
+    async def telecharger() -> Any:
+        async with httpx.AsyncClient(
+            headers={"User-Agent": parametres.user_agent}, timeout=120, follow_redirects=True
+        ) as client:
+            return await telecharger_donnees(client, liste_types)
+
+    try:
+        donnees = asyncio.run(telecharger())
+    except httpx.HTTPError as erreur:
+        console_erreur.print(f"[red]Téléchargement impossible : {erreur}[/]")
+        raise typer.Exit(code=1) from erreur
+    organisations = construire_organisations(donnees, population_min, liste_types)
+    with Base(parametres.base_sqlite) as base:
+        rapport = enregistrer_import(base, donnees, organisations)
+    console.print(
+        f"[green]✓[/] {rapport.organisations} organisation(s) importée(s), "
+        f"dont {rapport.avec_site} avec un site web connu."
+    )
+    if rapport.sans_site:
+        console.print(f"[yellow]{len(rapport.sans_site)} sans site web[/] (non analysables).")
+
+
+@app_cibles.command("lister")
+def cibles_lister(
+    limite: Annotated[int, typer.Option("--limite", help="Nombre maximal de lignes.")] = 50,
+) -> None:
+    """Liste les organisations enregistrées."""
+    parametres = obtenir_parametres()
+    with Base(parametres.base_sqlite) as base:
+        organisations = base.organisations(limite=limite)
+    tableau = Table(expand=True)
+    for colonne in ("Slug", "Nom", "Type", "Département", "Population", "Site web"):
+        tableau.add_column(colonne)
+    for enregistree in organisations:
+        o = enregistree.organisation
+        tableau.add_row(
+            o.slug, o.nom, o.type, o.departement or "", str(o.population or ""), o.site_web or ""
+        )
+    console.print(tableau)
+
+
+@app_cibles.command("ajouter")
+def cibles_ajouter(
+    nom: Annotated[str, typer.Option("--nom", help="Nom affiché.")],
+    site_web: Annotated[str, typer.Option("--site", help="URL du site web.")],
+    type_organisation: Annotated[
+        str, typer.Option("--type", help="commune, departement…")
+    ] = "autre",
+    departement: Annotated[str | None, typer.Option("--departement")] = None,
+    population: Annotated[int | None, typer.Option("--population")] = None,
+) -> None:
+    """Ajoute manuellement une organisation (ex. un domaine de test autorisé)."""
+    from bleublanccloud.cibles.importation import slugifier
+    from bleublanccloud.modeles import Organisation
+
+    parametres = obtenir_parametres()
+    organisation = Organisation(
+        slug=slugifier(nom),
+        nom=nom,
+        type=type_organisation,
+        departement=departement,
+        population=population,
+        site_web=site_web,
+        source="ajout manuel",
+    )
+    with Base(parametres.base_sqlite) as base:
+        base.enregistrer_organisation(organisation)
+    console.print(f"[green]✓[/] {nom} ajoutée (slug : {organisation.slug}).")
+
+
+# --------------------------------------------------------------------------- #
+# Campagne
+# --------------------------------------------------------------------------- #
+
+
+@app_campagne.command("lancer")
+def campagne_lancer(
+    limite: Annotated[
+        int | None, typer.Option("--limite", help="Nombre maximal d'organisations.")
+    ] = None,
+    organisation: Annotated[
+        str | None, typer.Option("--organisation", help="Slug d'une seule organisation.")
+    ] = None,
+    simulation: Annotated[
+        bool, typer.Option("--dry-run", help="Liste les cibles sans aucune requête réseau.")
+    ] = False,
+    oui: Annotated[
+        bool, typer.Option("--oui", help="Ne demande pas de confirmation (timer systemd).")
+    ] = False,
+) -> None:
+    """Scanne les organisations enregistrées et enregistre leurs scores."""
+    from rich.progress import Progress
+
+    from bleublanccloud.campagne import lancer_campagne, preparer_cibles
+    from bleublanccloud.scan import contexte_reseau
+
+    parametres = obtenir_parametres()
+    referentiels = referentiels_par_defaut()
+    with Base(parametres.base_sqlite) as base:
+        base.synchroniser_retraits(referentiels.retraits)
+        if organisation:
+            unique = base.organisation_par_slug(organisation)
+            if unique is None:
+                console_erreur.print(f"[red]Organisation inconnue : {organisation}[/]")
+                raise typer.Exit(code=2)
+            candidates = [unique]
+        else:
+            candidates = base.organisations(avec_site=True)
+        cibles, ignorees = preparer_cibles(candidates, referentiels.est_retire, limite)
+        console.print(f"{len(cibles)} organisation(s) à analyser, {len(ignorees)} ignorée(s).")
+        for ligne in ignorees[:10]:
+            console.print(f"  [grey50]• {ligne}[/]")
+        if simulation:
+            for cible in cibles[:20]:
+                console.print(f"  • {cible.organisation.organisation.nom} → {cible.domaine}")
+            if len(cibles) > 20:
+                console.print(f"  … et {len(cibles) - 20} autre(s).")
+            console.print("[yellow]Simulation : aucune requête n'a été envoyée.[/]")
+            return
+        if not cibles:
+            return
+        if not oui and not typer.confirm(
+            f"Lancer l'analyse passive de {len(cibles)} domaine(s) réel(s) ?", default=False
+        ):
+            raise typer.Abort()
+
+        async def executer() -> Any:
+            async with contexte_reseau(parametres, referentiels) as contexte:
+                with Progress(console=console) as barre:
+                    tache = barre.add_task("Scan", total=len(cibles))
+                    return await lancer_campagne(
+                        base,
+                        contexte,
+                        cibles,
+                        progression=lambda *_: barre.advance(tache),
+                    )
+
+        rapport = asyncio.run(executer())
+    repartition = " · ".join(f"{note} : {n}" for note, n in sorted(rapport.notes.items()))
+    console.print(
+        f"[green]✓[/] {rapport.scannees}/{rapport.prevues} scannée(s), "
+        f"{rapport.notees} notée(s). {repartition}"
+    )
+    for erreur in rapport.erreurs[:20]:
+        console.print(f"[yellow]⚠ {erreur}[/]")
+
+
+# --------------------------------------------------------------------------- #
 # Export
 # --------------------------------------------------------------------------- #
 
@@ -299,6 +474,23 @@ def referentiels_maj() -> None:
         console.print(f"[yellow]SecNumCloud :[/] {remarque}")
     for erreur in rapport.erreurs:
         console.print(f"[yellow]⚠ {erreur}[/]")
+
+
+@app_referentiels.command("inconnus")
+def referentiels_inconnus(
+    limite: Annotated[int, typer.Option("--limite")] = 30,
+) -> None:
+    """Hébergeurs, MX et DNS non identifiés les plus fréquents (pour enrichir le référentiel)."""
+    parametres = obtenir_parametres()
+    with Base(parametres.base_sqlite) as base:
+        statistiques = base.statistiques_inconnus(limite)
+    tableau = Table(title="Preuves non attribuées", expand=True)
+    tableau.add_column("Catégorie")
+    tableau.add_column("ASN ou domaine")
+    tableau.add_column("Occurrences", justify="right")
+    for categorie, cle, nombre in statistiques:
+        tableau.add_row(LIBELLES_CATEGORIES.get(categorie, categorie), cle, str(nombre))
+    console.print(tableau)
 
 
 @app_referentiels.command("verifier")
