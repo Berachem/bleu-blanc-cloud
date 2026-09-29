@@ -1,0 +1,52 @@
+name: Qualité
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scanner:
+    name: Scanner (Python)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scanner
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Installation
+        run: uv sync --locked
+      - name: Lint (ruff)
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Typage (mypy)
+        run: uv run mypy
+      - name: Tests (sans réseau)
+        run: uv run pytest --cov --cov-report=term-missing
+
+  site:
+    name: Site (Astro)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    env:
+      ASTRO_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Installation
+        run: npm ci
+      - name: Vérification des types
+        run: npm run verifier
+      - name: Construction
+        run: npm run build

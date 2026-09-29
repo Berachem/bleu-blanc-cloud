@@ -1,0 +1,37 @@
+# Secrets
+.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Données locales (base SQLite, sauvegardes)
+/donnees/
+*.db
+*.db-journal
+
+# Référentiels téléchargés (plages IP, base ASN)
+scanner/src/bleublanccloud/referentiels/telechargements/*
+!scanner/src/bleublanccloud/referentiels/telechargements/.gitkeep
+
+# Site
+site/node_modules/
+site/dist/
+site/.astro/
+site/public/donnees/*
+!site/public/donnees/.gitkeep
+
+# Divers
+.DS_Store
+*.log
