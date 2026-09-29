@@ -1,0 +1,19 @@
+{
+  "_commentaire": "Commune fictive : site chez OVHcloud, messagerie Microsoft 365, DNS OVHcloud.",
+  "zones": {"exempleville.fr": "exempleville.fr", "www.exempleville.fr": "exempleville.fr"},
+  "resolutions": {
+    "exempleville.fr": {"cnames": [], "ipv4": ["51.91.10.20"], "ipv6": []},
+    "www.exempleville.fr": {"cnames": ["exempleville.fr"], "ipv4": ["51.91.10.20"], "ipv6": []}
+  },
+  "enregistrements": {
+    "exempleville.fr|NS": ["dns110.ovh.net", "ns110.ovh.net"],
+    "exempleville.fr|MX": ["10 exempleville-fr.mail.protection.outlook.com"],
+    "exempleville.fr|TXT": [
+      "MS=ms12345678",
+      "v=spf1 include:spf.protection.outlook.com include:mx.ovh.com -all",
+      "google-site-verification=abcdef123456"
+    ],
+    "exempleville.fr|CAA": ["0 issue \"letsencrypt.org\""],
+    "_dmarc.exempleville.fr|TXT": ["v=DMARC1; p=quarantine; rua=mailto:dmarc@exempleville.fr"]
+  }
+}

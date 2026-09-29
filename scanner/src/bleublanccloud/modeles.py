@@ -84,7 +84,28 @@ class Fournisseur(ModeleStrict):
     )
     propose_offre_secnumcloud: bool = False
     asn: list[int] = Field(default_factory=list)
-    motifs_domaines: list[str] = Field(default_factory=list)
+    motifs_domaines: list[str] = Field(
+        default_factory=list,
+        description="Suffixes de noms d'hôtes (ou « re:<regex> ») rattachés au fournisseur.",
+    )
+    motifs_cdn: list[str] = Field(
+        default_factory=list,
+        description="Motifs de noms d'hôtes indiquant un rôle de CDN (hébergeur réel masqué).",
+    )
+    asn_cdn: list[int] = Field(
+        default_factory=list, description="ASN d'un réseau de diffusion de contenu (CDN)."
+    )
+    services_cdn: list[str] = Field(
+        default_factory=list,
+        description="Services des plages IP publiées qui correspondent à un CDN (ex. CLOUDFRONT).",
+    )
+    plages_cdn: bool = Field(
+        default=False, description="Toutes les plages IP publiées par ce fournisseur sont un CDN."
+    )
+    en_tetes_origine: dict[str, str] = Field(
+        default_factory=dict,
+        description="En-têtes HTTP (nom → regex, vide = présence) révélant une origine hébergée.",
+    )
     categories: list[str] = Field(default_factory=list)
     sources: list[HttpUrl] = Field(min_length=1)
     a_verifier: bool = True

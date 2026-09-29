@@ -1,0 +1,9 @@
+# Domaines exclus de toute analyse, sur demande de l'organisation concernée (page /retrait).
+# La liste est vérifiée AVANT toute requête réseau (DNS comme HTTP).
+# Un domaine exclut aussi tous ses sous-domaines.
+#
+# Format :
+# - domaine: exemple-retire.fr
+#   date_demande: "2026-01-15"
+#   motif: "Demande de retrait reçue par courriel"
+[]

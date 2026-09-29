@@ -1,0 +1,5 @@
+{"changeNumber": 1, "cloud": "Public", "values": [
+  {"name": "AzureCloud", "id": "AzureCloud", "properties": {"addressPrefixes": ["20.38.64.0/19", "13.107.246.0/24"]}},
+  {"name": "AzureCloud.francecentral", "id": "AzureCloud.francecentral", "properties": {"addressPrefixes": ["20.38.64.0/19"]}},
+  {"name": "AzureFrontDoor.Frontend", "id": "AzureFrontDoor.Frontend", "properties": {"addressPrefixes": ["13.107.246.0/24"]}}
+]}

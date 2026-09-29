@@ -59,6 +59,8 @@ ignore = [
     "RUF001", # caractères ambigus : le français utilise des apostrophes typographiques
     "RUF002",
     "RUF003",
+    "ASYNC230", # outil en ligne de commande : les petites écritures de fichiers restent synchrones
+    "ASYNC240",
 ]
 
 [tool.mypy]

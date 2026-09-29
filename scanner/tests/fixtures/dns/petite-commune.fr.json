@@ -1,0 +1,14 @@
+{
+  "_commentaire": "Commune fictive : hébergeur local non référencé, MX chez un prestataire inconnu, MX de secours Gandi.",
+  "zones": {"petite-commune.fr": "petite-commune.fr"},
+  "resolutions": {
+    "www.petite-commune.fr": {"cnames": [], "ipv4": ["185.10.20.30"], "ipv6": []},
+    "mail.prestataire-local.fr": {"cnames": [], "ipv4": ["185.10.20.31"], "ipv6": []},
+    "ns1.prestataire-local.fr": {"cnames": [], "ipv4": ["51.91.10.53"], "ipv6": []}
+  },
+  "enregistrements": {
+    "petite-commune.fr|NS": ["ns1.prestataire-local.fr"],
+    "petite-commune.fr|MX": ["10 mail.prestataire-local.fr", "20 spool.mail.gandi.net"]
+  },
+  "erreurs": ["petite-commune.fr|CAA"]
+}

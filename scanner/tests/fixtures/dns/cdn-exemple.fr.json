@@ -1,0 +1,11 @@
+{
+  "_commentaire": "Organisation fictive : site derrière Cloudflare, DNS Cloudflare, pas de MX.",
+  "zones": {"cdn-exemple.fr": "cdn-exemple.fr"},
+  "resolutions": {
+    "cdn-exemple.fr": {"cnames": [], "ipv4": ["104.16.1.1"], "ipv6": ["2606:4700::6810:101"]}
+  },
+  "enregistrements": {
+    "cdn-exemple.fr|NS": ["anna.ns.cloudflare.com", "bob.ns.cloudflare.com"],
+    "cdn-exemple.fr|TXT": ["v=spf1 -all"]
+  }
+}

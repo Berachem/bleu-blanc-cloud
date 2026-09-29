@@ -1,0 +1,8 @@
+{
+  "zones": {"mx-nul.fr": "mx-nul.fr"},
+  "resolutions": {"mx-nul.fr": {"cnames": ["mx-nul-fr.codeberg.page", "codeberg.page"], "ipv4": ["217.197.84.141"], "ipv6": []}},
+  "enregistrements": {
+    "mx-nul.fr|NS": ["ns-12-a.gandi.net"],
+    "mx-nul.fr|MX": ["0 ."]
+  }
+}

@@ -1,0 +1,1548 @@
+# Référentiel des fournisseurs — Bleu Blanc Cloud
+#
+# Chaque fait (pays du siège, maison mère, exposition au Cloud Act, offre SecNumCloud, ASN)
+# doit être justifié par au moins une URL source. Toutes les entrées démarrent en
+# « a_verifier: true » : un fait n'est considéré comme vérifié qu'après relecture humaine.
+#
+# Champs :
+#   motifs_domaines   suffixes de noms d'hôtes (ou « re:<regex> ») rattachés au fournisseur
+#   motifs_cdn        motifs indiquant un rôle de CDN (hébergeur réel masqué → niveau C)
+#   asn / asn_cdn     systèmes autonomes (hébergement / réseau de diffusion)
+#   services_cdn      services des plages IP publiées qui sont un CDN (ex. CLOUDFRONT)
+#   plages_cdn        toutes les plages IP publiées par ce fournisseur sont un CDN
+#   en_tetes_origine  en-têtes HTTP révélant une origine hébergée chez ce fournisseur
+#
+# Niveau calculé (voir analyse/attribution.py) :
+#   D si soumis_cloud_act ou autre_loi_extraterritoriale ;
+#   A si siège ET maison mère dans l'UE ; B sinon.
+
+# =========================================================================== #
+# France et Union européenne
+# =========================================================================== #
+
+- id: ovhcloud
+  nom: OVHcloud
+  pays_siege: FR
+  maison_mere: OVH Groupe SA
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  propose_offre_secnumcloud: true
+  asn: [16276]
+  motifs_domaines: ["ovh.net", "ovh.com", "ovhcloud.com", "ovh.fr", "ovh.cloud", "hosting.ovh.net"]
+  categories: [hebergement, messagerie, dns, envoi_emails, bureau_enregistrement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/OVHcloud"
+    - "https://bgp.tools/as/16276"
+    - "https://cyber.gouv.fr/"
+  remarque: "Offre SecNumCloud (Hosted Private Cloud, Bare Metal Pod) à confirmer sur la liste ANSSI."
+  a_verifier: true
+
+- id: scaleway
+  nom: Scaleway
+  pays_siege: FR
+  maison_mere: Iliad
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  propose_offre_secnumcloud: false
+  asn: [12876]
+  motifs_domaines: ["scw.cloud", "scaleway.com", "online.net", "scaleway-dns.com"]
+  categories: [hebergement, dns, envoi_emails, bureau_enregistrement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Scaleway"
+    - "https://bgp.tools/as/12876"
+  remarque: "Démarche de qualification SecNumCloud annoncée : statut à vérifier sur la liste ANSSI."
+  a_verifier: true
+
+- id: outscale
+  nom: 3DS Outscale
+  pays_siege: FR
+  maison_mere: Dassault Systèmes
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  propose_offre_secnumcloud: true
+  motifs_domaines: ["outscale.com"]
+  categories: [hebergement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Outscale"
+    - "https://www.outscale.com/"
+  remarque: "ASN à compléter après vérification."
+  a_verifier: true
+
+- id: clever-cloud
+  nom: Clever Cloud
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["cleverapps.io", "clever-cloud.com"]
+  categories: [hebergement]
+  sources:
+    - "https://www.clever-cloud.com/"
+  a_verifier: true
+
+- id: alwaysdata
+  nom: alwaysdata
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["alwaysdata.net", "alwaysdata.com"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://www.alwaysdata.com/"
+  remarque: "ASN à compléter après vérification."
+  a_verifier: true
+
+- id: o2switch
+  nom: o2switch
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [50474]
+  motifs_domaines: ["o2switch.net", "o2switch.fr"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://www.o2switch.fr/"
+    - "https://bgp.tools/as/50474"
+  a_verifier: true
+
+- id: gandi
+  nom: Gandi
+  pays_siege: FR
+  maison_mere: Your.Online
+  pays_maison_mere: NL
+  soumis_cloud_act: false
+  asn: [29169]
+  motifs_domaines: ["gandi.net"]
+  categories: [hebergement, messagerie, dns, bureau_enregistrement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Gandi"
+    - "https://bgp.tools/as/29169"
+  remarque: "Rapprochement avec Total Webhosting Solutions (Pays-Bas) en 2023, groupe renommé Your.Online."
+  a_verifier: true
+
+- id: ionos
+  nom: IONOS
+  pays_siege: DE
+  maison_mere: United Internet AG
+  pays_maison_mere: DE
+  soumis_cloud_act: false
+  asn: [8560]
+  motifs_domaines:
+    - "ionos.fr"
+    - "ionos.com"
+    - "ionos.de"
+    - "1and1.fr"
+    - "1and1.com"
+    - "ui-dns.com"
+    - "ui-dns.de"
+    - "ui-dns.org"
+    - "ui-dns.biz"
+    - "kundenserver.de"
+    - "perfora.net"
+  categories: [hebergement, messagerie, dns, bureau_enregistrement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/IONOS"
+    - "https://bgp.tools/as/8560"
+  a_verifier: true
+
+- id: strato
+  nom: STRATO
+  pays_siege: DE
+  maison_mere: United Internet AG
+  pays_maison_mere: DE
+  soumis_cloud_act: false
+  asn: [6724]
+  motifs_domaines: ["strato.de", "strato.com", "rzone.de"]
+  categories: [hebergement, messagerie]
+  sources:
+    - "https://de.wikipedia.org/wiki/Strato_AG"
+    - "https://bgp.tools/as/6724"
+  a_verifier: true
+
+- id: hetzner
+  nom: Hetzner Online
+  pays_siege: DE
+  soumis_cloud_act: false
+  asn: [24940, 213230]
+  motifs_domaines:
+    - "hetzner.com"
+    - "hetzner.de"
+    - "hetzner.cloud"
+    - "your-server.de"
+    - "first-ns.de"
+    - "second-ns.de"
+    - "second-ns.com"
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://de.wikipedia.org/wiki/Hetzner_Online"
+    - "https://bgp.tools/as/24940"
+  a_verifier: true
+
+- id: infomaniak
+  nom: Infomaniak
+  pays_siege: CH
+  soumis_cloud_act: false
+  asn: [29222]
+  motifs_domaines: ["infomaniak.ch", "infomaniak.com"]
+  categories: [hebergement, messagerie, dns, suites_saas]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Infomaniak"
+    - "https://bgp.tools/as/29222"
+  a_verifier: true
+
+- id: leaseweb
+  nom: Leaseweb
+  pays_siege: NL
+  soumis_cloud_act: false
+  asn: [60781]
+  motifs_domaines: ["leaseweb.com", "leaseweb.net"]
+  categories: [hebergement]
+  sources:
+    - "https://en.wikipedia.org/wiki/Leaseweb"
+    - "https://bgp.tools/as/60781"
+  a_verifier: true
+
+- id: hostinger
+  nom: Hostinger
+  pays_siege: LT
+  soumis_cloud_act: false
+  asn: [47583]
+  motifs_domaines: ["hostinger.com", "hostinger.fr", "dns-parking.com"]
+  categories: [hebergement, dns, messagerie]
+  sources:
+    - "https://en.wikipedia.org/wiki/Hostinger"
+    - "https://bgp.tools/as/47583"
+  a_verifier: true
+
+- id: lws
+  nom: LWS (Ligne Web Services)
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["lws.fr", "lwsdns.com"]
+  categories: [hebergement, dns, messagerie]
+  sources:
+    - "https://www.lws.fr/"
+  remarque: "ASN à compléter après vérification."
+  a_verifier: true
+
+- id: platform-sh
+  nom: Platform.sh (Upsun)
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["platform.sh", "platformsh.site", "upsun.app"]
+  categories: [hebergement]
+  sources:
+    - "https://en.wikipedia.org/wiki/Platform.sh"
+  remarque: "Plateforme française ; l'infrastructure sous-jacente peut être un cloud américain selon la région choisie."
+  a_verifier: true
+
+- id: jimdo
+  nom: Jimdo
+  pays_siege: DE
+  soumis_cloud_act: false
+  motifs_domaines: ["jimdo.com", "jimdosite.com", "jimcdn.com", "jimdofree.com"]
+  categories: [hebergement]
+  sources:
+    - "https://en.wikipedia.org/wiki/Jimdo"
+  a_verifier: true
+
+- id: e-monsite
+  nom: e-monsite
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["e-monsite.com"]
+  categories: [hebergement]
+  sources:
+    - "https://www.e-monsite.com/"
+  a_verifier: true
+
+- id: codeberg
+  nom: Codeberg e.V.
+  pays_siege: DE
+  soumis_cloud_act: false
+  motifs_domaines: ["codeberg.page", "codeberg.org"]
+  categories: [hebergement]
+  sources:
+    - "https://en.wikipedia.org/wiki/Codeberg"
+    - "https://codeberg.org/"
+  a_verifier: true
+
+- id: bunny
+  nom: Bunny.net (BunnyWay)
+  pays_siege: SI
+  soumis_cloud_act: false
+  asn: [200325]
+  motifs_domaines: ["bunny.net", "bunnyinfra.net"]
+  motifs_cdn: ["b-cdn.net", "bunnycdn.com"]
+  categories: [cdn, dns, services_tiers]
+  sources:
+    - "https://bunny.net/"
+    - "https://bgp.tools/as/200325"
+  a_verifier: true
+
+- id: nameshield
+  nom: Nameshield
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["nameshield.net", "nameshield.com"]
+  categories: [dns, bureau_enregistrement]
+  sources:
+    - "https://www.nameshield.com/"
+  a_verifier: true
+
+- id: orange
+  nom: Orange
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [3215, 5511]
+  motifs_domaines: ["orange.fr", "orange.com", "wanadoo.fr", "orange-business.com"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Orange_(entreprise)"
+    - "https://bgp.tools/as/3215"
+  a_verifier: true
+
+- id: sfr
+  nom: SFR (Altice France)
+  pays_siege: FR
+  maison_mere: Altice
+  soumis_cloud_act: false
+  asn: [15557]
+  motifs_domaines: ["sfr.net", "sfr.fr", "neuf.fr"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://fr.wikipedia.org/wiki/SFR"
+    - "https://bgp.tools/as/15557"
+  remarque: "Pays de la maison mère (Altice) à préciser."
+  a_verifier: true
+
+- id: free-iliad
+  nom: Free (Iliad)
+  pays_siege: FR
+  maison_mere: Iliad
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [12322]
+  motifs_domaines: ["free.fr", "proxad.net"]
+  categories: [hebergement, messagerie]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Iliad_(entreprise)"
+    - "https://bgp.tools/as/12322"
+  a_verifier: true
+
+- id: bouygues-telecom
+  nom: Bouygues Telecom
+  pays_siege: FR
+  maison_mere: Bouygues
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [5410]
+  motifs_domaines: ["bbox.fr", "bouyguestelecom.fr"]
+  categories: [hebergement, messagerie]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Bouygues_Telecom"
+    - "https://bgp.tools/as/5410"
+  a_verifier: true
+
+- id: jaguar-network
+  nom: Jaguar Network
+  pays_siege: FR
+  maison_mere: Iliad
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [30781]
+  motifs_domaines: ["jaguar-network.net", "jaguar-network.com"]
+  categories: [hebergement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Jaguar_Network"
+    - "https://bgp.tools/as/30781"
+  a_verifier: true
+
+- id: ikoula
+  nom: Ikoula
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [21409]
+  motifs_domaines: ["ikoula.com", "ikoula.fr"]
+  categories: [hebergement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Ikoula"
+    - "https://bgp.tools/as/21409"
+  a_verifier: true
+
+- id: mailinblack
+  nom: Mailinblack
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["mailinblack.com"]
+  categories: [messagerie, securite_messagerie]
+  sources:
+    - "https://www.mailinblack.com/"
+  a_verifier: true
+
+- id: altospam
+  nom: Altospam
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["altospam.com"]
+  categories: [messagerie, securite_messagerie]
+  sources:
+    - "https://www.altospam.com/"
+  a_verifier: true
+
+- id: brevo
+  nom: Brevo (ex-Sendinblue)
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["brevo.com", "sendinblue.com", "sibforms.com", "sibautomation.com"]
+  categories: [envoi_emails, services_tiers, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Brevo"
+    - "https://www.brevo.com/fr/"
+  a_verifier: true
+
+- id: mailjet
+  nom: Mailjet
+  pays_siege: FR
+  maison_mere: Sinch AB
+  pays_maison_mere: SE
+  soumis_cloud_act: false
+  motifs_domaines: ["mailjet.com"]
+  categories: [envoi_emails]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Mailjet"
+  a_verifier: true
+
+- id: proton
+  nom: Proton AG
+  pays_siege: CH
+  soumis_cloud_act: false
+  motifs_domaines: ["protonmail.ch", "protonmail.com", "proton.me"]
+  categories: [messagerie, suites_saas]
+  sources:
+    - "https://en.wikipedia.org/wiki/Proton_AG"
+  a_verifier: true
+
+- id: dailymotion
+  nom: Dailymotion
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["dailymotion.com", "dmcdn.net", "dm-event.net"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Dailymotion"
+  remarque: "Maison mère (groupe Vivendi / Havas) à préciser."
+  a_verifier: true
+
+- id: calameo
+  nom: Calaméo
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["calameo.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Calam%C3%A9o"
+  a_verifier: true
+
+- id: criteo
+  nom: Criteo
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["criteo.com", "criteo.net"]
+  categories: [mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Criteo"
+  remarque: "Société française cotée au Nasdaq avec une filiale américaine : exposition indirecte à vérifier."
+  a_verifier: true
+
+- id: axeptio
+  nom: Axeptio
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["axept.io", "axeptio.eu"]
+  categories: [services_tiers]
+  sources:
+    - "https://www.axeptio.eu/fr"
+  a_verifier: true
+
+- id: didomi
+  nom: Didomi
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["privacy-center.org", "didomi.io"]
+  categories: [services_tiers]
+  sources:
+    - "https://www.didomi.io/fr/"
+  a_verifier: true
+
+- id: tarteaucitron
+  nom: tarteaucitron.io
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["tarteaucitron.io"]
+  categories: [services_tiers]
+  sources:
+    - "https://tarteaucitron.io/fr/"
+    - "https://github.com/AmauriC/tarteaucitron.js"
+  a_verifier: true
+
+- id: crisp
+  nom: Crisp
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["crisp.chat"]
+  categories: [services_tiers]
+  sources:
+    - "https://crisp.chat/fr/"
+  a_verifier: true
+
+- id: iadvize
+  nom: iAdvize
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["iadvize.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/IAdvize"
+  a_verifier: true
+
+- id: eulerian
+  nom: Eulerian Technologies
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["eulerian.net", "eulerian.com"]
+  categories: [mesure_audience]
+  sources:
+    - "https://www.eulerian.com/"
+  a_verifier: true
+
+- id: kameleoon
+  nom: Kameleoon
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["kameleoon.eu", "kameleoon.io", "kameleoon.com"]
+  categories: [mesure_audience]
+  sources:
+    - "https://www.kameleoon.com/fr"
+  a_verifier: true
+
+- id: abtasty
+  nom: AB Tasty
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["abtasty.com"]
+  categories: [mesure_audience]
+  sources:
+    - "https://www.abtasty.com/fr/"
+  a_verifier: true
+
+- id: contentsquare
+  nom: Contentsquare
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["contentsquare.net", "contentsquare.com"]
+  categories: [mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Contentsquare"
+  remarque: "Société française avec une forte présence aux États-Unis : exposition indirecte à vérifier."
+  a_verifier: true
+
+- id: hotjar
+  nom: Hotjar
+  pays_siege: MT
+  maison_mere: Contentsquare
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["hotjar.com", "hotjar.io"]
+  categories: [mesure_audience]
+  sources:
+    - "https://en.wikipedia.org/wiki/Hotjar"
+  a_verifier: true
+
+- id: plausible
+  nom: Plausible Analytics
+  pays_siege: EE
+  soumis_cloud_act: false
+  motifs_domaines: ["plausible.io"]
+  categories: [mesure_audience]
+  sources:
+    - "https://plausible.io/about"
+  a_verifier: true
+
+- id: simple-analytics
+  nom: Simple Analytics
+  pays_siege: NL
+  soumis_cloud_act: false
+  motifs_domaines: ["simpleanalyticscdn.com", "simpleanalytics.com"]
+  categories: [mesure_audience]
+  sources:
+    - "https://www.simpleanalytics.com/"
+  a_verifier: true
+
+- id: statcounter
+  nom: StatCounter
+  pays_siege: IE
+  soumis_cloud_act: false
+  motifs_domaines: ["statcounter.com"]
+  categories: [mesure_audience]
+  sources:
+    - "https://en.wikipedia.org/wiki/StatCounter"
+  a_verifier: true
+
+- id: typeform
+  nom: Typeform
+  pays_siege: ES
+  soumis_cloud_act: false
+  motifs_domaines: ["typeform.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/Typeform"
+  a_verifier: true
+
+- id: tally
+  nom: Tally
+  pays_siege: BE
+  soumis_cloud_act: false
+  motifs_domaines: ["tally.so"]
+  categories: [services_tiers]
+  sources:
+    - "https://tally.so/"
+  a_verifier: true
+
+- id: framasoft
+  nom: Framasoft (association)
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["framaforms.org", "framasoft.org", "framadate.org", "framapad.org"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Framasoft"
+  a_verifier: true
+
+- id: friendly-captcha
+  nom: Friendly Captcha
+  pays_siege: DE
+  soumis_cloud_act: false
+  motifs_domaines: ["friendlycaptcha.com", "frcapi.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://friendlycaptcha.com/"
+  a_verifier: true
+
+- id: ign
+  nom: IGN (Institut national de l'information géographique et forestière)
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["geopf.fr", "ign.fr", "geoportail.gouv.fr"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Institut_national_de_l%27information_g%C3%A9ographique_et_foresti%C3%A8re"
+  a_verifier: true
+
+- id: osm-france
+  nom: OpenStreetMap France (association)
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["openstreetmap.fr"]
+  categories: [services_tiers]
+  sources:
+    - "https://www.openstreetmap.fr/"
+  a_verifier: true
+
+- id: livechat
+  nom: Text (ex-LiveChat Software)
+  pays_siege: PL
+  soumis_cloud_act: false
+  motifs_domaines: ["livechatinc.com", "livechat.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/LiveChat"
+  a_verifier: true
+
+- id: usercentrics
+  nom: Usercentrics (Cookiebot)
+  pays_siege: DE
+  soumis_cloud_act: false
+  motifs_domaines: ["cookiebot.com", "usercentrics.eu", "usercentrics.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://usercentrics.com/"
+  a_verifier: true
+
+- id: facil-iti
+  nom: FACIL'iti
+  pays_siege: FR
+  soumis_cloud_act: false
+  motifs_domaines: ["facil-iti.com", "facil-iti.app"]
+  categories: [services_tiers]
+  sources:
+    - "https://www.facil-iti.fr/"
+  a_verifier: true
+
+- id: jsdelivr
+  nom: jsDelivr
+  pays_siege: PL
+  soumis_cloud_act: false
+  motifs_domaines: ["jsdelivr.net"]
+  categories: [services_tiers]
+  sources:
+    - "https://www.jsdelivr.com/about"
+  remarque: "Réseau servi en partie par des CDN américains (Cloudflare, Fastly) : juridiction effective à vérifier."
+  a_verifier: true
+
+# =========================================================================== #
+# Hors UE — non soumis au Cloud Act (niveau B)
+# =========================================================================== #
+
+- id: openstreetmap
+  nom: OpenStreetMap Foundation
+  pays_siege: GB
+  soumis_cloud_act: false
+  motifs_domaines: ["openstreetmap.org"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/OpenStreetMap_Foundation"
+  a_verifier: true
+
+- id: innocraft
+  nom: InnoCraft (Matomo Cloud)
+  pays_siege: NZ
+  soumis_cloud_act: false
+  motifs_domaines: ["matomo.cloud", "innocraft.cloud"]
+  categories: [mesure_audience]
+  sources:
+    - "https://matomo.org/matomo-cloud/"
+    - "https://en.wikipedia.org/wiki/Matomo_(software)"
+  a_verifier: true
+
+# =========================================================================== #
+# Hors UE — soumis au Cloud Act ou à une loi extraterritoriale (niveau D)
+# =========================================================================== #
+
+- id: aws
+  nom: Amazon Web Services
+  pays_siege: US
+  maison_mere: Amazon.com, Inc.
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn: [16509, 14618]
+  motifs_domaines:
+    - "amazonaws.com"
+    - "elasticbeanstalk.com"
+    - "amplifyapp.com"
+    - "awsglobalaccelerator.com"
+    - "amazonses.com"
+    - "awsapps.com"
+    - "re:(^|\\.)awsdns-\\d+\\."
+  motifs_cdn: ["cloudfront.net"]
+  services_cdn: ["CLOUDFRONT", "CLOUDFRONT_ORIGIN_FACING"]
+  en_tetes_origine:
+    server: "^AmazonS3$"
+    x-amz-request-id: ""
+  categories: [hebergement, cdn, dns, messagerie, envoi_emails]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Amazon_Web_Services"
+    - "https://en.wikipedia.org/wiki/CLOUD_Act"
+    - "https://bgp.tools/as/16509"
+  a_verifier: true
+
+- id: microsoft
+  nom: Microsoft (Azure, Microsoft 365)
+  pays_siege: US
+  maison_mere: Microsoft Corporation
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn: [8075]
+  motifs_domaines:
+    - "outlook.com"
+    - "office365.com"
+    - "office.com"
+    - "microsoft.com"
+    - "onmicrosoft.com"
+    - "sharepoint.com"
+    - "azurewebsites.net"
+    - "cloudapp.azure.com"
+    - "cloudapp.net"
+    - "trafficmanager.net"
+    - "azure-dns.com"
+    - "azure-dns.net"
+    - "azure-dns.org"
+    - "azure-dns.info"
+    - "windows.net"
+    - "azurestaticapps.net"
+    - "aspnetcdn.com"
+    - "clarity.ms"
+  motifs_cdn: ["azureedge.net", "azurefd.net", "msedge.net"]
+  services_cdn: ["AzureFrontDoor.Frontend"]
+  en_tetes_origine:
+    x-ms-request-id: ""
+  categories: [hebergement, cdn, dns, messagerie, suites_saas, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Microsoft"
+    - "https://en.wikipedia.org/wiki/CLOUD_Act"
+    - "https://bgp.tools/as/8075"
+  a_verifier: true
+
+- id: google
+  nom: Google (Google Cloud, Workspace)
+  pays_siege: US
+  maison_mere: Alphabet Inc.
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn: [15169, 396982, 19527]
+  motifs_domaines:
+    - "google.com"
+    - "googlemail.com"
+    - "googledomains.com"
+    - "googlehosted.com"
+    - "appspot.com"
+    - "googleusercontent.com"
+    - "googleapis.com"
+    - "gstatic.com"
+    - "firebaseapp.com"
+    - "web.app"
+    - "run.app"
+    - "withgoogle.com"
+    - "googletagmanager.com"
+    - "google-analytics.com"
+    - "doubleclick.net"
+    - "googleadservices.com"
+    - "googlesyndication.com"
+    - "youtube.com"
+    - "youtube-nocookie.com"
+    - "ytimg.com"
+    - "recaptcha.net"
+  en_tetes_origine:
+    server: "^(GSE|gws|Google Frontend|UploadServer)$"
+    x-goog-generation: ""
+  categories: [hebergement, dns, messagerie, suites_saas, services_tiers, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Google"
+    - "https://en.wikipedia.org/wiki/CLOUD_Act"
+    - "https://bgp.tools/as/15169"
+  a_verifier: true
+
+- id: cloudflare
+  nom: Cloudflare
+  pays_siege: US
+  soumis_cloud_act: true
+  asn_cdn: [13335, 209242]
+  motifs_domaines:
+    - "cloudflare.com"
+    - "cloudflare.net"
+    - "cloudflare-dns.com"
+    - "pages.dev"
+    - "workers.dev"
+    - "cloudflareinsights.com"
+  motifs_cdn: ["cdn.cloudflare.net"]
+  plages_cdn: true
+  categories: [cdn, dns, messagerie, services_tiers, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Cloudflare"
+    - "https://en.wikipedia.org/wiki/CLOUD_Act"
+    - "https://bgp.tools/as/13335"
+  remarque: "Les pages Cloudflare Pages / Workers (pages.dev, workers.dev) sont traitées comme un hébergement."
+  a_verifier: true
+
+- id: akamai
+  nom: Akamai Technologies
+  pays_siege: US
+  soumis_cloud_act: true
+  asn: [63949]
+  asn_cdn: [20940, 16625]
+  motifs_domaines: ["akam.net", "akamaitechnologies.com", "linode.com", "linodeobjects.com"]
+  motifs_cdn:
+    - "akamai.net"
+    - "akamaiedge.net"
+    - "akamaihd.net"
+    - "akamaized.net"
+    - "edgekey.net"
+    - "edgesuite.net"
+  categories: [cdn, hebergement, dns]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Akamai_Technologies"
+    - "https://bgp.tools/as/20940"
+  a_verifier: true
+
+- id: fastly
+  nom: Fastly
+  pays_siege: US
+  soumis_cloud_act: true
+  asn_cdn: [54113]
+  motifs_domaines: ["fastly.com"]
+  motifs_cdn: ["fastly.net", "fastlylb.net"]
+  plages_cdn: true
+  categories: [cdn]
+  sources:
+    - "https://en.wikipedia.org/wiki/Fastly"
+    - "https://bgp.tools/as/54113"
+  a_verifier: true
+
+- id: imperva
+  nom: Imperva
+  pays_siege: US
+  maison_mere: Thales
+  pays_maison_mere: FR
+  soumis_cloud_act: true
+  motifs_cdn: ["incapdns.net"]
+  categories: [cdn]
+  sources:
+    - "https://en.wikipedia.org/wiki/Imperva"
+  remarque: "Société américaine rachetée par Thales (France) fin 2023 : exposition au Cloud Act via l'entité américaine, à vérifier."
+  a_verifier: true
+
+- id: vercel
+  nom: Vercel
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["vercel.app", "vercel-dns.com", "vercel.com", "now.sh"]
+  en_tetes_origine:
+    x-vercel-id: ""
+  categories: [hebergement, dns]
+  sources:
+    - "https://en.wikipedia.org/wiki/Vercel"
+  a_verifier: true
+
+- id: netlify
+  nom: Netlify
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["netlify.app", "netlify.com", "netlifyglobalcdn.com"]
+  en_tetes_origine:
+    x-nf-request-id: ""
+  categories: [hebergement, dns]
+  sources:
+    - "https://en.wikipedia.org/wiki/Netlify"
+  a_verifier: true
+
+- id: github
+  nom: GitHub (Pages)
+  pays_siege: US
+  maison_mere: Microsoft Corporation
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn: [36459]
+  motifs_domaines: ["github.io", "github.com", "githubusercontent.com"]
+  en_tetes_origine:
+    x-github-request-id: ""
+  categories: [hebergement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/GitHub"
+    - "https://bgp.tools/as/36459"
+  a_verifier: true
+
+- id: wix
+  nom: Wix.com
+  pays_siege: IL
+  soumis_cloud_act: true
+  asn: [58182]
+  motifs_domaines: ["wix.com", "wixsite.com", "wixdns.net", "wixstatic.com", "parastorage.com", "wixmp.com"]
+  en_tetes_origine:
+    x-wix-request-id: ""
+  categories: [hebergement, dns]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Wix.com"
+    - "https://bgp.tools/as/58182"
+  remarque: "Société israélienne cotée au Nasdaq, avec des filiales et une infrastructure américaines : exposition au Cloud Act à vérifier."
+  a_verifier: true
+
+- id: squarespace
+  nom: Squarespace
+  pays_siege: US
+  soumis_cloud_act: true
+  asn: [53831]
+  motifs_domaines: ["squarespace.com", "squarespace-cdn.com", "sqspcdn.com"]
+  en_tetes_origine:
+    server: "^Squarespace"
+  categories: [hebergement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Squarespace"
+    - "https://bgp.tools/as/53831"
+  a_verifier: true
+
+- id: automattic
+  nom: WordPress.com (Automattic)
+  pays_siege: US
+  soumis_cloud_act: true
+  asn: [2635]
+  motifs_domaines: ["wordpress.com", "wp.com", "wpcomstaging.com"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Automattic"
+    - "https://bgp.tools/as/2635"
+  a_verifier: true
+
+- id: shopify
+  nom: Shopify
+  pays_siege: CA
+  soumis_cloud_act: true
+  motifs_domaines: ["myshopify.com", "shopify.com", "shopifycloud.com", "shopifycdn.com"]
+  en_tetes_origine:
+    x-shopid: ""
+  categories: [hebergement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Shopify"
+  remarque: "Société canadienne avec des filiales américaines et une infrastructure hébergée par un cloud américain : exposition au Cloud Act à vérifier."
+  a_verifier: true
+
+- id: webflow
+  nom: Webflow
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["webflow.io", "webflow.com", "website-files.com"]
+  categories: [hebergement]
+  sources:
+    - "https://en.wikipedia.org/wiki/Webflow"
+  a_verifier: true
+
+- id: weebly
+  nom: Weebly (Block, Inc.)
+  pays_siege: US
+  maison_mere: Block, Inc.
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  motifs_domaines: ["weebly.com", "editmysite.com"]
+  categories: [hebergement]
+  sources:
+    - "https://en.wikipedia.org/wiki/Weebly"
+  a_verifier: true
+
+- id: wpengine
+  nom: WP Engine
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["wpengine.com", "wpenginepowered.com"]
+  categories: [hebergement]
+  sources:
+    - "https://en.wikipedia.org/wiki/WP_Engine"
+  a_verifier: true
+
+- id: acquia
+  nom: Acquia
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["acquia-sites.com", "acquia.com"]
+  categories: [hebergement]
+  sources:
+    - "https://en.wikipedia.org/wiki/Acquia"
+  a_verifier: true
+
+- id: godaddy
+  nom: GoDaddy
+  pays_siege: US
+  soumis_cloud_act: true
+  asn: [26496]
+  motifs_domaines: ["domaincontrol.com", "secureserver.net", "godaddy.com"]
+  categories: [hebergement, dns, messagerie, bureau_enregistrement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/GoDaddy"
+    - "https://bgp.tools/as/26496"
+  a_verifier: true
+
+- id: namecheap
+  nom: Namecheap
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["registrar-servers.com", "namecheap.com", "privateemail.com"]
+  categories: [dns, messagerie, bureau_enregistrement]
+  sources:
+    - "https://en.wikipedia.org/wiki/Namecheap"
+  a_verifier: true
+
+- id: oracle
+  nom: Oracle Cloud
+  pays_siege: US
+  maison_mere: Oracle Corporation
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn: [31898]
+  motifs_domaines: ["oraclecloud.com", "oracle.com", "dynect.net"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Oracle_(entreprise)"
+    - "https://bgp.tools/as/31898"
+  a_verifier: true
+
+- id: digitalocean
+  nom: DigitalOcean
+  pays_siege: US
+  soumis_cloud_act: true
+  asn: [14061]
+  motifs_domaines: ["digitalocean.com", "digitaloceanspaces.com", "ondigitalocean.app"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://fr.wikipedia.org/wiki/DigitalOcean"
+    - "https://bgp.tools/as/14061"
+  a_verifier: true
+
+- id: ns1
+  nom: NS1 (IBM)
+  pays_siege: US
+  maison_mere: IBM
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  motifs_domaines: ["nsone.net"]
+  categories: [dns]
+  sources:
+    - "https://en.wikipedia.org/wiki/NS1_(company)"
+  a_verifier: true
+
+- id: vercara
+  nom: UltraDNS (Vercara / DigiCert)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["ultradns.com", "ultradns.net", "ultradns.org", "ultradns.info", "ultradns.biz"]
+  categories: [dns]
+  sources:
+    - "https://en.wikipedia.org/wiki/UltraDNS"
+  a_verifier: true
+
+- id: mailchimp
+  nom: Mailchimp (Intuit)
+  pays_siege: US
+  maison_mere: Intuit Inc.
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  motifs_domaines:
+    - "mailchimp.com"
+    - "mcsv.net"
+    - "mcdlv.net"
+    - "list-manage.com"
+    - "mandrillapp.com"
+    - "chimpstatic.com"
+  categories: [envoi_emails, services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Mailchimp"
+  a_verifier: true
+
+- id: twilio
+  nom: Twilio (SendGrid, Segment)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["twilio.com", "sendgrid.net", "sendgrid.com", "segment.com", "segment.io"]
+  categories: [envoi_emails, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Twilio"
+  a_verifier: true
+
+- id: mailgun
+  nom: Mailgun
+  pays_siege: US
+  maison_mere: Sinch AB
+  pays_maison_mere: SE
+  soumis_cloud_act: true
+  motifs_domaines: ["mailgun.org", "mailgun.com", "mailgun.net"]
+  categories: [messagerie, envoi_emails]
+  sources:
+    - "https://en.wikipedia.org/wiki/Mailgun"
+  remarque: "Entité américaine (Mailgun Technologies, Inc.) détenue par le suédois Sinch : exposition au Cloud Act via l'entité américaine."
+  a_verifier: true
+
+- id: sparkpost
+  nom: SparkPost (Bird)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["sparkpostmail.com", "sparkpost.com"]
+  categories: [envoi_emails]
+  sources:
+    - "https://en.wikipedia.org/wiki/SparkPost"
+  remarque: "Rachetée par MessageBird (Pays-Bas, devenu Bird) en 2021 ; entité américaine conservée : à vérifier."
+  a_verifier: true
+
+- id: proofpoint
+  nom: Proofpoint
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["pphosted.com", "ppe-hosted.com", "proofpoint.com"]
+  categories: [messagerie, securite_messagerie]
+  sources:
+    - "https://en.wikipedia.org/wiki/Proofpoint,_Inc."
+  a_verifier: true
+
+- id: barracuda
+  nom: Barracuda Networks
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["barracudanetworks.com"]
+  categories: [messagerie, securite_messagerie]
+  sources:
+    - "https://en.wikipedia.org/wiki/Barracuda_Networks"
+  a_verifier: true
+
+- id: cisco
+  nom: Cisco (Secure Email, Webex)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["iphmx.com", "webex.com", "cisco.com"]
+  categories: [messagerie, securite_messagerie, suites_saas]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Cisco"
+  a_verifier: true
+
+- id: salesforce
+  nom: Salesforce (Slack, Pardot)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["salesforce.com", "force.com", "exacttarget.com", "pardot.com", "slack.com"]
+  categories: [suites_saas, envoi_emails]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Salesforce"
+  a_verifier: true
+
+- id: hubspot
+  nom: HubSpot
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines:
+    - "hubspot.com"
+    - "hubspot.net"
+    - "hs-scripts.com"
+    - "hs-analytics.net"
+    - "hs-banner.com"
+    - "hsforms.net"
+    - "hsforms.com"
+    - "hscollectedforms.net"
+    - "hubspotemail.net"
+    - "usemessages.com"
+  categories: [suites_saas, services_tiers, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/HubSpot"
+  a_verifier: true
+
+- id: zendesk
+  nom: Zendesk
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["zendesk.com", "zdassets.com", "zopim.com"]
+  categories: [suites_saas, services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Zendesk"
+  a_verifier: true
+
+- id: intercom
+  nom: Intercom
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["intercom.io", "intercomcdn.com", "intercomassets.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/Intercom_(company)"
+  a_verifier: true
+
+- id: atlassian
+  nom: Atlassian
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["atlassian.net", "atlassian.com", "statuspage.io"]
+  categories: [suites_saas]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Atlassian"
+  remarque: "Siège juridique transféré aux États-Unis en 2022."
+  a_verifier: true
+
+- id: zoom
+  nom: Zoom Communications
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["zoom.us", "zoom.com"]
+  categories: [suites_saas]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Zoom_(logiciel)"
+  a_verifier: true
+
+- id: docusign
+  nom: DocuSign
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["docusign.net", "docusign.com"]
+  categories: [suites_saas]
+  sources:
+    - "https://fr.wikipedia.org/wiki/DocuSign"
+  a_verifier: true
+
+- id: adobe
+  nom: Adobe
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines:
+    - "adobe.com"
+    - "typekit.net"
+    - "omtrdc.net"
+    - "2o7.net"
+    - "demdex.net"
+    - "adobedtm.com"
+    - "mktomail.com"
+  categories: [suites_saas, services_tiers, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Adobe"
+  a_verifier: true
+
+- id: dropbox
+  nom: Dropbox
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["dropbox.com", "dropboxusercontent.com"]
+  categories: [suites_saas]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Dropbox"
+  a_verifier: true
+
+- id: stripe
+  nom: Stripe
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["stripe.com", "stripe.network"]
+  categories: [suites_saas, services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Stripe_(entreprise)"
+  a_verifier: true
+
+- id: knowbe4
+  nom: KnowBe4
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["knowbe4.com"]
+  categories: [suites_saas]
+  sources:
+    - "https://en.wikipedia.org/wiki/KnowBe4"
+  a_verifier: true
+
+- id: onetrust
+  nom: OneTrust
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["onetrust.com", "onetrust.io", "cookielaw.org"]
+  categories: [services_tiers, suites_saas]
+  sources:
+    - "https://en.wikipedia.org/wiki/OneTrust"
+  a_verifier: true
+
+- id: meta
+  nom: Meta Platforms (Facebook, Instagram)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["facebook.net", "facebook.com", "fbcdn.net", "instagram.com", "cdninstagram.com"]
+  categories: [services_tiers, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Meta_Platforms"
+  a_verifier: true
+
+- id: linkedin
+  nom: LinkedIn (Microsoft)
+  pays_siege: US
+  maison_mere: Microsoft Corporation
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  motifs_domaines: ["licdn.com", "linkedin.com"]
+  categories: [services_tiers, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/LinkedIn"
+  a_verifier: true
+
+- id: x-corp
+  nom: X (ex-Twitter)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["twitter.com", "twimg.com", "x.com", "ads-twitter.com"]
+  categories: [services_tiers, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/X_(r%C3%A9seau_social)"
+  a_verifier: true
+
+- id: tiktok
+  nom: TikTok (ByteDance)
+  pays_siege: SG
+  maison_mere: ByteDance
+  pays_maison_mere: CN
+  soumis_cloud_act: false
+  autre_loi_extraterritoriale: "Loi chinoise sur le renseignement national (2017)"
+  motifs_domaines: ["tiktok.com", "tiktokcdn.com", "byteoversea.com"]
+  categories: [services_tiers, mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/TikTok"
+    - "https://fr.wikipedia.org/wiki/ByteDance"
+  remarque: "Structure capitalistique et juridiction applicables à vérifier."
+  a_verifier: true
+
+- id: yandex
+  nom: Yandex
+  pays_siege: RU
+  soumis_cloud_act: false
+  autre_loi_extraterritoriale: "Législation russe sur la surveillance des communications (SORM)"
+  motifs_domaines: ["yandex.ru", "yandex.net", "yandex.com"]
+  categories: [mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Yandex"
+  a_verifier: true
+
+- id: vimeo
+  nom: Vimeo
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["vimeo.com", "vimeocdn.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Vimeo"
+  remarque: "Rachat par Bending Spoons (Italie) annoncé en 2025 ; l'entité Vimeo, Inc. reste américaine : à vérifier."
+  a_verifier: true
+
+- id: issuu
+  nom: Issuu
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["issuu.com", "isu.pub"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/Issuu"
+  a_verifier: true
+
+- id: jotform
+  nom: Jotform
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["jotform.com", "jotfor.ms"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/Jotform"
+  a_verifier: true
+
+- id: surveymonkey
+  nom: SurveyMonkey
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["surveymonkey.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/SurveyMonkey"
+  a_verifier: true
+
+- id: calendly
+  nom: Calendly
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["calendly.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/Calendly"
+  a_verifier: true
+
+- id: hcaptcha
+  nom: hCaptcha (Intuition Machines)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["hcaptcha.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/HCaptcha"
+  a_verifier: true
+
+- id: mapbox
+  nom: Mapbox
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["mapbox.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/Mapbox"
+  a_verifier: true
+
+- id: sentry
+  nom: Sentry (Functional Software)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["sentry.io", "sentry-cdn.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/Sentry_(software)"
+  a_verifier: true
+
+- id: newrelic
+  nom: New Relic
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["newrelic.com", "nr-data.net"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/New_Relic"
+  a_verifier: true
+
+- id: datadog
+  nom: Datadog
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["datadoghq.com", "datadoghq.eu", "datadoghq-browser-agent.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Datadog"
+  a_verifier: true
+
+- id: mixpanel
+  nom: Mixpanel
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["mixpanel.com", "mxpnl.com"]
+  categories: [mesure_audience]
+  sources:
+    - "https://en.wikipedia.org/wiki/Mixpanel"
+  a_verifier: true
+
+- id: amplitude
+  nom: Amplitude
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["amplitude.com"]
+  categories: [mesure_audience]
+  sources:
+    - "https://en.wikipedia.org/wiki/Amplitude_(company)"
+  a_verifier: true
+
+- id: piano
+  nom: Piano (ex-AT Internet)
+  pays_siege: FR
+  maison_mere: Piano Software, Inc.
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  motifs_domaines: ["xiti.com", "ati-host.net", "aticdn.net", "pa-cd.com", "piano.io"]
+  categories: [mesure_audience]
+  sources:
+    - "https://fr.wikipedia.org/wiki/AT_Internet"
+  remarque: "AT Internet (France) rachetée par Piano (États-Unis) en 2021 : exposition au Cloud Act via la maison mère, à vérifier."
+  a_verifier: true
+
+- id: algolia
+  nom: Algolia
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["algolia.net", "algolianet.com", "algolia.io", "algolia.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Algolia"
+  remarque: "Fondée en France ; siège social aux États-Unis : à vérifier."
+  a_verifier: true
+
+- id: userway
+  nom: UserWay
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["userway.org"]
+  categories: [services_tiers]
+  sources:
+    - "https://userway.org/"
+  a_verifier: true
+
+- id: fonticons
+  nom: Font Awesome (Fonticons, Inc.)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["fontawesome.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/Font_Awesome"
+  a_verifier: true
+
+- id: openjs
+  nom: OpenJS Foundation (CDN jQuery)
+  pays_siege: US
+  soumis_cloud_act: true
+  motifs_domaines: ["jquery.com"]
+  categories: [services_tiers]
+  sources:
+    - "https://en.wikipedia.org/wiki/OpenJS_Foundation"
+  remarque: "Organisation américaine ; applicabilité du Cloud Act à un CDN de bibliothèques à vérifier."
+  a_verifier: true
