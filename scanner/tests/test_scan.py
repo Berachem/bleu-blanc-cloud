@@ -4,14 +4,18 @@ from __future__ import annotations
 
 import dataclasses
 
+import httpx
 import pytest
+import respx
 
 from bleublanccloud.configuration import Parametres
 from bleublanccloud.modeles import Retrait
 from bleublanccloud.referentiels import Referentiels
-from bleublanccloud.scan import CibleInvalide, normaliser_cible, scanner_domaine
+from bleublanccloud.scan import CibleInvalide, ContexteScan, normaliser_cible, scanner_domaine
 from bleublanccloud.sondes.ip import ResolveurAsn
-from tests.conftest import ResolveurFactice, fabriquer_contexte
+from bleublanccloud.sondes.tls import DonneesTls
+from tests.conftest import DOSSIER_FIXTURES, ResolveurFactice, fabriquer_contexte
+from tests.test_http import HorlogeFactice, fabriquer_client, simuler_site
 
 
 @pytest.mark.parametrize(
@@ -109,3 +113,49 @@ async def test_scan_domaine_inexistant(
     contexte = fabriquer_contexte(parametres, referentiels, ResolveurFactice({}), resolveur_asn)
     resultat = await scanner_domaine("inexistant.fr", contexte)
     assert resultat.statut == "erreur"
+
+
+@respx.mock
+async def test_scan_complet_avec_http_tls_rdap(
+    parametres: Parametres, referentiels: Referentiels, resolveur_asn: ResolveurAsn
+) -> None:
+    simuler_site()
+    respx.get("https://rdap.nic.fr/domain/exempleville.fr").mock(
+        return_value=httpx.Response(
+            200, text=(DOSSIER_FIXTURES / "rdap" / "afnic_exempleville.json").read_text()
+        )
+    )
+    horloge = HorlogeFactice()
+    client_web = fabriquer_client(parametres, referentiels, horloge)
+    client_rdap = fabriquer_client(parametres, referentiels, horloge)
+    hotes_tls: list[str] = []
+
+    async def sonde_tls(hote: str) -> DonneesTls:
+        hotes_tls.append(hote)
+        return DonneesTls(hote=hote, emetteur_organisation="Let's Encrypt", emetteur_nom="R11")
+
+    contexte = ContexteScan.construire(
+        parametres,
+        referentiels,
+        ResolveurFactice.depuis_fixture("exempleville.fr"),
+        resolveur_asn,
+        client_web=client_web,
+        client_rdap=client_rdap,
+        serveurs_rdap={"fr": "https://rdap.nic.fr/"},
+        sonde_tls=sonde_tls,
+    )
+    resultat = await scanner_domaine("exempleville.fr", contexte)
+    await client_web.fermer()
+    await client_rdap.fermer()
+
+    assert resultat.informations.bureau_enregistrement == "OVH"
+    assert resultat.informations.autorite_certification == "Let's Encrypt (R11)"
+    assert hotes_tls == ["www.exempleville.fr"]
+    hebergement = next(c for c in resultat.constats if c.categorie == "hebergement")
+    assert hebergement.preuve["nom_hote"] == "www.exempleville.fr"
+    regles = {c.preuve.get("regle") for c in resultat.constats}
+    assert {"youtube", "google-fonts", "microsoft-365", "tarteaucitron"} <= regles
+    assert "fournisseur:google" in regles
+    assert "cdn.exemple-agence.fr" in resultat.informations.domaines_tiers_inconnus
+    # Les ressources de l'hébergeur du site (OVHcloud) ne sont jamais comptées comme tierces
+    assert "fournisseur:ovhcloud" not in regles

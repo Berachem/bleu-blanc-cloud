@@ -1,0 +1,14 @@
+{
+  "objectClassName": "domain",
+  "ldhName": "exempleville.fr",
+  "status": ["active"],
+  "entities": [
+    {"objectClassName": "entity", "handle": "ANO00-FRNIC", "roles": ["registrant"]},
+    {
+      "objectClassName": "entity",
+      "handle": "1234",
+      "roles": ["registrar"],
+      "vcardArray": ["vcard", [["version", {}, "text", "4.0"], ["fn", {}, "text", "OVH"]]]
+    }
+  ]
+}

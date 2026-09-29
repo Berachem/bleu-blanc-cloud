@@ -73,6 +73,11 @@ def charger_referentiels(dossier: Path = DOSSIER_REFERENTIELS) -> Referentiels:
             raise ErreurReferentiel(
                 f"Règle {regle.id} : fournisseur inconnu « {regle.fournisseur_id} »."
             )
+        for autre in regle.incompatible_avec:
+            if autre not in {r.id for r in regles}:
+                raise ErreurReferentiel(
+                    f"Règle {regle.id} : règle incompatible inconnue « {autre} »."
+                )
         if regle.fournisseur_id is None and regle.niveau is None:
             raise ErreurReferentiel(
                 f"Règle {regle.id} : sans fournisseur, un niveau explicite est obligatoire."

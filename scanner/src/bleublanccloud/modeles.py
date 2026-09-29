@@ -116,7 +116,17 @@ class ExempleRegle(ModeleStrict):
     """Exemple d'élément qui doit déclencher une règle (sert de test automatique)."""
 
     type: Literal[
-        "script", "ressource", "iframe", "cookie", "en_tete", "txt", "spf", "mx", "cname", "html"
+        "script",
+        "ressource",
+        "iframe",
+        "image",
+        "cookie",
+        "en_tete",
+        "txt",
+        "spf",
+        "mx",
+        "cname",
+        "html",
     ]
     valeur: str
     nom: str | None = Field(default=None, description="Nom de l'en-tête pour le type en_tete.")
@@ -153,6 +163,10 @@ class RegleDetection(ModeleStrict):
         description="Niveau imposé (ex. « A » pour une solution auto-hébergée sans fournisseur).",
     )
     signal_positif: bool = False
+    incompatible_avec: list[str] = Field(
+        default_factory=list,
+        description="Règles qui, si elles sont détectées, annulent celle-ci.",
+    )
     motifs: MotifsRegle
     exemples: list[ExempleRegle] = Field(min_length=1)
     description: str | None = None

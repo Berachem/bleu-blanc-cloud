@@ -1,2 +1,1294 @@
-# Règles de détection des services tiers (complétées en phase 2).
-[]
+# Règles de détection des services tiers — Bleu Blanc Cloud
+#
+# Chaque règle rattache des indices observables (scripts, ressources, cookies, en-têtes,
+# enregistrements DNS, code HTML) à un service et à un fournisseur de fournisseurs.yaml.
+#
+#   categorie        catégorie notée : suites_saas, services_tiers, mesure_audience
+#                    (ou « informatif » : affiché mais non noté)
+#   type_service     sous-catégorie (sert aussi à proposer des alternatives)
+#   niveau           niveau imposé quand il n'y a pas de fournisseur (solution auto-hébergée)
+#   signal_positif   solution française, européenne ou auto-hébergée mise en avant
+#   incompatible_avec  règles qui, si elles sont détectées, annulent celle-ci
+#
+# Motifs : les domaines sont comparés par suffixe ; chemins, cookies, en-têtes, txt, spf,
+# mx, cname et html sont des expressions régulières (insensibles à la casse).
+#
+# Chaque règle possède au moins un exemple : il est rejoué automatiquement par les tests.
+
+# =========================================================================== #
+# Mesure d'audience, publicité, suivi
+# =========================================================================== #
+
+- id: google-analytics
+  nom: Google Analytics
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: google
+  motifs:
+    domaines_scripts: ["google-analytics.com"]
+    chemins: ["googletagmanager\\.com/gtag/js"]
+    cookies: ["^_ga(_[A-Z0-9]+)?$", "^_gid$", "^_gat"]
+    html: ["gtag\\(\\s*['\"]config['\"]\\s*,\\s*['\"](G|UA)-", "google-analytics\\.com/(analytics|ga)\\.js"]
+  exemples:
+    - {type: script, valeur: "https://www.googletagmanager.com/gtag/js?id=G-ABC123XYZ"}
+    - {type: script, valeur: "https://www.google-analytics.com/analytics.js"}
+    - {type: cookie, valeur: "_ga"}
+
+- id: google-tag-manager
+  nom: Google Tag Manager
+  categorie: mesure_audience
+  type_service: gestionnaire_balises
+  fournisseur_id: google
+  motifs:
+    chemins: ["googletagmanager\\.com/gtm\\.js", "googletagmanager\\.com/ns\\.html"]
+    html: ["\\bGTM-[A-Z0-9]{5,8}\\b"]
+  exemples:
+    - {type: script, valeur: "https://www.googletagmanager.com/gtm.js?id=GTM-ABCD123"}
+    - {type: iframe, valeur: "https://www.googletagmanager.com/ns.html?id=GTM-ABCD123"}
+
+- id: google-ads
+  nom: Google Ads (DoubleClick)
+  categorie: mesure_audience
+  type_service: publicite
+  fournisseur_id: google
+  motifs:
+    domaines_ressources: ["googleadservices.com", "doubleclick.net", "googlesyndication.com"]
+  exemples:
+    - {type: script, valeur: "https://www.googleadservices.com/pagead/conversion.js"}
+    - {type: ressource, valeur: "https://stats.g.doubleclick.net/g/collect"}
+
+- id: matomo-auto-heberge
+  nom: Matomo (auto-hébergé)
+  categorie: mesure_audience
+  type_service: analytique
+  niveau: A
+  signal_positif: true
+  incompatible_avec: [matomo-cloud]
+  description: "Mesure d'audience libre hébergée par l'organisation elle-même."
+  motifs:
+    chemins: ["/(matomo|piwik)\\.(js|php)"]
+    html: ["_paq\\.push\\(", "['\"/](matomo|piwik)\\.js"]
+  exemples:
+    - {type: html, valeur: "var _paq = window._paq = window._paq || []; _paq.push(['trackPageView']);"}
+    - {type: script, valeur: "https://stats.exempleville.fr/matomo.js"}
+
+- id: matomo-cloud
+  nom: Matomo Cloud
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: innocraft
+  motifs:
+    domaines_ressources: ["matomo.cloud", "innocraft.cloud"]
+  exemples:
+    - {type: script, valeur: "https://cdn.matomo.cloud/exempleville.matomo.cloud/matomo.js"}
+
+- id: piano-analytics
+  nom: Piano Analytics (ex-AT Internet)
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: piano
+  motifs:
+    domaines_ressources: ["xiti.com", "ati-host.net", "aticdn.net", "pa-cd.com"]
+    cookies: ["^atuserid$", "^atidvisitor$"]
+  exemples:
+    - {type: script, valeur: "https://tag.aticdn.net/piano-analytics.js"}
+    - {type: ressource, valeur: "https://logs1412.xiti.com/hit.xiti?s=123456"}
+    - {type: cookie, valeur: "atuserid"}
+
+- id: eulerian
+  nom: Eulerian Analytics
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: eulerian
+  motifs:
+    domaines_ressources: ["eulerian.net", "eulerian.com"]
+  exemples:
+    - {type: script, valeur: "https://exempleville.eulerian.net/ea.js"}
+
+- id: plausible
+  nom: Plausible Analytics
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: plausible
+  signal_positif: true
+  motifs:
+    domaines_scripts: ["plausible.io"]
+  exemples:
+    - {type: script, valeur: "https://plausible.io/js/script.js"}
+
+- id: simple-analytics
+  nom: Simple Analytics
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: simple-analytics
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["simpleanalyticscdn.com"]
+  exemples:
+    - {type: script, valeur: "https://scripts.simpleanalyticscdn.com/latest.js"}
+
+- id: microsoft-clarity
+  nom: Microsoft Clarity
+  categorie: mesure_audience
+  type_service: enregistrement_session
+  fournisseur_id: microsoft
+  motifs:
+    domaines_ressources: ["clarity.ms"]
+    cookies: ["^_clck$", "^_clsk$"]
+  exemples:
+    - {type: script, valeur: "https://www.clarity.ms/tag/abcd1234"}
+    - {type: cookie, valeur: "_clck"}
+
+- id: hotjar
+  nom: Hotjar
+  categorie: mesure_audience
+  type_service: enregistrement_session
+  fournisseur_id: hotjar
+  motifs:
+    domaines_ressources: ["hotjar.com", "hotjar.io"]
+    cookies: ["^_hj"]
+    html: ["static\\.hotjar\\.com"]
+  exemples:
+    - {type: html, valeur: "(function(h,o,t,j,a,r){h.hj=h.hj||function(){};r.src='https://static.hotjar.com/c/hotjar-'+j+'.js';})"}
+    - {type: cookie, valeur: "_hjSessionUser_123456"}
+
+- id: contentsquare
+  nom: Contentsquare
+  categorie: mesure_audience
+  type_service: enregistrement_session
+  fournisseur_id: contentsquare
+  motifs:
+    domaines_ressources: ["contentsquare.net"]
+  exemples:
+    - {type: script, valeur: "https://t.contentsquare.net/uxa/abc123.js"}
+
+- id: meta-pixel
+  nom: Pixel Meta (Facebook)
+  categorie: mesure_audience
+  type_service: publicite
+  fournisseur_id: meta
+  motifs:
+    chemins: ["connect\\.facebook\\.net/.+/fbevents\\.js", "facebook\\.com/tr\\?"]
+    cookies: ["^_fbp$"]
+    html: ["fbq\\(\\s*['\"]init['\"]"]
+  exemples:
+    - {type: script, valeur: "https://connect.facebook.net/en_US/fbevents.js"}
+    - {type: cookie, valeur: "_fbp"}
+
+- id: linkedin-insight
+  nom: LinkedIn Insight Tag
+  categorie: mesure_audience
+  type_service: publicite
+  fournisseur_id: linkedin
+  motifs:
+    chemins: ["snap\\.licdn\\.com/li\\.lms-analytics", "px\\.ads\\.linkedin\\.com"]
+    html: ["_linkedin_partner_id"]
+  exemples:
+    - {type: script, valeur: "https://snap.licdn.com/li.lms-analytics/insight.min.js"}
+
+- id: tiktok-pixel
+  nom: Pixel TikTok
+  categorie: mesure_audience
+  type_service: publicite
+  fournisseur_id: tiktok
+  motifs:
+    chemins: ["analytics\\.tiktok\\.com"]
+  exemples:
+    - {type: script, valeur: "https://analytics.tiktok.com/i18n/pixel/events.js"}
+
+- id: x-pixel
+  nom: Pixel X (Twitter)
+  categorie: mesure_audience
+  type_service: publicite
+  fournisseur_id: x-corp
+  motifs:
+    domaines_ressources: ["ads-twitter.com"]
+    chemins: ["analytics\\.twitter\\.com"]
+  exemples:
+    - {type: script, valeur: "https://static.ads-twitter.com/uwt.js"}
+
+- id: yandex-metrica
+  nom: Yandex Metrica
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: yandex
+  motifs:
+    chemins: ["mc\\.yandex\\.(ru|com)"]
+  exemples:
+    - {type: script, valeur: "https://mc.yandex.ru/metrika/tag.js"}
+
+- id: criteo
+  nom: Criteo
+  categorie: mesure_audience
+  type_service: publicite
+  fournisseur_id: criteo
+  motifs:
+    domaines_ressources: ["criteo.com", "criteo.net"]
+  exemples:
+    - {type: script, valeur: "https://static.criteo.net/js/ld/publishertag.js"}
+
+- id: adobe-analytics
+  nom: Adobe Analytics / Experience Platform
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: adobe
+  motifs:
+    domaines_ressources: ["omtrdc.net", "2o7.net", "demdex.net", "adobedtm.com"]
+  exemples:
+    - {type: script, valeur: "https://assets.adobedtm.com/launch-EN123abc.min.js"}
+
+- id: mixpanel
+  nom: Mixpanel
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: mixpanel
+  motifs:
+    domaines_ressources: ["mixpanel.com", "mxpnl.com"]
+  exemples:
+    - {type: script, valeur: "https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js"}
+
+- id: segment
+  nom: Segment (Twilio)
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: twilio
+  motifs:
+    chemins: ["cdn\\.segment\\.(com|io)"]
+  exemples:
+    - {type: script, valeur: "https://cdn.segment.com/analytics.js/v1/abc123/analytics.min.js"}
+
+- id: amplitude
+  nom: Amplitude
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: amplitude
+  motifs:
+    domaines_ressources: ["amplitude.com"]
+  exemples:
+    - {type: script, valeur: "https://cdn.amplitude.com/libs/analytics-browser-2.0.0-min.js.gz"}
+
+- id: kameleoon
+  nom: Kameleoon
+  categorie: mesure_audience
+  type_service: tests_ab
+  fournisseur_id: kameleoon
+  motifs:
+    domaines_ressources: ["kameleoon.eu", "kameleoon.io", "kameleoon.com"]
+  exemples:
+    - {type: script, valeur: "https://abc123.kameleoon.eu/kameleoon.js"}
+
+- id: ab-tasty
+  nom: AB Tasty
+  categorie: mesure_audience
+  type_service: tests_ab
+  fournisseur_id: abtasty
+  motifs:
+    domaines_ressources: ["abtasty.com"]
+  exemples:
+    - {type: script, valeur: "https://try.abtasty.com/abc123.js"}
+
+- id: cloudflare-web-analytics
+  nom: Cloudflare Web Analytics
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: cloudflare
+  motifs:
+    domaines_ressources: ["cloudflareinsights.com"]
+  exemples:
+    - {type: script, valeur: "https://static.cloudflareinsights.com/beacon.min.js"}
+
+- id: statcounter
+  nom: StatCounter
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: statcounter
+  motifs:
+    domaines_ressources: ["statcounter.com"]
+  exemples:
+    - {type: script, valeur: "https://www.statcounter.com/counter/counter.js"}
+
+- id: hubspot-suivi
+  nom: HubSpot (suivi des visiteurs)
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: hubspot
+  motifs:
+    domaines_scripts: ["hs-scripts.com", "hs-analytics.net", "hs-banner.com"]
+    cookies: ["^hubspotutk$", "^__hstc$", "^__hssc$"]
+  exemples:
+    - {type: script, valeur: "https://js.hs-scripts.com/1234567.js"}
+    - {type: cookie, valeur: "hubspotutk"}
+
+- id: brevo-suivi
+  nom: Brevo (suivi des visiteurs)
+  categorie: mesure_audience
+  type_service: analytique
+  fournisseur_id: brevo
+  motifs:
+    domaines_scripts: ["sibautomation.com"]
+  exemples:
+    - {type: script, valeur: "https://sibautomation.com/sa.js?key=abc123"}
+
+# =========================================================================== #
+# Services tiers chargés par le site
+# =========================================================================== #
+
+# --- Polices ---------------------------------------------------------------- #
+
+- id: google-fonts
+  nom: Google Fonts
+  categorie: services_tiers
+  type_service: polices
+  fournisseur_id: google
+  motifs:
+    domaines_ressources: ["fonts.googleapis.com", "fonts.gstatic.com"]
+  exemples:
+    - {type: ressource, valeur: "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700"}
+    - {type: ressource, valeur: "https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2"}
+
+- id: adobe-fonts
+  nom: Adobe Fonts (Typekit)
+  categorie: services_tiers
+  type_service: polices
+  fournisseur_id: adobe
+  motifs:
+    domaines_ressources: ["use.typekit.net", "p.typekit.net"]
+  exemples:
+    - {type: ressource, valeur: "https://use.typekit.net/abc1234.css"}
+
+- id: font-awesome
+  nom: Font Awesome (CDN)
+  categorie: services_tiers
+  type_service: polices
+  fournisseur_id: fonticons
+  motifs:
+    domaines_ressources: ["fontawesome.com"]
+  exemples:
+    - {type: script, valeur: "https://kit.fontawesome.com/abc123def4.js"}
+
+- id: bunny-fonts
+  nom: Bunny Fonts
+  categorie: services_tiers
+  type_service: polices
+  fournisseur_id: bunny
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["fonts.bunny.net"]
+  exemples:
+    - {type: ressource, valeur: "https://fonts.bunny.net/css?family=inter:400"}
+
+# --- Vidéos ----------------------------------------------------------------- #
+
+- id: youtube
+  nom: YouTube
+  categorie: services_tiers
+  type_service: videos
+  fournisseur_id: google
+  motifs:
+    domaines_ressources: ["youtube.com", "youtube-nocookie.com", "ytimg.com"]
+  exemples:
+    - {type: iframe, valeur: "https://www.youtube.com/embed/dQw4w9WgXcQ"}
+    - {type: iframe, valeur: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"}
+
+- id: vimeo
+  nom: Vimeo
+  categorie: services_tiers
+  type_service: videos
+  fournisseur_id: vimeo
+  motifs:
+    domaines_ressources: ["vimeo.com", "vimeocdn.com"]
+  exemples:
+    - {type: iframe, valeur: "https://player.vimeo.com/video/123456789"}
+
+- id: dailymotion
+  nom: Dailymotion
+  categorie: services_tiers
+  type_service: videos
+  fournisseur_id: dailymotion
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["dailymotion.com", "dmcdn.net"]
+  exemples:
+    - {type: iframe, valeur: "https://www.dailymotion.com/embed/video/x8abcde"}
+
+- id: peertube
+  nom: PeerTube
+  categorie: services_tiers
+  type_service: videos
+  niveau: A
+  signal_positif: true
+  description: "Plateforme vidéo libre et décentralisée (instance auto-hébergée ou associative)."
+  motifs:
+    chemins: ["/videos/embed/[0-9a-f-]{8,}"]
+  exemples:
+    - {type: iframe, valeur: "https://videos.exempleville.fr/videos/embed/6f1d1e2b-1234-4567-89ab-abcdefabcdef"}
+
+# --- Cartes ----------------------------------------------------------------- #
+
+- id: google-maps
+  nom: Google Maps
+  categorie: services_tiers
+  type_service: cartes
+  fournisseur_id: google
+  motifs:
+    chemins: ["maps\\.googleapis\\.com", "google\\.[a-z.]+/maps", "maps\\.google\\.[a-z.]+"]
+  exemples:
+    - {type: iframe, valeur: "https://www.google.com/maps/embed?pb=!1m18!1m12"}
+    - {type: script, valeur: "https://maps.googleapis.com/maps/api/js?key=abc"}
+
+- id: openstreetmap
+  nom: OpenStreetMap (tuiles officielles)
+  categorie: services_tiers
+  type_service: cartes
+  fournisseur_id: openstreetmap
+  signal_positif: true
+  motifs:
+    chemins: ["(tile|www)\\.openstreetmap\\.org"]
+  exemples:
+    - {type: iframe, valeur: "https://www.openstreetmap.org/export/embed.html?bbox=2.29,48.85,2.30,48.86"}
+    - {type: image, valeur: "https://tile.openstreetmap.org/12/2072/1409.png"}
+
+- id: openstreetmap-france
+  nom: OpenStreetMap France (tuiles, uMap)
+  categorie: services_tiers
+  type_service: cartes
+  fournisseur_id: osm-france
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["openstreetmap.fr"]
+  exemples:
+    - {type: image, valeur: "https://a.tile.openstreetmap.fr/osmfr/12/2072/1409.png"}
+
+- id: ign-geoplateforme
+  nom: IGN Géoplateforme (Géoportail)
+  categorie: services_tiers
+  type_service: cartes
+  fournisseur_id: ign
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["geopf.fr", "ign.fr", "geoportail.gouv.fr"]
+  exemples:
+    - {type: ressource, valeur: "https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetCapabilities"}
+
+- id: mapbox
+  nom: Mapbox
+  categorie: services_tiers
+  type_service: cartes
+  fournisseur_id: mapbox
+  motifs:
+    domaines_ressources: ["mapbox.com"]
+  exemples:
+    - {type: script, valeur: "https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"}
+
+# --- Captcha ---------------------------------------------------------------- #
+
+- id: google-recaptcha
+  nom: Google reCAPTCHA
+  categorie: services_tiers
+  type_service: captcha
+  fournisseur_id: google
+  motifs:
+    chemins: ["google\\.com/recaptcha", "gstatic\\.com/recaptcha", "recaptcha\\.net"]
+  exemples:
+    - {type: script, valeur: "https://www.google.com/recaptcha/api.js"}
+
+- id: hcaptcha
+  nom: hCaptcha
+  categorie: services_tiers
+  type_service: captcha
+  fournisseur_id: hcaptcha
+  motifs:
+    domaines_ressources: ["hcaptcha.com"]
+  exemples:
+    - {type: script, valeur: "https://js.hcaptcha.com/1/api.js"}
+
+- id: cloudflare-turnstile
+  nom: Cloudflare Turnstile
+  categorie: services_tiers
+  type_service: captcha
+  fournisseur_id: cloudflare
+  motifs:
+    chemins: ["challenges\\.cloudflare\\.com/turnstile"]
+  exemples:
+    - {type: script, valeur: "https://challenges.cloudflare.com/turnstile/v0/api.js"}
+
+- id: friendly-captcha
+  nom: Friendly Captcha
+  categorie: services_tiers
+  type_service: captcha
+  fournisseur_id: friendly-captcha
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["friendlycaptcha.com", "frcapi.com"]
+  exemples:
+    - {type: ressource, valeur: "https://api.friendlycaptcha.com/api/v1/puzzle"}
+
+# --- Discussion en ligne ---------------------------------------------------- #
+
+- id: crisp
+  nom: Crisp
+  categorie: services_tiers
+  type_service: discussion
+  fournisseur_id: crisp
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["crisp.chat"]
+  exemples:
+    - {type: script, valeur: "https://client.crisp.chat/l.js"}
+
+- id: intercom
+  nom: Intercom
+  categorie: services_tiers
+  type_service: discussion
+  fournisseur_id: intercom
+  motifs:
+    domaines_ressources: ["intercom.io", "intercomcdn.com"]
+  exemples:
+    - {type: script, valeur: "https://widget.intercom.io/widget/abc123"}
+
+- id: zendesk-widget
+  nom: Zendesk (widget)
+  categorie: services_tiers
+  type_service: discussion
+  fournisseur_id: zendesk
+  motifs:
+    domaines_ressources: ["zdassets.com", "zopim.com"]
+  exemples:
+    - {type: script, valeur: "https://static.zdassets.com/ekr/snippet.js?key=abc"}
+
+- id: iadvize
+  nom: iAdvize
+  categorie: services_tiers
+  type_service: discussion
+  fournisseur_id: iadvize
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["iadvize.com"]
+  exemples:
+    - {type: script, valeur: "https://halc.iadvize.com/iadvize.js?sid=1234"}
+
+- id: livechat
+  nom: LiveChat (Text)
+  categorie: services_tiers
+  type_service: discussion
+  fournisseur_id: livechat
+  motifs:
+    domaines_ressources: ["livechatinc.com"]
+  exemples:
+    - {type: script, valeur: "https://cdn.livechatinc.com/tracking.js"}
+
+# --- Bandeaux de consentement (cookies) ------------------------------------ #
+
+- id: tarteaucitron
+  nom: tarteaucitron.js (auto-hébergé)
+  categorie: services_tiers
+  type_service: bandeau_cookies
+  niveau: A
+  signal_positif: true
+  incompatible_avec: [tarteaucitron-io]
+  description: "Gestionnaire de consentement libre et français, hébergé par l'organisation."
+  motifs:
+    chemins: ["tarteaucitron(\\.min)?\\.js"]
+    html: ["tarteaucitron\\.init\\("]
+  exemples:
+    - {type: script, valeur: "https://www.exempleville.fr/js/tarteaucitron/tarteaucitron.js"}
+    - {type: html, valeur: "<script>tarteaucitron.init({privacyUrl: ''});</script>"}
+
+- id: tarteaucitron-io
+  nom: tarteaucitron.io (service en ligne)
+  categorie: services_tiers
+  type_service: bandeau_cookies
+  fournisseur_id: tarteaucitron
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["tarteaucitron.io"]
+  exemples:
+    - {type: script, valeur: "https://tarteaucitron.io/load.js?domain=exempleville.fr&uuid=abc"}
+
+- id: axeptio
+  nom: Axeptio
+  categorie: services_tiers
+  type_service: bandeau_cookies
+  fournisseur_id: axeptio
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["axept.io"]
+  exemples:
+    - {type: script, valeur: "https://static.axept.io/sdk.js"}
+
+- id: didomi
+  nom: Didomi
+  categorie: services_tiers
+  type_service: bandeau_cookies
+  fournisseur_id: didomi
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["privacy-center.org"]
+  exemples:
+    - {type: script, valeur: "https://sdk.privacy-center.org/abc-123/loader.js"}
+
+- id: onetrust
+  nom: OneTrust
+  categorie: services_tiers
+  type_service: bandeau_cookies
+  fournisseur_id: onetrust
+  motifs:
+    domaines_ressources: ["cookielaw.org", "onetrust.com"]
+  exemples:
+    - {type: script, valeur: "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"}
+
+- id: cookiebot
+  nom: Cookiebot (Usercentrics)
+  categorie: services_tiers
+  type_service: bandeau_cookies
+  fournisseur_id: usercentrics
+  motifs:
+    domaines_ressources: ["cookiebot.com", "usercentrics.eu"]
+  exemples:
+    - {type: script, valeur: "https://consent.cookiebot.com/uc.js"}
+
+# --- Formulaires, prise de rendez-vous ------------------------------------- #
+
+- id: google-forms
+  nom: Google Forms
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: google
+  motifs:
+    chemins: ["docs\\.google\\.com/forms"]
+  exemples:
+    - {type: iframe, valeur: "https://docs.google.com/forms/d/e/1FAIpQLSabc/viewform?embedded=true"}
+
+- id: microsoft-forms
+  nom: Microsoft Forms
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: microsoft
+  motifs:
+    chemins: ["forms\\.(office|microsoft)\\.com"]
+  exemples:
+    - {type: iframe, valeur: "https://forms.office.com/Pages/ResponsePage.aspx?id=abc"}
+
+- id: typeform
+  nom: Typeform
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: typeform
+  motifs:
+    domaines_ressources: ["typeform.com"]
+  exemples:
+    - {type: script, valeur: "https://embed.typeform.com/next/embed.js"}
+
+- id: jotform
+  nom: Jotform
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: jotform
+  motifs:
+    domaines_ressources: ["jotform.com", "jotfor.ms"]
+  exemples:
+    - {type: script, valeur: "https://form.jotform.com/jsform/231234567890"}
+
+- id: framaforms
+  nom: Framaforms
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: framasoft
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["framaforms.org"]
+  exemples:
+    - {type: iframe, valeur: "https://framaforms.org/inscription-exemple-1700000000"}
+
+- id: tally
+  nom: Tally
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: tally
+  motifs:
+    domaines_ressources: ["tally.so"]
+  exemples:
+    - {type: script, valeur: "https://tally.so/widgets/embed.js"}
+
+- id: hubspot-formulaires
+  nom: HubSpot Forms
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: hubspot
+  motifs:
+    domaines_ressources: ["hsforms.net", "hsforms.com", "hscollectedforms.net"]
+  exemples:
+    - {type: script, valeur: "https://js.hsforms.net/forms/embed/v2.js"}
+
+- id: mailchimp-formulaires
+  nom: Mailchimp (formulaires d'inscription)
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: mailchimp
+  motifs:
+    domaines_ressources: ["list-manage.com", "chimpstatic.com"]
+  exemples:
+    - {type: script, valeur: "https://chimpstatic.com/mcjs-connected/js/users/abc/def.js"}
+
+- id: brevo-formulaires
+  nom: Brevo (formulaires d'inscription)
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: brevo
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["sibforms.com"]
+  exemples:
+    - {type: iframe, valeur: "https://sibforms.com/serve/MUIFAabc"}
+
+- id: surveymonkey
+  nom: SurveyMonkey
+  categorie: services_tiers
+  type_service: formulaires
+  fournisseur_id: surveymonkey
+  motifs:
+    domaines_ressources: ["surveymonkey.com"]
+  exemples:
+    - {type: script, valeur: "https://widget.surveymonkey.com/collect/website/js/abc.js"}
+
+- id: calendly
+  nom: Calendly
+  categorie: services_tiers
+  type_service: rendez_vous
+  fournisseur_id: calendly
+  motifs:
+    domaines_ressources: ["calendly.com"]
+  exemples:
+    - {type: script, valeur: "https://assets.calendly.com/assets/external/widget.js"}
+
+# --- Publications, réseaux sociaux ----------------------------------------- #
+
+- id: calameo
+  nom: Calaméo
+  categorie: services_tiers
+  type_service: publications
+  fournisseur_id: calameo
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["calameo.com"]
+  exemples:
+    - {type: iframe, valeur: "https://v.calameo.com/?bkcode=000123456abcdef"}
+
+- id: issuu
+  nom: Issuu
+  categorie: services_tiers
+  type_service: publications
+  fournisseur_id: issuu
+  motifs:
+    domaines_ressources: ["issuu.com", "isu.pub"]
+  exemples:
+    - {type: iframe, valeur: "https://e.issuu.com/embed.html?d=bulletin-municipal"}
+
+- id: facebook-widgets
+  nom: Facebook (widgets et SDK)
+  categorie: services_tiers
+  type_service: reseaux_sociaux
+  fournisseur_id: meta
+  motifs:
+    chemins: ["connect\\.facebook\\.net/.+/sdk\\.js", "facebook\\.com/plugins/"]
+  exemples:
+    - {type: iframe, valeur: "https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fexempleville"}
+    - {type: script, valeur: "https://connect.facebook.net/fr_FR/sdk.js"}
+
+- id: instagram-integration
+  nom: Instagram (intégration)
+  categorie: services_tiers
+  type_service: reseaux_sociaux
+  fournisseur_id: meta
+  motifs:
+    domaines_ressources: ["instagram.com", "cdninstagram.com"]
+  exemples:
+    - {type: script, valeur: "https://www.instagram.com/embed.js"}
+
+- id: x-widgets
+  nom: X / Twitter (widgets)
+  categorie: services_tiers
+  type_service: reseaux_sociaux
+  fournisseur_id: x-corp
+  motifs:
+    chemins: ["platform\\.(twitter|x)\\.com"]
+  exemples:
+    - {type: script, valeur: "https://platform.twitter.com/widgets.js"}
+
+# --- CDN de bibliothèques --------------------------------------------------- #
+
+- id: google-hosted-libraries
+  nom: Google Hosted Libraries
+  categorie: services_tiers
+  type_service: bibliotheques
+  fournisseur_id: google
+  motifs:
+    chemins: ["ajax\\.googleapis\\.com"]
+  exemples:
+    - {type: script, valeur: "https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"}
+
+- id: cdnjs
+  nom: cdnjs (Cloudflare)
+  categorie: services_tiers
+  type_service: bibliotheques
+  fournisseur_id: cloudflare
+  motifs:
+    chemins: ["cdnjs\\.cloudflare\\.com"]
+  exemples:
+    - {type: script, valeur: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"}
+
+- id: unpkg
+  nom: unpkg
+  categorie: services_tiers
+  type_service: bibliotheques
+  fournisseur_id: cloudflare
+  description: "CDN de paquets npm servi par l'infrastructure de Cloudflare (à vérifier)."
+  motifs:
+    domaines_ressources: ["unpkg.com"]
+  exemples:
+    - {type: script, valeur: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"}
+
+- id: jsdelivr
+  nom: jsDelivr
+  categorie: services_tiers
+  type_service: bibliotheques
+  fournisseur_id: jsdelivr
+  motifs:
+    domaines_ressources: ["jsdelivr.net"]
+  exemples:
+    - {type: script, valeur: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"}
+
+- id: jquery-cdn
+  nom: CDN jQuery
+  categorie: services_tiers
+  type_service: bibliotheques
+  fournisseur_id: openjs
+  motifs:
+    domaines_ressources: ["code.jquery.com"]
+  exemples:
+    - {type: script, valeur: "https://code.jquery.com/jquery-3.7.1.min.js"}
+
+- id: microsoft-ajax-cdn
+  nom: Microsoft Ajax CDN
+  categorie: services_tiers
+  type_service: bibliotheques
+  fournisseur_id: microsoft
+  motifs:
+    domaines_ressources: ["ajax.aspnetcdn.com"]
+  exemples:
+    - {type: script, valeur: "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.7.1.min.js"}
+
+- id: bunny-cdn
+  nom: Bunny CDN
+  categorie: services_tiers
+  type_service: cdn
+  fournisseur_id: bunny
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["b-cdn.net"]
+  exemples:
+    - {type: image, valeur: "https://exempleville.b-cdn.net/images/logo.png"}
+
+# --- Supervision, traduction, accessibilité, divers ------------------------ #
+
+- id: sentry
+  nom: Sentry
+  categorie: services_tiers
+  type_service: supervision
+  fournisseur_id: sentry
+  motifs:
+    domaines_ressources: ["sentry.io", "sentry-cdn.com"]
+  exemples:
+    - {type: script, valeur: "https://browser.sentry-cdn.com/7.100.0/bundle.min.js"}
+
+- id: new-relic
+  nom: New Relic
+  categorie: services_tiers
+  type_service: supervision
+  fournisseur_id: newrelic
+  motifs:
+    domaines_ressources: ["nr-data.net", "newrelic.com"]
+  exemples:
+    - {type: script, valeur: "https://js-agent.newrelic.com/nr-loader-spa-1.250.0.min.js"}
+
+- id: datadog-rum
+  nom: Datadog RUM
+  categorie: services_tiers
+  type_service: supervision
+  fournisseur_id: datadog
+  motifs:
+    domaines_ressources: ["datadoghq-browser-agent.com"]
+  exemples:
+    - {type: script, valeur: "https://www.datadoghq-browser-agent.com/eu1/v5/datadog-rum.js"}
+
+- id: google-translate
+  nom: Google Traduction (widget)
+  categorie: services_tiers
+  type_service: traduction
+  fournisseur_id: google
+  motifs:
+    chemins: ["translate\\.google(apis)?\\.com"]
+  exemples:
+    - {type: script, valeur: "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"}
+
+- id: algolia
+  nom: Algolia (recherche)
+  categorie: services_tiers
+  type_service: recherche
+  fournisseur_id: algolia
+  motifs:
+    domaines_ressources: ["algolia.net", "algolianet.com"]
+  exemples:
+    - {type: ressource, valeur: "https://abc123-dsn.algolia.net/1/indexes/*/queries"}
+
+- id: userway
+  nom: UserWay (accessibilité)
+  categorie: services_tiers
+  type_service: accessibilite
+  fournisseur_id: userway
+  motifs:
+    domaines_ressources: ["userway.org"]
+  exemples:
+    - {type: script, valeur: "https://cdn.userway.org/widget.js"}
+
+- id: facil-iti
+  nom: FACIL'iti (accessibilité)
+  categorie: services_tiers
+  type_service: accessibilite
+  fournisseur_id: facil-iti
+  signal_positif: true
+  motifs:
+    domaines_ressources: ["facil-iti.com", "facil-iti.app"]
+  exemples:
+    - {type: script, valeur: "https://ws.facil-iti.com/tag/faciliti-tag.min.js"}
+
+- id: stripe-js
+  nom: Stripe (paiement)
+  categorie: services_tiers
+  type_service: paiement
+  fournisseur_id: stripe
+  motifs:
+    chemins: ["js\\.stripe\\.com"]
+  exemples:
+    - {type: script, valeur: "https://js.stripe.com/v3/"}
+
+# =========================================================================== #
+# Suites collaboratives et SaaS (enregistrements TXT, SPF, MX)
+# =========================================================================== #
+
+- id: microsoft-365
+  nom: Microsoft 365
+  categorie: suites_saas
+  type_service: bureautique
+  fournisseur_id: microsoft
+  motifs:
+    txt: ["^MS=ms\\d+"]
+    mx: ["mail\\.protection\\.outlook\\.com$"]
+    spf: ["include:spf\\.protection\\.outlook\\.com"]
+  exemples:
+    - {type: txt, valeur: "MS=ms12345678"}
+    - {type: mx, valeur: "exempleville-fr.mail.protection.outlook.com"}
+    - {type: spf, valeur: "v=spf1 include:spf.protection.outlook.com -all"}
+
+- id: google-workspace
+  nom: Google Workspace
+  categorie: suites_saas
+  type_service: bureautique
+  fournisseur_id: google
+  motifs:
+    mx: ["(^|\\.)aspmx\\.l\\.google\\.com$", "^smtp\\.google\\.com$", "googlemail\\.com$"]
+    spf: ["include:_spf\\.google\\.com"]
+  exemples:
+    - {type: mx, valeur: "aspmx.l.google.com"}
+    - {type: spf, valeur: "v=spf1 include:_spf.google.com ~all"}
+
+- id: google-search-console
+  nom: Google Search Console (vérification de propriété)
+  categorie: informatif
+  type_service: verification_domaine
+  fournisseur_id: google
+  description: "Vérification de propriété du site : n'indique pas l'usage d'une suite bureautique."
+  motifs:
+    txt: ["^google-site-verification="]
+  exemples:
+    - {type: txt, valeur: "google-site-verification=abcdef123456"}
+
+- id: facebook-verification
+  nom: Meta Business (vérification de domaine)
+  categorie: informatif
+  type_service: verification_domaine
+  fournisseur_id: meta
+  motifs:
+    txt: ["^facebook-domain-verification="]
+  exemples:
+    - {type: txt, valeur: "facebook-domain-verification=abc123def456"}
+
+- id: atlassian
+  nom: Atlassian (Jira, Confluence)
+  categorie: suites_saas
+  type_service: gestion_projet
+  fournisseur_id: atlassian
+  motifs:
+    txt: ["^atlassian-domain-verification="]
+    spf: ["include:_spf\\.atlassian\\.net"]
+  exemples:
+    - {type: txt, valeur: "atlassian-domain-verification=abc123"}
+
+- id: docusign
+  nom: DocuSign
+  categorie: suites_saas
+  type_service: signature_electronique
+  fournisseur_id: docusign
+  motifs:
+    txt: ["^docusign="]
+  exemples:
+    - {type: txt, valeur: "docusign=1234abcd-12ab-34cd-56ef-1234567890ab"}
+
+- id: adobe-cloud
+  nom: Adobe (Creative Cloud, Acrobat Sign, Marketo)
+  categorie: suites_saas
+  type_service: bureautique
+  fournisseur_id: adobe
+  motifs:
+    txt: ["^adobe-(idp-site|sign)-verification="]
+    spf: ["include:mktomail\\.com"]
+  exemples:
+    - {type: txt, valeur: "adobe-idp-site-verification=abc123"}
+
+- id: zoom
+  nom: Zoom
+  categorie: suites_saas
+  type_service: visioconference
+  fournisseur_id: zoom
+  motifs:
+    txt: ["^ZOOM_verify_"]
+  exemples:
+    - {type: txt, valeur: "ZOOM_verify_abcdefghijkl"}
+
+- id: cisco-webex
+  nom: Cisco Webex
+  categorie: suites_saas
+  type_service: visioconference
+  fournisseur_id: cisco
+  motifs:
+    txt: ["^webexdomainverification"]
+  exemples:
+    - {type: txt, valeur: "webexdomainverification.ABCD=1234-5678"}
+
+- id: dropbox
+  nom: Dropbox
+  categorie: suites_saas
+  type_service: stockage
+  fournisseur_id: dropbox
+  motifs:
+    txt: ["^dropbox-domain-verification="]
+  exemples:
+    - {type: txt, valeur: "dropbox-domain-verification=abc123"}
+
+- id: slack
+  nom: Slack
+  categorie: suites_saas
+  type_service: messagerie_instantanee
+  fournisseur_id: salesforce
+  motifs:
+    txt: ["^slack-domain-verification="]
+  exemples:
+    - {type: txt, valeur: "slack-domain-verification=abc123"}
+
+- id: salesforce
+  nom: Salesforce
+  categorie: suites_saas
+  type_service: crm
+  fournisseur_id: salesforce
+  motifs:
+    spf: ["include:_spf\\.salesforce\\.com", "include:\\S*exacttarget\\.com"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:_spf.salesforce.com ~all"}
+
+- id: hubspot-crm
+  nom: HubSpot (CRM, envoi d'e-mails)
+  categorie: suites_saas
+  type_service: crm
+  fournisseur_id: hubspot
+  motifs:
+    spf: ["include:\\S*hubspotemail\\.net"]
+    txt: ["^hubspot-developer-verification="]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:1234567.spf01.hubspotemail.net ~all"}
+
+- id: zendesk-support
+  nom: Zendesk (support)
+  categorie: suites_saas
+  type_service: crm
+  fournisseur_id: zendesk
+  motifs:
+    spf: ["include:mail\\.zendesk\\.com"]
+    txt: ["^zendesk-verification="]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:mail.zendesk.com ~all"}
+
+- id: knowbe4
+  nom: KnowBe4
+  categorie: suites_saas
+  type_service: sensibilisation_securite
+  fournisseur_id: knowbe4
+  motifs:
+    txt: ["^knowbe4-site-verification="]
+  exemples:
+    - {type: txt, valeur: "knowbe4-site-verification=abc123"}
+
+- id: stripe-verification
+  nom: Stripe (compte)
+  categorie: suites_saas
+  type_service: paiement
+  fournisseur_id: stripe
+  motifs:
+    txt: ["^stripe-verification="]
+  exemples:
+    - {type: txt, valeur: "stripe-verification=abc123"}
+
+- id: onetrust-verification
+  nom: OneTrust (compte)
+  categorie: suites_saas
+  type_service: conformite
+  fournisseur_id: onetrust
+  motifs:
+    txt: ["^onetrust-domain-verification="]
+  exemples:
+    - {type: txt, valeur: "onetrust-domain-verification=abc123"}
+
+# --- Envoi d'e-mails -------------------------------------------------------- #
+
+- id: sendgrid
+  nom: SendGrid (Twilio)
+  categorie: suites_saas
+  type_service: envoi_emails
+  fournisseur_id: twilio
+  motifs:
+    spf: ["include:sendgrid\\.net"]
+    cname: ["sendgrid\\.net$"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:sendgrid.net ~all"}
+
+- id: mailgun
+  nom: Mailgun
+  categorie: suites_saas
+  type_service: envoi_emails
+  fournisseur_id: mailgun
+  motifs:
+    spf: ["include:mailgun\\.org"]
+    mx: ["mailgun\\.org$"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:mailgun.org ~all"}
+    - {type: mx, valeur: "mxa.mailgun.org"}
+
+- id: amazon-ses
+  nom: Amazon SES
+  categorie: suites_saas
+  type_service: envoi_emails
+  fournisseur_id: aws
+  motifs:
+    spf: ["include:amazonses\\.com"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:amazonses.com ~all"}
+
+- id: mailchimp-envoi
+  nom: Mailchimp / Mandrill (envoi)
+  categorie: suites_saas
+  type_service: envoi_emails
+  fournisseur_id: mailchimp
+  motifs:
+    spf: ["include:servers\\.mcsv\\.net", "include:spf\\.mandrillapp\\.com"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:servers.mcsv.net ?all"}
+
+- id: sparkpost
+  nom: SparkPost
+  categorie: suites_saas
+  type_service: envoi_emails
+  fournisseur_id: sparkpost
+  motifs:
+    spf: ["include:sparkpostmail\\.com"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:sparkpostmail.com ~all"}
+
+- id: brevo-envoi
+  nom: Brevo (envoi)
+  categorie: suites_saas
+  type_service: envoi_emails
+  fournisseur_id: brevo
+  signal_positif: true
+  motifs:
+    spf: ["include:spf\\.(sendinblue|brevo)\\.com"]
+    txt: ["^brevo-code:", "^Sendinblue-code:"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:spf.brevo.com ~all"}
+    - {type: txt, valeur: "brevo-code:abc123def456"}
+
+- id: mailjet-envoi
+  nom: Mailjet (envoi)
+  categorie: suites_saas
+  type_service: envoi_emails
+  fournisseur_id: mailjet
+  signal_positif: true
+  motifs:
+    spf: ["include:spf\\.mailjet\\.com"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:spf.mailjet.com ~all"}
+
+- id: ovhcloud-messagerie
+  nom: Messagerie OVHcloud
+  categorie: suites_saas
+  type_service: messagerie
+  fournisseur_id: ovhcloud
+  signal_positif: true
+  motifs:
+    spf: ["include:mx\\.ovh\\.com"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:mx.ovh.com ~all"}
+
+- id: gandi-messagerie
+  nom: Messagerie Gandi
+  categorie: suites_saas
+  type_service: messagerie
+  fournisseur_id: gandi
+  signal_positif: true
+  motifs:
+    spf: ["include:_mailcust\\.gandi\\.net"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:_mailcust.gandi.net ?all"}
+
+- id: ionos-messagerie
+  nom: Messagerie IONOS
+  categorie: suites_saas
+  type_service: messagerie
+  fournisseur_id: ionos
+  signal_positif: true
+  motifs:
+    spf: ["include:_spf(-eu)?\\.ionos\\.com", "include:_spf\\.perfora\\.net"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:_spf-eu.ionos.com ~all"}
+
+- id: infomaniak-ksuite
+  nom: Infomaniak (kSuite, messagerie)
+  categorie: suites_saas
+  type_service: bureautique
+  fournisseur_id: infomaniak
+  signal_positif: true
+  motifs:
+    spf: ["include:spf\\.infomaniak\\.ch"]
+  exemples:
+    - {type: spf, valeur: "v=spf1 include:spf.infomaniak.ch -all"}
+
+- id: proton-mail
+  nom: Proton Mail
+  categorie: suites_saas
+  type_service: messagerie
+  fournisseur_id: proton
+  signal_positif: true
+  motifs:
+    txt: ["^protonmail-verification="]
+    spf: ["include:_spf\\.protonmail\\.ch"]
+  exemples:
+    - {type: txt, valeur: "protonmail-verification=abc123def456"}
+    - {type: spf, valeur: "v=spf1 include:_spf.protonmail.ch ~all"}
