@@ -34,6 +34,8 @@ app_cibles = typer.Typer(help="Organisations à analyser (import, liste, ajout m
 app.add_typer(app_cibles, name="cibles")
 app_campagne = typer.Typer(help="Campagnes de scan.")
 app.add_typer(app_campagne, name="campagne")
+app_rapports = typer.Typer(help="Rapports rédigés par l'IA (Mistral).")
+app.add_typer(app_rapports, name="rapports")
 
 console = Console()
 console_erreur = Console(stderr=True)
@@ -360,6 +362,91 @@ def campagne_lancer(
         f"{rapport.notees} notée(s). {repartition}"
     )
     for erreur in rapport.erreurs[:20]:
+        console.print(f"[yellow]⚠ {erreur}[/]")
+
+
+# --------------------------------------------------------------------------- #
+# Rapports IA
+# --------------------------------------------------------------------------- #
+
+
+@app_rapports.command("generer")
+def rapports_generer(
+    maximum: Annotated[
+        int | None, typer.Option("--max", help="Nombre maximal de rapports à générer.")
+    ] = None,
+    simulation: Annotated[
+        bool, typer.Option("--dry-run", help="Estime les appels et le coût, sans appel à l'API.")
+    ] = False,
+    oui: Annotated[bool, typer.Option("--oui", help="Ne demande pas de confirmation.")] = False,
+) -> None:
+    """Génère les rapports IA des derniers scans (cache : aucun appel si rien n'a changé)."""
+    from rich.progress import Progress
+
+    from bleublanccloud.ia.client_mistral import (
+        ClientMistral,
+        GenerateurRapports,
+        construire_messages,
+        estimer,
+    )
+    from bleublanccloud.ia.generation import appliquer_cache, generer_rapports, planifier
+
+    parametres = obtenir_parametres()
+    referentiels = referentiels_par_defaut()
+    modele = parametres.mistral_modele
+    with Base(parametres.base_sqlite) as base:
+        plan = planifier(base, referentiels, modele)
+        taches = plan.a_generer[:maximum] if maximum is not None else plan.a_generer
+        estimation = estimer(
+            [construire_messages(t.demande, referentiels.fournisseurs) for t in taches],
+            parametres.mistral_prix_entree_par_m,
+            parametres.mistral_prix_sortie_par_m,
+        )
+        console.print(
+            f"Modèle : {modele} · {plan.deja_a_jour} rapport(s) à jour · "
+            f"{len(plan.depuis_cache)} réutilisable(s) depuis le cache · "
+            f"{len(plan.a_generer)} à générer"
+            + (f" (limité à {len(taches)})" if maximum is not None else "")
+        )
+        console.print(f"Estimation : {estimation.en_texte()}")
+        if simulation:
+            console.print("[yellow]Simulation : aucun appel à l'API n'a été effectué.[/]")
+            return
+        appliquer_cache(base, plan, modele)
+        if not taches:
+            console.print("[green]✓[/] Rien à générer.")
+            return
+        if parametres.mistral_api_key is None:
+            console_erreur.print("[red]MISTRAL_API_KEY manquante dans le fichier .env.[/]")
+            raise typer.Exit(code=1)
+        if not oui and not typer.confirm(f"Générer {len(taches)} rapport(s) ?", default=False):
+            raise typer.Abort()
+        generateur = GenerateurRapports(
+            client=ClientMistral(
+                parametres.mistral_api_key.get_secret_value(), parametres.mistral_serveur
+            ),
+            modele=modele,
+            fournisseurs=referentiels.fournisseurs,
+            alternatives_connues=referentiels.alternatives,
+        )
+
+        async def executer() -> Any:
+            with Progress(console=console) as barre:
+                tache_barre = barre.add_task("Rapports", total=len(taches))
+                return await generer_rapports(
+                    base, taches, generateur, progression=lambda _: barre.advance(tache_barre)
+                )
+
+        bilan = asyncio.run(executer())
+    cout = (
+        bilan.jetons_entree * parametres.mistral_prix_entree_par_m
+        + bilan.jetons_sortie * parametres.mistral_prix_sortie_par_m
+    ) / 1_000_000
+    console.print(
+        f"[green]✓[/] {bilan.generes} rapport(s) générés, {len(bilan.en_erreur)} en erreur, "
+        f"{bilan.appels} appel(s), coût réel ≈ {cout:.4f} $."
+    )
+    for erreur in bilan.en_erreur[:20]:
         console.print(f"[yellow]⚠ {erreur}[/]")
 
 
