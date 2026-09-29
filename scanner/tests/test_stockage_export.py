@@ -170,6 +170,44 @@ def test_statistiques_inconnus(base: Base) -> None:
     assert ("dns", "prestataire.fr", 1) in stats
 
 
+def _inconnu(categorie: str, valeur: str, **preuve: object) -> Constat:
+    cle = {"hebergement": "hebergeur", "messagerie": "mx", "dns": "ns"}[categorie]
+    return Constat(
+        sonde="dns", categorie=categorie, cle=cle, valeur=valeur, niveau="inconnu", preuve=preuve
+    )  # type: ignore[arg-type]
+
+
+def test_statistiques_inconnus_dernier_scan_par_organisation(base: Base) -> None:
+    premiere = base.enregistrer_organisation(organisation("premiere-00001"))
+    seconde = base.enregistrer_organisation(organisation("seconde-00002", nom="Seconde"))
+
+    # Première organisation : trois scans successifs, seul le plus récent compte
+    for jour, asn in ((1, 64500), (8, 64500), (15, 64501)):
+        res = resultat(jour=jour)
+        res.constats = [_inconnu("messagerie", f"mx{jour}.exemple.fr", asn=asn, nom_as="AS TEST")]
+        base.enregistrer_scan(premiere, res, None, VERSION_METHODO)
+    # Seconde organisation : deux MX dans le même AS, comptés une seule fois
+    res = resultat("seconde.fr", jour=15)
+    res.constats = [
+        _inconnu("messagerie", "mx1.seconde.fr", asn=64501, nom_as="AS TEST"),
+        _inconnu("messagerie", "mx2.seconde.fr", asn=64501, nom_as="AS TEST"),
+        _inconnu("dns", "ns1.hebergeur-inconnu.fr"),
+    ]
+    base.enregistrer_scan(seconde, res, None, VERSION_METHODO)
+    # Scan unitaire sans organisation : le plus récent pour ce domaine seulement
+    for jour, asn in ((2, 64502), (3, 64503)):
+        res = resultat("unitaire.fr", jour=jour)
+        res.constats = [_inconnu("hebergement", "192.0.2.1", asn=asn, nom_as="UNITAIRE")]
+        base.enregistrer_scan(None, res, None, VERSION_METHODO)
+
+    assert base.statistiques_inconnus() == [
+        ("messagerie", "AS64501 AS TEST", 2),
+        ("dns", "hebergeur-inconnu.fr", 1),
+        ("hebergement", "AS64503 UNITAIRE", 1),
+    ]
+    assert base.statistiques_inconnus(limite=1) == [("messagerie", "AS64501 AS TEST", 2)]
+
+
 # --------------------------------------------------------------------------- #
 # Alternatives et export
 # --------------------------------------------------------------------------- #

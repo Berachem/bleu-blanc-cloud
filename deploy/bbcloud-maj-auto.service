@@ -1,7 +1,7 @@
-# Campagne hebdomadaire Bleu Blanc Cloud :
-# référentiels → campagne → rapports IA → export → build → publication.
+# Mise à jour automatique : git fetch → (si nouveau) fusion, dépendances, tests,
+# puis régénération et publication du site à partir des données existantes (aucun scan).
 [Unit]
-Description=Bleu Blanc Cloud — campagne hebdomadaire et publication
+Description=Bleu Blanc Cloud — mise à jour automatique du code et du site
 Documentation=https://github.com/Berachem/bleu-blanc-cloud/blob/main/deploy/README.md
 Wants=network-online.target
 After=network-online.target
@@ -13,9 +13,9 @@ Group=bbcloud
 WorkingDirectory=/opt/bleu-blanc-cloud
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
 Environment=ASTRO_TELEMETRY_DISABLED=1
-ExecStart=/opt/bleu-blanc-cloud/deploy/campagne-hebdomadaire.sh
-SyslogIdentifier=bbcloud-campagne
-TimeoutStartSec=12h
+ExecStart=/opt/bleu-blanc-cloud/deploy/maj-auto.sh
+SyslogIdentifier=bbcloud-maj-auto
+TimeoutStartSec=1h
 Nice=10
 IOSchedulingClass=idle
 # Durcissement
@@ -29,6 +29,3 @@ ProtectKernelModules=true
 ProtectControlGroups=true
 RestrictSUIDSGID=true
 LockPersonality=true
-
-[Install]
-WantedBy=multi-user.target

@@ -305,14 +305,31 @@ class Base:
         return [(r["debut"], int(r["score_global"]), r["note"]) for r in lignes]
 
     def statistiques_inconnus(self, limite: int = 30) -> list[tuple[str, str, int]]:
-        """Preuves non attribuées les plus fréquentes (pour enrichir fournisseurs.yaml)."""
+        """Preuves non attribuées les plus fréquentes (pour enrichir fournisseurs.yaml).
+
+        Seul le dernier scan de chaque organisation est pris en compte (les scans unitaires
+        sans organisation sont regroupés par domaine), et une même preuve n'est comptée
+        qu'une fois par organisation : le nombre retourné est un nombre d'organisations.
+        """
         lignes = self.connexion.execute(
             """
-            SELECT categorie, valeur, preuve_json FROM constats
-            WHERE niveau = 'inconnu' AND categorie IN ('hebergement', 'messagerie', 'dns')
+            WITH derniers_scans AS (
+                SELECT id FROM (
+                    SELECT id, ROW_NUMBER() OVER (
+                        PARTITION BY COALESCE('organisation:' || organisation_id,
+                                              'domaine:' || domaine)
+                        ORDER BY debut DESC, id DESC
+                    ) AS rang
+                    FROM scans
+                )
+                WHERE rang = 1
+            )
+            SELECT c.scan_id, c.categorie, c.valeur, c.preuve_json FROM constats c
+            JOIN derniers_scans d ON d.id = c.scan_id
+            WHERE c.niveau = 'inconnu' AND c.categorie IN ('hebergement', 'messagerie', 'dns')
             """
         )
-        compteur: dict[tuple[str, str], int] = {}
+        scans_par_cle: dict[tuple[str, str], set[int]] = {}
         for ligne in lignes:
             preuve: dict[str, Any] = json.loads(ligne["preuve_json"])
             if preuve.get("asn"):
@@ -322,9 +339,9 @@ class Base:
                 cle = f"{ligne['valeur']} ({LIBELLES_RESOLUTION[preuve['resolution']]})"
             else:
                 cle = ".".join(str(ligne["valeur"]).split(".")[-2:])
-            compteur[(ligne["categorie"], cle)] = compteur.get((ligne["categorie"], cle), 0) + 1
-        tries = sorted(compteur.items(), key=lambda e: e[1], reverse=True)[:limite]
-        return [(categorie, cle, nombre) for (categorie, cle), nombre in tries]
+            scans_par_cle.setdefault((ligne["categorie"], cle), set()).add(ligne["scan_id"])
+        comptes = [(cat, cle, len(scans)) for (cat, cle), scans in scans_par_cle.items()]
+        return sorted(comptes, key=lambda e: (-e[2], e[0], e[1]))[:limite]
 
     # ------------------------------------------------------------------ #
     # Rapports IA

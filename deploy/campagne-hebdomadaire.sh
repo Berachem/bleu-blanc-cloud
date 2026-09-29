@@ -4,12 +4,21 @@
 set -euo pipefail
 
 RACINE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VERROU="${VERROU:-$RACINE/donnees/bbcloud.verrou}"
 cd "$RACINE/scanner"
 
-echo "▶ Mise à jour du code (branche main)"
-# Dépôt privé : la clé de déploiement de ~/.ssh/config est utilisée, sans jamais rien demander.
-export GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=15"
-git -C "$RACINE" pull --ff-only --quiet || echo "⚠ git pull impossible : on continue avec la version locale"
+# Verrou partagé avec la mise à jour automatique (maj-auto.sh) : jamais les deux en même
+# temps. Si une mise à jour est en cours (tests, build), la campagne l'attend.
+mkdir -p "$(dirname "$VERROU")"
+exec 9>"$VERROU"
+if ! flock --nonblock 9; then
+  echo "▶ Mise à jour automatique en cours : attente de sa fin (2 h au maximum)"
+  flock --wait "${ATTENTE_VERROU_S:-7200}" 9 || { echo "✗ Verrou toujours occupé : campagne annulée." >&2; exit 1; }
+fi
+
+# Le code n'est plus tiré ici : bbcloud-maj-auto ne fusionne une nouvelle version qu'après
+# le passage des tests. La campagne tourne donc toujours sur une version testée.
+echo "▶ Code en version $(git -C "$RACINE" rev-parse --short HEAD)"
 uv sync --frozen --quiet
 
 echo "▶ Mise à jour des référentiels (plages IP, base ASN, RDAP, SecNumCloud)"

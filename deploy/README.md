@@ -120,7 +120,7 @@ Le script (idempotent, relançable sans risque) :
 - génère une **clé SSH de publication** pour Codeberg et l'affiche ;
 - installe les services systemd, active la **sauvegarde quotidienne** et laisse le **timer de campagne désactivé** jusqu'à ta validation.
 
-Les mises à jour hebdomadaires du code (`git pull`) utilisent ensuite automatiquement la même clé de déploiement.
+Les mises à jour automatiques du code (`bbcloud-maj-auto`, toutes les heures) utilisent ensuite la même clé de déploiement.
 
 > Options : `AVEC_CHROMIUM=1 bash installer.sh` installe Chromium pour que chaque publication vérifie automatiquement l'absence de requête externe et de cookie (≈ 300 Mo). `DEPOT_PRIVE=1` ou `DEPOT_PRIVE=0` force le mode si la détection automatique se trompe.
 >
@@ -223,8 +223,28 @@ systemctl list-timers 'bbcloud*'
 
 - Lancer la chaîne complète tout de suite : `systemctl start bbcloud-campagne.service`
 - Suivre les journaux : `journalctl -u bbcloud-campagne -f`
-- La chaîne hebdomadaire (`deploy/campagne-hebdomadaire.sh`) : `git pull` → `referentiels maj` → `cibles importer` → `campagne lancer --oui` → `rapports generer --oui` (seulement si la clé Mistral est présente ; le cache évite tout appel si rien n'a changé) → `publier`.
+- La chaîne hebdomadaire (`deploy/campagne-hebdomadaire.sh`) : `uv sync` → `referentiels maj` → `cibles importer` → `campagne lancer --oui` → `rapports generer --oui` (seulement si la clé Mistral est présente ; le cache évite tout appel si rien n'a changé) → `publier`.
 - Durée indicative d'une campagne complète (~1 000 organisations, 1 requête/s/domaine, 10 scans en parallèle) : **30 à 60 minutes**.
+
+### Mise à jour automatique du code (toutes les heures)
+
+`bbcloud-maj-auto.timer` est activé par l'installateur. Chaque heure, `deploy/maj-auto.sh` :
+
+1. fait un `git fetch` et **s'arrête aussitôt s'il n'y a rien de nouveau** sur `main` ;
+2. sinon : `git merge --ff-only`, `uv sync`, puis `npm ci` **seulement si** `site/package-lock.json` a changé ;
+3. lance les tests (`pytest`) ;
+4. **uniquement s'ils passent**, régénère et publie le site à partir des données déjà en base (export → build → push), **sans relancer de scan**. Tant que la base ne contient aucune organisation notée, rien n'est publié.
+
+Si les tests échouent, le serveur **revient à la version précédente**, rien n'est publié, le service passe en échec (`systemctl --failed`) et ce commit n'est plus retenté : il faut pousser un correctif.
+
+Un verrou (`flock` sur `donnees/bbcloud.verrou`) empêche la mise à jour et la campagne hebdomadaire de tourner en même temps : pendant une campagne, la mise à jour est reportée à l'heure suivante ; pendant une mise à jour, la campagne attend sa fin (2 h au maximum). La campagne ne tire plus le code elle-même : elle tourne toujours sur une version qui a passé les tests.
+
+```bash
+systemctl start bbcloud-maj-auto.service   # lancer une vérification tout de suite
+journalctl -u bbcloud-maj-auto -f          # suivre les journaux (priorités : -p warning pour les alertes)
+systemctl list-timers 'bbcloud*'           # prochaines exécutions
+systemctl disable --now bbcloud-maj-auto.timer   # suspendre les mises à jour automatiques
+```
 
 ---
 
@@ -234,10 +254,10 @@ systemctl list-timers 'bbcloud*'
 - Lancer une sauvegarde : `systemctl start bbcloud-sauvegarde.service`
 - Restaurer :
   ```bash
-  systemctl stop bbcloud-campagne.timer
+  systemctl stop bbcloud-campagne.timer bbcloud-maj-auto.timer
   gunzip -c /mnt/sauvegardes/bleublanccloud-AAAA-MM-JJ.db.gz > /opt/bleu-blanc-cloud/donnees/bleublanccloud.db
   chown bbcloud:bbcloud /opt/bleu-blanc-cloud/donnees/bleublanccloud.db
-  systemctl start bbcloud-campagne.timer
+  systemctl start bbcloud-campagne.timer bbcloud-maj-auto.timer
   ```
 - Pense aussi à inclure le conteneur dans tes sauvegardes Proxmox (*Datacenter → Backup*).
 
@@ -261,7 +281,7 @@ Tant que le dépôt GitHub est privé, renseigne dans le formulaire de migration
 - [ ] **Dogfooding** : `bbcloud scanner bleublanccloud.berachem.dev` donne A.
 - [ ] **Dépôt GitHub passé en public** : le site renvoie vers le code source, la méthodologie et les référentiels.
 
-Toute modification de ces fichiers se fait dans le dépôt GitHub (le conteneur récupère la dernière version chaque dimanche par `git pull`).
+Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur récupère la nouvelle version dans l'heure (`bbcloud-maj-auto`), après passage des tests, et republie le site.
 
 ---
 
@@ -273,7 +293,7 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub (le conteneur 
 | Ajouter un **hébergeur** non identifié | compléter `fournisseurs.yaml` (avec sources) à partir de `bbcloud referentiels inconnus` |
 | Changer la **méthodologie** | nouvelle version dans `analyse/score.py` + entrée dans `docs/methodologie.md` |
 | Changer les **consignes IA** | incrémenter `VERSION_INVITE` dans `ia/invites.py` (les rapports seront régénérés) |
-| Mettre à jour le code tout de suite | `su - bbcloud -c 'cd /opt/bleu-blanc-cloud && git pull && cd scanner && uv sync'` |
+| Mettre à jour le code tout de suite | `systemctl start bbcloud-maj-auto.service` (tests puis republication) |
 
 ---
 
@@ -289,4 +309,7 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub (le conteneur 
 | Le site affiche encore une ancienne version / pas de HTTPS | vérifier le CNAME (« DNS only »), patienter quelques minutes, contrôler la branche `pages` du dépôt Codeberg. |
 | `npm run build` échoue par manque de mémoire | passer le conteneur à 3–4 Go de RAM. |
 | Beaucoup de « robots.txt injoignable » | réseau sortant filtré ou sites en panne : le robot n'analyse alors aucune page, par respect de la RFC 9309. |
+| `bbcloud-maj-auto` en échec : « Tests en échec » | le serveur est resté sur l'ancienne version. Lire `journalctl -u bbcloud-maj-auto -p warning`, corriger dans le dépôt et pousser : le nouveau commit est testé à l'heure suivante. |
+| `bbcloud-maj-auto` : « Fusion en avance rapide impossible » | des fichiers ont été modifiés à la main sur le serveur : `su - bbcloud -c 'git -C /opt/bleu-blanc-cloud status'`, puis annuler ces modifications (le code se modifie dans le dépôt GitHub). |
+| `bbcloud-maj-auto` : « mise à jour reportée » | normal pendant la campagne hebdomadaire (verrou partagé) : nouvel essai à l'heure suivante. |
 | Rapports IA en erreur | `journalctl -u bbcloud-campagne` ; vérifier la clé et le quota Mistral ; les rapports en erreur sont retentés à la campagne suivante. |

@@ -5,6 +5,11 @@
 #   DEPOT_PAGES    URL git (SSH) du dépôt Pages, ex. git@codeberg.org:berachem/bleublanccloud-pages.git
 #   BRANCHE_PAGES  branche publiée (défaut : pages)
 #   DOMAINE_SITE   domaine personnalisé (défaut : bleublanccloud.berachem.dev)
+#
+# Variables d'exécution :
+#   NPM_CI=0          ne pas relancer « npm ci » (déjà fait par maj-auto.sh si nécessaire)
+#   EXIGER_DONNEES=1  ne rien construire ni publier si la base ne contient aucune organisation
+#                     notée (évite de publier un site vide avant la première campagne)
 set -euo pipefail
 
 RACINE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -18,10 +23,20 @@ CLONE_PAGES="${CLONE_PAGES:-$RACINE/donnees/depot-pages}"
 
 echo "▶ Export des données"
 (cd "$RACINE/scanner" && uv run bbcloud exporter --vers "$RACINE/site/public/donnees")
+if [ "${EXIGER_DONNEES:-0}" = "1" ]; then
+  nombre="$(grep -oE '"nombre_organisations": *[0-9]+' "$RACINE/site/public/donnees/meta.json" \
+    2>/dev/null | grep -oE '[0-9]+$' || true)"
+  if [ "${nombre:-0}" -eq 0 ]; then
+    echo "⚠ Aucune organisation notée dans la base : site non régénéré ni publié."
+    exit 0
+  fi
+fi
 
 echo "▶ Construction du site"
 cd "$RACINE/site"
-npm ci --no-audit --no-fund --silent
+if [ "${NPM_CI:-1}" = "1" ] || [ ! -d node_modules ]; then
+  npm ci --no-audit --no-fund --silent
+fi
 ASTRO_TELEMETRY_DISABLED=1 npm run build --silent
 if [ "${VERIFIER_EXTERNE:-1}" = "1" ] && command -v chromium >/dev/null 2>&1; then
   npm run verifier:externe --silent

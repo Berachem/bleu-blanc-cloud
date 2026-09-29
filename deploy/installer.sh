@@ -7,7 +7,7 @@
 # - public : clonage en HTTPS, sans identifiant ;
 # - privé  : le script génère une clé SSH de déploiement en lecture seule, l'affiche, attend
 #            que vous l'ajoutiez au dépôt GitHub, puis clone en SSH. Les mises à jour
-#            hebdomadaires (git pull) utilisent la même clé.
+#            automatiques (bbcloud-maj-auto, git fetch) utilisent la même clé.
 #
 # Variables facultatives :
 #   DEPOT=Berachem/bleu-blanc-cloud   dépôt GitHub (propriétaire/nom)
@@ -151,7 +151,7 @@ installer_paquets() {
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -qq
   apt-get install -y -qq git curl ca-certificates sqlite3 xz-utils gzip locales tzdata \
-    openssh-client >/dev/null
+    openssh-client util-linux >/dev/null
   if [ "$AVEC_CHROMIUM" = "1" ]; then
     apt-get install -y -qq chromium >/dev/null
   fi
@@ -243,7 +243,10 @@ principal() {
   etape "Services systemd"
   install -m 644 "$RACINE"/deploy/bbcloud-*.service "$RACINE"/deploy/bbcloud-*.timer /etc/systemd/system/
   systemctl daemon-reload
+  chmod 755 "$RACINE"/deploy/*.sh
   systemctl enable --now bbcloud-sauvegarde.timer >/dev/null
+  systemctl enable --now bbcloud-maj-auto.timer >/dev/null
+  echo "→ Mise à jour automatique activée (toutes les heures) : journalctl -u bbcloud-maj-auto"
   echo "→ Timer de campagne installé mais NON activé : activez-le après votre première campagne de test."
 
   etape "Vérification"

@@ -606,10 +606,12 @@ def referentiels_inconnus(
     parametres = obtenir_parametres()
     with Base(parametres.base_sqlite) as base:
         statistiques = base.statistiques_inconnus(limite)
-    tableau = Table(title="Preuves non attribuées", expand=True)
+    tableau = Table(
+        title="Preuves non attribuées (dernier scan de chaque organisation)", expand=True
+    )
     tableau.add_column("Catégorie")
     tableau.add_column("ASN ou domaine")
-    tableau.add_column("Occurrences", justify="right")
+    tableau.add_column("Organisations", justify="right")
     for categorie, cle, nombre in statistiques:
         tableau.add_row(LIBELLES_CATEGORIES.get(categorie, categorie), cle, str(nombre))
     console.print(tableau)

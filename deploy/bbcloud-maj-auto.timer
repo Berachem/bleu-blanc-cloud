@@ -1,0 +1,11 @@
+[Unit]
+Description=Bleu Blanc Cloud — mise à jour automatique toutes les heures
+
+[Timer]
+OnCalendar=hourly
+RandomizedDelaySec=5min
+Persistent=true
+Unit=bbcloud-maj-auto.service
+
+[Install]
+WantedBy=timers.target
