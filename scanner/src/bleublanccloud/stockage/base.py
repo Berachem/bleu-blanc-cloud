@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -28,6 +28,21 @@ LIBELLES_RESOLUTION = {
     "echec_dns": "échec DNS",
     "asn_introuvable": "opérateur de l'IP introuvable",
 }
+
+
+CTE_DERNIERS_SCANS = """
+derniers_scans AS (
+    SELECT id FROM (
+        SELECT id, ROW_NUMBER() OVER (
+            PARTITION BY COALESCE('organisation:' || organisation_id, 'domaine:' || domaine)
+            ORDER BY debut DESC, id DESC
+        ) AS rang
+        FROM scans
+    )
+    WHERE rang = 1
+)
+"""
+"""Dernier scan de chaque organisation (les scans sans organisation sont groupés par domaine)."""
 
 
 def _maintenant() -> str:
@@ -363,6 +378,94 @@ class Base:
         ).fetchone()
         return self._scan(ligne) if ligne else None
 
+    def scans_notes(
+        self, tous: bool = False, observatoire: bool = False
+    ) -> Iterator[ScanEnregistre]:
+        """Scans notés : le dernier de chaque organisation (ou tous l'historique si `tous`).
+
+        `observatoire` écarte les scans unitaires sans organisation et les analyses sur
+        demande (comme les statistiques du site).
+        """
+        lignes = self.connexion.execute(
+            """
+            WITH notes AS (
+                SELECT s.id, ROW_NUMBER() OVER (
+                    PARTITION BY COALESCE('organisation:' || s.organisation_id,
+                                          'domaine:' || s.domaine)
+                    ORDER BY s.debut DESC, s.id DESC
+                ) AS rang
+                FROM scans s JOIN scores sc ON sc.scan_id = s.id
+            )
+            SELECT s.* FROM scans s
+            JOIN notes n ON n.id = s.id
+            LEFT JOIN organisations o ON o.id = s.organisation_id
+            WHERE (n.rang = 1 OR :tous)
+              AND (NOT :observatoire OR (o.id IS NOT NULL AND o.type != 'sur_demande'))
+            ORDER BY s.id
+            """,
+            {"tous": tous, "observatoire": observatoire},
+        ).fetchall()
+        for ligne in lignes:
+            yield self._scan(ligne)
+
+    def mettre_a_jour_scan(
+        self,
+        scan_id: int,
+        constats: list[Constat],
+        informations: InformationsComplementaires,
+        score: Score,
+        revise: bool,
+    ) -> None:
+        """Remplace les constats (même nombre, même ordre) et le score d'un scan recalculé.
+
+        `revise` : constats ou score modifiés, ce qui rend obsolètes les rapports IA
+        antérieurs (date enregistrée dans `scans.recalcule_le`).
+        """
+        with self.transaction() as c:
+            c.executemany(
+                """
+                UPDATE constats SET sonde = ?, categorie = ?, cle = ?, valeur = ?,
+                                    fournisseur_id = ?, niveau = ?, preuve_json = ?
+                WHERE scan_id = ? AND ordre = ?
+                """,
+                [
+                    (
+                        constat.sonde,
+                        constat.categorie,
+                        constat.cle,
+                        constat.valeur,
+                        constat.fournisseur_id,
+                        constat.niveau,
+                        json.dumps(constat.preuve, ensure_ascii=False, default=str),
+                        scan_id,
+                        ordre,
+                    )
+                    for ordre, constat in enumerate(constats)
+                ],
+            )
+            c.execute(
+                """
+                UPDATE scans SET informations_json = ?, version_methodo = ?,
+                                 recalcule_le = CASE WHEN ? THEN ? ELSE recalcule_le END
+                WHERE id = ?
+                """,
+                (
+                    informations.model_dump_json(),
+                    score.version_methodo,
+                    revise,
+                    _maintenant(),
+                    scan_id,
+                ),
+            )
+            c.execute(
+                """
+                INSERT INTO scores (scan_id, score_global, note, detail_json) VALUES (?, ?, ?, ?)
+                ON CONFLICT (scan_id) DO UPDATE SET score_global = excluded.score_global,
+                    note = excluded.note, detail_json = excluded.detail_json
+                """,
+                (scan_id, score.score_global, score.note, score.model_dump_json()),
+            )
+
     def historique_scores(self, organisation_id: int) -> list[tuple[str, int, str]]:
         """(date, score, note) de tous les scans notés d'une organisation (phase 8)."""
         lignes = self.connexion.execute(
@@ -375,34 +478,44 @@ class Base:
         )
         return [(r["debut"], int(r["score_global"]), r["note"]) for r in lignes]
 
-    def statistiques_inconnus(self, limite: int = 30) -> list[tuple[str, str, int]]:
+    def statistiques_inconnus(
+        self, limite: int = 30, asn_transit: Collection[int] = ()
+    ) -> list[tuple[str, str, int]]:
         """Preuves non attribuées les plus fréquentes (pour enrichir fournisseurs.yaml).
 
         Seul le dernier scan de chaque organisation est pris en compte (les scans unitaires
         sans organisation sont regroupés par domaine), et une même preuve n'est comptée
         qu'une fois par organisation : le nombre retourné est un nombre d'organisations.
+        Les adresses annoncées par un opérateur de transit (`asn_transit`) sont écartées :
+        elles relèvent de `statistiques_transit`.
         """
+        return self._statistiques_non_attribues(limite, asn_transit, transit=False)
+
+    def statistiques_transit(
+        self, asn_transit: Collection[int], limite: int = 30
+    ) -> list[tuple[str, str, int]]:
+        """Origines indéterminées : adresses annoncées par un opérateur de transit (même
+        comptage que `statistiques_inconnus`)."""
+        return self._statistiques_non_attribues(limite, asn_transit, transit=True)
+
+    def _statistiques_non_attribues(
+        self, limite: int, asn_transit: Collection[int], transit: bool
+    ) -> list[tuple[str, str, int]]:
         lignes = self.connexion.execute(
-            """
-            WITH derniers_scans AS (
-                SELECT id FROM (
-                    SELECT id, ROW_NUMBER() OVER (
-                        PARTITION BY COALESCE('organisation:' || organisation_id,
-                                              'domaine:' || domaine)
-                        ORDER BY debut DESC, id DESC
-                    ) AS rang
-                    FROM scans
-                )
-                WHERE rang = 1
-            )
+            f"""
+            WITH {CTE_DERNIERS_SCANS}
             SELECT c.scan_id, c.categorie, c.valeur, c.preuve_json FROM constats c
             JOIN derniers_scans d ON d.id = c.scan_id
             WHERE c.niveau = 'inconnu' AND c.categorie IN ('hebergement', 'messagerie', 'dns')
             """
         )
+        transitaires = set(asn_transit)
         scans_par_cle: dict[tuple[str, str], set[int]] = {}
         for ligne in lignes:
             preuve: dict[str, Any] = json.loads(ligne["preuve_json"])
+            est_transit = "transitaire" in preuve or preuve.get("asn") in transitaires
+            if est_transit != transit:
+                continue
             if preuve.get("asn"):
                 cle = f"AS{preuve['asn']} {preuve.get('nom_as') or ''}".strip()
             elif preuve.get("resolution") in LIBELLES_RESOLUTION:
@@ -570,9 +683,15 @@ class Base:
             )
 
     def rapport_du_scan(self, scan_id: int) -> RapportEnregistre | None:
+        """Dernier rapport valide du scan, s'il n'a pas été rendu obsolète par un recalcul
+        (constats ou score modifiés après sa rédaction)."""
         ligne = self.connexion.execute(
-            "SELECT * FROM rapports_ia WHERE scan_id = ? AND statut = 'valide' "
-            "ORDER BY id DESC LIMIT 1",
+            """
+            SELECT r.* FROM rapports_ia r JOIN scans s ON s.id = r.scan_id
+            WHERE r.scan_id = ? AND r.statut = 'valide'
+              AND (s.recalcule_le IS NULL OR r.cree_le >= s.recalcule_le)
+            ORDER BY r.id DESC LIMIT 1
+            """,
             (scan_id,),
         ).fetchone()
         return self._rapport(ligne) if ligne else None

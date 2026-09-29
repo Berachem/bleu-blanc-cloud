@@ -245,6 +245,7 @@ cd /opt/bleu-blanc-cloud/scanner
    uv run bbcloud campagne lancer --limite 10 --dry-run   # liste les cibles, aucune requête
    uv run bbcloud campagne lancer --limite 10             # confirmation demandée
    uv run bbcloud referentiels inconnus                   # hébergeurs non identifiés à ajouter au référentiel
+   uv run bbcloud scores couverture                       # part du poids encore inconnue
    ```
 5. **Rapports IA** :
    ```bash
@@ -406,7 +407,9 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur
 | Besoin | Action |
 |---|---|
 | Demande de **retrait** d'une organisation | ajouter le domaine dans `scanner/src/bleublanccloud/referentiels/retraits.yaml`, committer ; il n'est plus jamais analysé et sa fiche disparaît à la publication suivante |
-| Ajouter un **hébergeur** non identifié | compléter `fournisseurs.yaml` (avec sources) à partir de `bbcloud referentiels inconnus` |
+| Ajouter un **hébergeur** non identifié | compléter `fournisseurs.yaml` (avec sources) à partir de `bbcloud referentiels inconnus` ; ne pas y ajouter les **réseaux de transit** (tableau à part), à déclarer dans `transitaires.yaml` |
+| Appliquer un référentiel mis à jour **sans rescanner** | automatique : `bbcloud-maj-auto` lance `bbcloud scores recalculer` quand les référentiels changent. À la main : `uv run bbcloud scores recalculer --dry-run` (aperçu des notes modifiées), puis sans `--dry-run`, puis `uv run bbcloud publier`. Les rapports IA des fiches modifiées sont retirés jusqu'au prochain `rapports generer` |
+| Mesurer le **poids encore inconnu** de l'observatoire | `uv run bbcloud scores couverture` |
 | Changer la **méthodologie** | nouvelle version dans `analyse/score.py` + entrée dans `docs/methodologie.md` |
 | Changer les **consignes IA** | incrémenter `VERSION_INVITE` dans `ia/invites.py` (les rapports seront régénérés) |
 | Mettre à jour le code tout de suite | `systemctl start bbcloud-maj-auto.service` (tests puis republication) |
@@ -421,7 +424,9 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur
 | Symptôme | Piste |
 |---|---|
 | `referentiels maj` : « IPINFO_TOKEN absent » | normal sans jeton : le scanner interroge RIPEstat (plus lent). Ajoute `IPINFO_TOKEN` dans `.env`. |
-| Hébergeurs souvent « inconnus » | lancer `referentiels maj` ; compléter `fournisseurs.yaml` avec `referentiels inconnus`. |
+| Hébergeurs souvent « inconnus » | lancer `referentiels maj` ; compléter `fournisseurs.yaml` avec `referentiels inconnus`, puis `scores recalculer`. |
+| Un fournisseur ajouté reste « inconnu » dans `referentiels inconnus` | les constats enregistrés n'ont pas encore été réattribués : `uv run bbcloud scores recalculer` (lancé automatiquement par `bbcloud-maj-auto` quand le référentiel arrive par `git`). |
+| « Origine indéterminée (réseau de transit) » sur une fiche | l'adresse est annoncée par un opérateur de transit (Cogent…) : l'hébergeur réel n'est pas identifiable par l'ASN. Chercher un nom d'hôte ou un en-tête révélateur ; ne pas ajouter le transitaire comme fournisseur. |
 | `Permission denied (publickey)` sur **github.com** (dépôt privé) | la clé de déploiement n'est pas (ou plus) dans *Settings → Deploy keys* du dépôt. Clé à ajouter : `cat /home/bbcloud/.ssh/id_ed25519_github.pub`. Test : `su - bbcloud -c 'ssh -T git@github.com'` (réponse attendue : « successfully authenticated »). |
 | L'installateur choisit le mauvais mode (public/privé) | relancer avec `DEPOT_PRIVE=1 bash installer.sh` ou `DEPOT_PRIVE=0 bash installer.sh`. |
 | `Permission denied (publickey)` à la publication | la clé de déploiement Codeberg n'a pas l'accès en écriture, ou `DEPOT_PAGES` n'est pas en SSH. Test : `su - bbcloud -c 'ssh -T git@codeberg.org'`. |

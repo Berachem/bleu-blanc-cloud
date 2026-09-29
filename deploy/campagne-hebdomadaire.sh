@@ -30,6 +30,11 @@ uv run bbcloud cibles importer --population-min "${POPULATION_MIN:-10000}" || ec
 echo "▶ Campagne de scan"
 uv run bbcloud campagne lancer --oui
 
+# Les organisations dont le scan a échoué cette semaine gardent leur scan précédent :
+# il est réattribué avec les référentiels du jour, comme les nouveaux scans.
+echo "▶ Recalcul des scores des scans plus anciens (référentiels à jour, aucun scan)"
+uv run bbcloud scores recalculer
+
 echo "▶ Photos des organisations (Wikimedia Commons, licences libres, auto-hébergées)"
 uv run bbcloud photos maj || echo "⚠ photos non mises à jour : les fiches gardent les précédentes"
 

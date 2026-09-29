@@ -9,7 +9,7 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Final, Literal
 
-from bleublanccloud.modeles import Constat, Fournisseur, Niveau
+from bleublanccloud.modeles import Constat, Fournisseur, Niveau, Transitaire
 from bleublanccloud.sondes.dns import ChaineResolution, DonneesDns
 from bleublanccloud.sondes.ip import InfoIp
 
@@ -24,6 +24,9 @@ PAYS_UE: Final = frozenset(
 ORDRE_NIVEAUX: Final[dict[Niveau, int]] = {"A": 0, "B": 1, "C": 2, "D": 3}
 
 Role = Literal["cdn", "hebergement"]
+
+ORIGINE_INDETERMINEE: Final = "origine indéterminée (réseau de transit)"
+"""Attribution d'une IP annoncée par un opérateur de transit : l'hébergeur réel est inconnu."""
 
 
 def niveau_juridiction(fournisseur: Fournisseur) -> Niveau:
@@ -82,10 +85,17 @@ class Correspondance:
 
 
 class Attributeur:
-    """Index des fournisseurs par motif de nom d'hôte, par ASN et par en-tête HTTP."""
+    """Index des fournisseurs par motif de nom d'hôte, par ASN et par en-tête HTTP.
 
-    def __init__(self, fournisseurs: Mapping[str, Fournisseur]) -> None:
+    Les ASN des opérateurs de transit (`transitaires`) ne sont jamais attribués : une IP
+    qu'ils annoncent a une origine indéterminée (voir `transitaire`).
+    """
+
+    def __init__(
+        self, fournisseurs: Mapping[str, Fournisseur], transitaires: Iterable[Transitaire] = ()
+    ) -> None:
         self.fournisseurs = dict(fournisseurs)
+        self._transit = {asn: t for t in transitaires for asn in t.asn}
         motifs: list[tuple[str, Fournisseur, Role]] = []
         self._par_asn: dict[int, tuple[Fournisseur, Role]] = {}
         for fournisseur in fournisseurs.values():
@@ -144,10 +154,18 @@ class Attributeur:
                 info.ip,
                 info.prefixe,
             )
+        if self.transitaire(info) is not None:
+            return None
         if info.asn is not None and info.asn in self._par_asn:
             fournisseur, role = self._par_asn[info.asn]
             return Correspondance(fournisseur, role, "asn", info.ip, f"AS{info.asn}")
         return self.par_nom_as(info)
+
+    def transitaire(self, info: InfoIp | None) -> Transitaire | None:
+        """Opérateur de transit qui annonce l'IP (hors plage publiée d'un cloud), sinon None."""
+        if info is None or info.asn is None or info.plage_cloud in self.fournisseurs:
+            return None
+        return self._transit.get(info.asn)
 
     def par_nom_as(self, info: InfoIp) -> Correspondance | None:
         """Présomption à partir du nom de l'AS (ex. « Ville de Paris »), en dernier recours."""
@@ -198,6 +216,18 @@ def _preuve_ip(info: InfoIp | None) -> dict[str, object]:
     return info.model_dump(exclude_none=True)
 
 
+def _noter_non_attribue(
+    preuve: dict[str, object], info: InfoIp | None, attributeur: Attributeur
+) -> None:
+    """Explique dans la preuve pourquoi aucun fournisseur n'est retenu."""
+    transitaire = attributeur.transitaire(info)
+    if transitaire is None or info is None:
+        preuve["attribution"] = "fournisseur non référencé"
+        return
+    preuve["attribution"] = ORIGINE_INDETERMINEE
+    preuve["transitaire"] = {"id": transitaire.id, "nom": transitaire.nom, "asn": info.asn}
+
+
 def constat_hebergement(
     resolution: ChaineResolution,
     info_ip: InfoIp | None,
@@ -223,7 +253,7 @@ def constat_hebergement(
     valeur = _decrire_ip(info_ip, ip)
 
     if correspondance is None:
-        preuve["attribution"] = "fournisseur non référencé"
+        _noter_non_attribue(preuve, info_ip, attributeur)
         return Constat(
             sonde="ip",
             categorie="hebergement",
@@ -288,7 +318,7 @@ def constats_serveurs(
         if correspondance is not None:
             preuve["attribution"] = correspondance.en_preuve()
         else:
-            preuve["attribution"] = "fournisseur non référencé"
+            _noter_non_attribue(preuve, info, attributeur)
         fournisseur = correspondance.fournisseur if correspondance else None
         constats.append(
             Constat(

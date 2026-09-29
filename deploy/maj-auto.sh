@@ -6,7 +6,9 @@
 #   3. tests du scanner (pytest) : en cas d'échec, retour à la version précédente, rien n'est
 #      publié et le commit fautif n'est plus retenté tant qu'un nouveau commit n'arrive pas ;
 #   4. si les tests passent : régénération et publication du site à partir des données déjà
-#      en base (export → build → push), SANS relancer de scan.
+#      en base (export → build → push), SANS relancer de scan. Si les référentiels ou le
+#      calcul du score ont changé, les scores sont d'abord recalculés depuis les constats
+#      enregistrés (bbcloud scores recalculer).
 #
 # Un verrou (flock) partagé avec la campagne hebdomadaire garantit que les deux ne tournent
 # jamais en même temps : si la campagne est en cours, la mise à jour est reportée à l'heure
@@ -101,6 +103,13 @@ principal() {
     return 1
   fi
   rm -f "$FICHIER_REJET"
+
+  # Référentiels ou méthodologie modifiés : constats réattribués et scores recalculés en base
+  if ! git diff --quiet "$ancien" "$nouveau" -- \
+    scanner/src/bleublanccloud/referentiels/ scanner/src/bleublanccloud/analyse/; then
+    info "▶ Référentiels ou calcul du score modifiés : recalcul des scores (aucun scan)"
+    (cd "$RACINE/scanner" && uv run bbcloud scores recalculer)
+  fi
 
   info "▶ Régénération et publication du site (données existantes, aucun scan)"
   NPM_CI=0 EXIGER_DONNEES=1 "$RACINE/deploy/publier.sh"

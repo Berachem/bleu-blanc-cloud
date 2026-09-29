@@ -132,6 +132,17 @@ class Fournisseur(ModeleStrict):
     remarque: str | None = None
 
 
+class Transitaire(ModeleStrict):
+    """Opérateur de transit (transitaires.yaml) : son ASN ne révèle pas l'hébergeur réel."""
+
+    id: str
+    nom: str
+    asn: list[int] = Field(min_length=1)
+    sources: list[HttpUrl] = Field(min_length=1)
+    a_verifier: bool = True
+    remarque: str | None = None
+
+
 class ExempleRegle(ModeleStrict):
     """Exemple d'élément qui doit déclencher une règle (sert de test automatique)."""
 

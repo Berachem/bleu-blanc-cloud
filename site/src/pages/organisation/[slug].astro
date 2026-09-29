@@ -55,6 +55,11 @@ const nomFournisseur = (constat: Constat) =>
   constat.fournisseur_id ? (org.fournisseurs[constat.fournisseur_id]?.nom ?? constat.fournisseur_id) : null;
 const preuve = (constat: Constat) => JSON.stringify(constat.preuve, null, 2);
 const signalPositif = (constat: Constat) => constat.preuve?.signal_positif === true;
+// Adresse annoncée par un opérateur de transit : l'hébergeur réel n'est pas connu
+const transitaire = (constat: Constat) => {
+  const t = constat.preuve?.transitaire as { nom?: unknown } | undefined;
+  return typeof t?.nom === "string" ? t.nom : null;
+};
 const alternativesParId = new Map(org.alternatives.map((a) => [a.id, a]));
 const fournisseurs = Object.values(org.fournisseurs);
 const infos = org.informations;
@@ -206,6 +211,9 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
                       <span class="constat__valeur">{constat.valeur}</span>
                       {nomFournisseur(constat) && constat.valeur !== nomFournisseur(constat) && (
                         <span class="texte-secondaire">{nomFournisseur(constat)}</span>
+                      )}
+                      {transitaire(constat) && (
+                        <span class="texte-secondaire">Origine indéterminée (réseau de transit {transitaire(constat)})</span>
                       )}
                       {signalPositif(constat) && <span class="constat__positif">Solution européenne ou libre</span>}
                       {retraits.has(rang) && (

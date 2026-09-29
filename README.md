@@ -56,7 +56,9 @@ npm run dev                   # http://localhost:4321
 |---|---|
 | `bbcloud referentiels maj` | plages IP des clouds, base ASN (IPinfo Lite), amorçage RDAP, contrôle SecNumCloud |
 | `bbcloud referentiels verifier` | valide les YAML et liste les faits « à vérifier » |
-| `bbcloud referentiels inconnus` | hébergeurs, MX et DNS non identifiés les plus fréquents |
+| `bbcloud referentiels inconnus` | hébergeurs, MX et DNS non identifiés les plus fréquents (réseaux de transit listés à part) |
+| `bbcloud scores recalculer [--dry-run] [--tous]` | réattribue les constats enregistrés et recalcule les scores après une mise à jour du référentiel, sans rescanner |
+| `bbcloud scores couverture` | part du poids encore inconnue sur l'ensemble de l'observatoire, par catégorie |
 | `bbcloud scanner berachem.dev [--json] [--enregistrer]` | scan unitaire et score |
 | `bbcloud cibles importer --population-min 10000` | communes, départements, régions |
 | `bbcloud cibles lister` · `bbcloud cibles ajouter` | liste, ajout manuel |
@@ -75,7 +77,7 @@ npm run dev                   # http://localhost:4321
 |---|---|
 | Lint et format Python | `uv run ruff check . && uv run ruff format --check .` |
 | Typage (strict sur `analyse/`) | `uv run mypy` |
-| Tests et couverture | `uv run pytest --cov` (≈ 470 tests, couverture ≈ 93 %) |
+| Tests et couverture | `uv run pytest --cov` (≈ 730 tests) |
 | Types du site | `npm run verifier` |
 | Aucune requête externe, aucun cookie | `npm run build && npm run verifier:externe` |
 

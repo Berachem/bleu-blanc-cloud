@@ -1,0 +1,102 @@
+# Réseaux de transit — Bleu Blanc Cloud
+#
+# Un opérateur de transit (« transitaire ») achemine le trafic d'autres réseaux. Quand une
+# adresse IP est annoncée par l'un de ces systèmes autonomes, c'est souvent qu'un client
+# sans ASN propre (hébergeur régional, collectivité…) utilise des adresses fournies par son
+# opérateur : l'hébergeur réel n'est pas connu.
+#
+# Règle (méthodologie, section 3) : un ASN de transit ne vaut JAMAIS attribution. Le constat
+# reste « origine indéterminée » (niveau inconnu, exclu du calcul), sauf si le nom d'hôte
+# (CNAME, MX, NS) ou une plage IP publiée désigne un fournisseur connu.
+#
+# Un ASN ne peut pas figurer à la fois ici et dans fournisseurs.yaml (vérifié au chargement).
+# Comme pour les fournisseurs, chaque entrée a au moins une URL source et reste
+# « a_verifier: true » tant qu'elle n'a pas été relue.
+
+- id: cogent
+  nom: Cogent Communications
+  asn: [174]
+  sources:
+    - "https://bgp.tools/as/174"
+    - "https://www.peeringdb.com/asn/174"
+  a_verifier: true
+
+- id: lumen
+  nom: Lumen (ex-Level 3)
+  asn: [3356]
+  sources:
+    - "https://bgp.tools/as/3356"
+    - "https://www.peeringdb.com/asn/3356"
+  a_verifier: true
+
+- id: arelion
+  nom: Arelion (ex-Telia Carrier)
+  asn: [1299]
+  sources:
+    - "https://bgp.tools/as/1299"
+    - "https://www.peeringdb.com/asn/1299"
+  a_verifier: true
+
+- id: ntt
+  nom: NTT Global IP Network
+  asn: [2914]
+  sources:
+    - "https://bgp.tools/as/2914"
+    - "https://www.peeringdb.com/asn/2914"
+  a_verifier: true
+
+- id: gtt
+  nom: GTT Communications
+  asn: [3257]
+  sources:
+    - "https://bgp.tools/as/3257"
+    - "https://www.peeringdb.com/asn/3257"
+  a_verifier: true
+
+- id: tata
+  nom: Tata Communications
+  asn: [6453]
+  sources:
+    - "https://bgp.tools/as/6453"
+    - "https://www.peeringdb.com/asn/6453"
+  a_verifier: true
+
+- id: zayo
+  nom: Zayo
+  asn: [6461]
+  sources:
+    - "https://bgp.tools/as/6461"
+    - "https://www.peeringdb.com/asn/6461"
+  a_verifier: true
+
+- id: sparkle
+  nom: Telecom Italia Sparkle
+  asn: [6762]
+  sources:
+    - "https://bgp.tools/as/6762"
+    - "https://www.peeringdb.com/asn/6762"
+  a_verifier: true
+
+- id: hurricane-electric
+  nom: Hurricane Electric
+  asn: [6939]
+  sources:
+    - "https://bgp.tools/as/6939"
+    - "https://www.peeringdb.com/asn/6939"
+  a_verifier: true
+
+- id: pccw
+  nom: PCCW Global
+  asn: [3491]
+  sources:
+    - "https://bgp.tools/as/3491"
+    - "https://www.peeringdb.com/asn/3491"
+  a_verifier: true
+
+- id: telxius
+  nom: Telxius
+  asn: [12956]
+  sources:
+    - "https://bgp.tools/as/12956"
+    - "https://www.peeringdb.com/asn/12956"
+  a_verifier: true

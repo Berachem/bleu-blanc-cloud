@@ -82,11 +82,12 @@
   nom: alwaysdata
   pays_siege: FR
   soumis_cloud_act: false
+  asn: [60362]
   motifs_domaines: ["alwaysdata.net", "alwaysdata.com"]
   categories: [hebergement, messagerie, dns]
   sources:
     - "https://www.alwaysdata.com/"
-  remarque: "ASN à compléter après vérification."
+    - "https://bgp.tools/as/60362"
   a_verifier: true
 
 - id: o2switch
@@ -303,12 +304,13 @@
   nom: Orange
   pays_siege: FR
   soumis_cloud_act: false
-  asn: [3215, 5511]
+  asn: [3215, 5511, 15401]  # 15401 : Orange Business Services
   motifs_domaines: ["orange.fr", "orange.com", "wanadoo.fr", "orange-business.com"]
   categories: [hebergement, messagerie, dns]
   sources:
     - "https://fr.wikipedia.org/wiki/Orange_(entreprise)"
     - "https://bgp.tools/as/3215"
+    - "https://bgp.tools/as/15401"
   a_verifier: true
 
 - id: sfr
@@ -854,6 +856,209 @@
   remarque: "Infrastructure exploitée par l'organisme public lui-même (ou un groupement public) : niveau A. La règle générique sur le nom d'AS est une présomption signalée comme telle dans la preuve."
   a_verifier: true
 
+# --------------------------------------------------------------------------- #
+# Ajouts après la campagne complète (sortie de « referentiels inconnus »)
+# --------------------------------------------------------------------------- #
+
+- id: adista
+  nom: ADISTA
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [16347]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://bgp.tools/as/16347"
+    - "https://www.peeringdb.com/net/3017"
+  remarque: "Opérateur et hébergeur de Maxéville (Meurthe-et-Moselle) ; actionnariat à vérifier."
+  a_verifier: true
+
+- id: celeste
+  nom: Celeste
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [34177]
+  motifs_domaines: ["celeste.fr"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://www.celeste.fr/qui-est-l-operateur-celeste/"
+    - "https://bgp.tools/as/34177"
+  remarque: "Actionnaire majoritaire : CVC DIF (fonds d'infrastructure de CVC Capital Partners) depuis janvier 2026, auparavant InfraVia. Pays de rattachement du fonds à vérifier : le niveau repose ici sur le siège français."
+  a_verifier: true
+
+- id: nordnet
+  nom: Nordnet
+  pays_siege: FR
+  maison_mere: Orange
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [8362]
+  motifs_domaines: ["nordnet.fr", "nordnet.com"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Nordnet"
+    - "https://www.nordnet.com/qui-sommes-nous"
+  remarque: "Filiale d'Orange depuis 1998."
+  a_verifier: true
+
+- id: owentis
+  nom: OWENTIS
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [39444]
+  categories: [hebergement, messagerie]
+  sources:
+    - "https://www.peeringdb.com/net/6709"
+    - "https://bgp.tools/as/39444"
+  remarque: "Opérateur de Levallois-Perret ; service de messagerie précis et actionnariat à vérifier."
+  a_verifier: true
+
+- id: aqua-ray
+  nom: Aqua Ray
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [41653]
+  categories: [hebergement, dns]
+  sources:
+    - "https://bgp.tools/as/41653"
+    - "https://www.peeringdb.com/asn/41653"
+  remarque: "Actionnariat à vérifier."
+  a_verifier: true
+
+- id: muona
+  nom: Muona
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [50818]
+  categories: [hebergement]
+  sources:
+    - "https://bgp.tools/as/50818"
+    - "https://www.peeringdb.com/net/40524"
+  remarque: "Actionnariat à vérifier."
+  a_verifier: true
+
+- id: register-it
+  nom: Register.it
+  pays_siege: IT
+  maison_mere: team.blue
+  pays_maison_mere: BE
+  soumis_cloud_act: false
+  asn: [39729]
+  motifs_domaines: ["register.it"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://press.team.blue/180904-register-group-joins-team-blue/"
+    - "https://bgp.tools/as/39729"
+  remarque: "Groupe team.blue depuis 2018 ; actionnaires du groupe (fonds d'investissement) à vérifier."
+  a_verifier: true
+
+- id: celeonet
+  nom: Celeonet
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [31178]
+  motifs_domaines: ["celeonet.fr"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://annuaire-entreprises.data.gouv.fr/entreprise/celeonet-450734744"
+    - "https://www.celeonet.fr/societe"
+  remarque: "Hébergeur de Choisy-le-Roi (Val-de-Marne)."
+  a_verifier: true
+
+- id: linkt
+  nom: Linkt
+  pays_siege: FR
+  maison_mere: Groupe Altitude
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [44407]
+  motifs_domaines: ["linkt.fr"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://www.linkt.fr/qui-sommes-nous/"
+    - "https://www.altitude.fr/linkt/"
+  a_verifier: true
+
+- id: rcodezero
+  nom: RcodeZero (nic.at)
+  pays_siege: AT
+  maison_mere: nic.at (ipcom GmbH)
+  pays_maison_mere: AT
+  soumis_cloud_act: false
+  asn: [1921, 207021]
+  motifs_domaines: ["rcodezero.at"]
+  categories: [dns]
+  sources:
+    - "https://www.peeringdb.com/net/17422"
+    - "https://ipinfo.io/AS207021"
+  remarque: "Service DNS anycast du registre autrichien nic.at."
+  a_verifier: true
+
+- id: alter-way
+  nom: Alter Way
+  pays_siege: FR
+  maison_mere: Smile
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [41628]
+  categories: [hebergement]
+  sources:
+    - "https://www.smile.eu/en/alter-way"
+    - "https://www.solutions-numeriques.com/econocom-revend-alter-way-a-smile/"
+  remarque: "Cédée par Econocom au groupe Smile ; actionnaires de Smile à vérifier."
+  a_verifier: true
+
+- id: srr
+  nom: SRR (SFR Réunion)
+  pays_siege: FR
+  maison_mere: SFR (Altice France)
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [34306]
+  categories: [hebergement]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Soci%C3%A9t%C3%A9_r%C3%A9unionnaise_du_radiot%C3%A9l%C3%A9phone"
+    - "https://www.sfr.re/mentions-legales/"
+  remarque: "Société réunionnaise du radiotéléphone, filiale de SFR (La Réunion, région ultrapériphérique de l'UE)."
+  a_verifier: true
+
+- id: over-link
+  nom: OVER-LINK
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [48426]
+  categories: [hebergement]
+  sources:
+    - "https://iplocate.io/AS48426"
+    - "https://bgp.tools/as/48426"
+  remarque: "Opérateur de Sophia-Antipolis ; actionnariat à vérifier."
+  a_verifier: true
+
+- id: wistee
+  nom: Wistee
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [48594]
+  categories: [hebergement]
+  sources:
+    - "https://bgp.tools/as/48594"
+  remarque: "Hébergeur de Persan (Val-d'Oise) ; actionnariat à vérifier."
+  a_verifier: true
+
+- id: i3d-net
+  nom: i3D.net
+  pays_siege: NL
+  maison_mere: Ubisoft
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [49544]
+  motifs_domaines: ["i3d.net"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.i3d.net/ubisoft-acquires-i3d/"
+    - "https://www.peeringdb.com/net/2496"
+  remarque: "Hébergeur de Rotterdam racheté par Ubisoft en 2018."
+  a_verifier: true
+
 # =========================================================================== #
 # Hors UE — non soumis au Cloud Act (niveau B)
 # =========================================================================== #
@@ -890,6 +1095,32 @@
     - "https://www.peeringdb.com/asn/25091"
     - "https://www.ip-max.net/"
   remarque: "Opérateur genevois ; service de messagerie précis (filtrage ?) à identifier."
+  a_verifier: true
+
+- id: datacamp
+  nom: Datacamp Limited (CDN77, DataPacket)
+  pays_siege: GB
+  soumis_cloud_act: false
+  asn: [60068]
+  motifs_domaines: ["datacamp.co.uk"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://bgp.tools/as/60068"
+    - "https://www.datacamp.co.uk/"
+  remarque: "Infrastructure londonienne (marques CDN77 et DataPacket). Les serveurs DNS observés peuvent appartenir à un prestataire qui loue cette infrastructure : le niveau suit l'opérateur du réseau."
+  a_verifier: true
+
+- id: planethoster
+  nom: PlanetHoster
+  pays_siege: CA
+  soumis_cloud_act: false
+  asn: [53589]
+  motifs_domaines: ["planethoster.com", "planethoster.net"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://www.planethoster.com/en/The-Company"
+    - "https://www.peeringdb.com/asn/53589"
+  remarque: "Société canadienne (Laval, Québec) ; des serveurs situés en France ne changent pas la juridiction du siège."
   a_verifier: true
 
 # =========================================================================== #
@@ -1772,4 +2003,19 @@
     - "https://www.peeringdb.com/net/10569"
     - "https://www.f5.com/company/news/press-releases/f5-completes-acquisition-of-volterra"
   remarque: "Réseau mondial F5 Distributed Cloud (ex-Volterra) placé devant le site : hébergeur réel masqué."
+  a_verifier: true
+
+- id: vultr
+  nom: Vultr (The Constant Company)
+  pays_siege: US
+  maison_mere: The Constant Company, LLC
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn: [20473]
+  motifs_domaines: ["vultr.com", "constant.com"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.peeringdb.com/asn/20473"
+    - "https://www.constant.com/company/about-us/"
+  remarque: "Société de West Palm Beach (Floride). Les serveurs DNS observés peuvent appartenir à un prestataire qui loue cette infrastructure : le niveau suit l'opérateur du réseau."
   a_verifier: true

@@ -1,9 +1,10 @@
-"""Chargement et validation des référentiels YAML (fournisseurs, règles, alternatives, retraits)."""
+"""Chargement et validation des référentiels YAML (fournisseurs, transitaires, règles,
+alternatives, retraits)."""
 
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -12,7 +13,7 @@ import yaml
 from pydantic import TypeAdapter
 
 from bleublanccloud.configuration import DOSSIER_REFERENTIELS
-from bleublanccloud.modeles import Alternative, Fournisseur, RegleDetection, Retrait
+from bleublanccloud.modeles import Alternative, Fournisseur, RegleDetection, Retrait, Transitaire
 
 
 class ErreurReferentiel(ValueError):
@@ -27,6 +28,7 @@ class Referentiels:
     regles: list[RegleDetection]
     alternatives: dict[str, Alternative]
     retraits: dict[str, Retrait]
+    transitaires: dict[str, Transitaire] = field(default_factory=dict)
 
     def est_retire(self, nom_hote: str) -> bool:
         """Indique si un nom d'hôte (ou l'un de ses domaines parents) a demandé son retrait."""
@@ -52,7 +54,7 @@ def _verifier_unicite(identifiants: list[str], nom_fichier: str) -> None:
 
 
 def charger_referentiels(dossier: Path = DOSSIER_REFERENTIELS) -> Referentiels:
-    """Charge et valide les quatre référentiels d'un dossier."""
+    """Charge et valide les référentiels d'un dossier (transitaires.yaml est facultatif)."""
     fournisseurs = TypeAdapter(list[Fournisseur]).validate_python(
         _lire_yaml(dossier / "fournisseurs.yaml")
     )
@@ -63,10 +65,17 @@ def charger_referentiels(dossier: Path = DOSSIER_REFERENTIELS) -> Referentiels:
         _lire_yaml(dossier / "alternatives.yaml")
     )
     retraits = TypeAdapter(list[Retrait]).validate_python(_lire_yaml(dossier / "retraits.yaml"))
+    fichier_transitaires = dossier / "transitaires.yaml"
+    transitaires = (
+        TypeAdapter(list[Transitaire]).validate_python(_lire_yaml(fichier_transitaires))
+        if fichier_transitaires.is_file()
+        else []
+    )
 
     _verifier_unicite([f.id for f in fournisseurs], "fournisseurs.yaml")
     _verifier_unicite([r.id for r in regles], "regles_detection.yaml")
     _verifier_unicite([a.id for a in alternatives], "alternatives.yaml")
+    _verifier_unicite([t.id for t in transitaires], "transitaires.yaml")
 
     index_fournisseurs = {f.id: f for f in fournisseurs}
     proprietaires_asn: dict[int, str] = {}
@@ -85,6 +94,20 @@ def charger_referentiels(dossier: Path = DOSSIER_REFERENTIELS) -> Referentiels:
                 raise ErreurReferentiel(
                     f"Fournisseur {fournisseur.id} : motif de nom d'AS invalide « {motif} »."
                 ) from erreur
+    transit_asn: dict[int, str] = {}
+    for transitaire in transitaires:
+        for asn in transitaire.asn:
+            if asn in proprietaires_asn:
+                raise ErreurReferentiel(
+                    f"AS{asn} déclaré à la fois comme transitaire ({transitaire.id}) et comme "
+                    f"fournisseur ({proprietaires_asn[asn]})."
+                )
+            if asn in transit_asn:
+                raise ErreurReferentiel(
+                    f"AS{asn} rattaché à deux transitaires : "
+                    f"{transit_asn[asn]} et {transitaire.id}."
+                )
+            transit_asn[asn] = transitaire.id
     for regle in regles:
         if regle.fournisseur_id is not None and regle.fournisseur_id not in index_fournisseurs:
             raise ErreurReferentiel(
@@ -105,6 +128,7 @@ def charger_referentiels(dossier: Path = DOSSIER_REFERENTIELS) -> Referentiels:
         regles=regles,
         alternatives={a.id: a for a in alternatives},
         retraits={r.domaine.lower().rstrip("."): r for r in retraits},
+        transitaires={t.id: t for t in transitaires},
     )
 
 

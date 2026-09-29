@@ -42,9 +42,13 @@ Chaque élément observé est rattaché, lorsque c'est possible, à un fournisse
 3. **système autonome (ASN)** de l'adresse IP ;
 4. à défaut, **nom du système autonome** : un réseau dont le nom désigne un organisme public français (« Ville de… », « Métropole », « Conseil départemental », « Groupement d'intérêt public »…) est classé **auto-hébergement public**, niveau A. Cette présomption n'est appliquée que si le pays connu de l'adresse IP est la France, jamais pour une société commerciale (SA, SAS, SARL…), et elle est signalée comme telle dans la preuve. Les réseaux publics confirmés (ex. Ville de Paris, Ville et Eurométropole de Strasbourg, GIP Gigalis) sont recensés par leur ASN.
 
+**Réseaux de transit.** Certains systèmes autonomes sont ceux de grands opérateurs de transit (Cogent, Lumen, Arelion…) qui acheminent le trafic d'autres réseaux. Une adresse IP annoncée par l'un d'eux appartient souvent à un client sans ASN propre (hébergeur régional, collectivité…) : l'hébergeur réel n'est pas connu. Ces ASN, recensés dans un [référentiel dédié](https://github.com/Berachem/bleu-blanc-cloud/blob/main/scanner/src/bleublanccloud/referentiels/transitaires.yaml), ne valent **jamais** attribution : le constat indique une **origine indéterminée** (niveau inconnu, exclu du calcul), sauf si le nom d'hôte ou une plage IP publiée désigne un fournisseur connu.
+
 Un serveur de messagerie ou DNS qui n'est pas reconnu par son nom est résolu en adresses IP : toutes ses adresses (IPv4 puis IPv6) sont essayées jusqu'à identifier l'opérateur, et une requête DNS en échec est relancée une fois. Un serveur MX qui ne résout vers **aucune adresse** est signalé (il ne peut pas recevoir de courriel) et reste « inconnu ».
 
 Chaque fait du référentiel (pays du siège, maison mère, exposition au Cloud Act, offre SecNumCloud) est accompagné d'au moins une source. Tant qu'un fait n'a pas été relu, il est marqué « à vérifier ».
+
+**Mise à jour du référentiel.** Les preuves brutes de chaque constat (nom d'hôte, chaîne CNAME, adresse IP, ASN, nom du système autonome) sont conservées. Lorsqu'un fournisseur est ajouté ou corrigé, les constats déjà enregistrés sont réattribués et les scores recalculés **sans nouvelle analyse des sites** ; la page de l'organisation garde la date du scan d'origine. Un rapport IA rédigé à partir des anciens constats est retiré jusqu'à sa nouvelle rédaction. Une nouvelle règle de détection de services tiers, elle, ne s'applique qu'au scan suivant (les pages visitées ne sont pas conservées).
 
 ## 3. Niveaux de juridiction
 
@@ -145,7 +149,7 @@ Bleu Blanc Cloud est un projet personnel et bénévole, **sans aucun lien avec l
 
 | Version | Date | Modifications |
 |---|---|---|
-| 1.2 | 2026-09-29 | Indicateur de **couverture** : note affichée comme **provisoire** si plus de 30 % du poids applicable n'a pas pu être évalué (fournisseur inconnu ou données indisponibles) ; les catégories sans objet sont exclues de ce calcul. |
+| 1.2 | 2026-09-29 | Indicateur de **couverture** : note affichée comme **provisoire** si plus de 30 % du poids applicable n'a pas pu être évalué (fournisseur inconnu ou données indisponibles) ; les catégories sans objet sont exclues de ce calcul. *Précision ultérieure, sans nouvelle version car aucun score ne change* : les adresses annoncées par un **réseau de transit** sont explicitement marquées « origine indéterminée » (elles étaient déjà classées inconnues) ; les scores peuvent être recalculés sans nouvelle analyse après une mise à jour du référentiel. |
 | 1.1 | 2026-09-29 | Attribution : réseaux d'organismes publics français classés A « auto-hébergement public » (ASN recensés, ou présomption sur le nom du système autonome) ; résolution des serveurs MX et NS plus robuste (toutes les adresses IPv4 et IPv6, nouvelle tentative en cas d'échec DNS, signalement des MX sans adresse) ; 15 fournisseurs ajoutés au référentiel après la première campagne de test. Les règles de calcul du score sont inchangées. |
 | 1.0 | 2026-09-29 | Première version publique. Précisions : catégorie messagerie sans objet en l'absence de MX ; catégories web non évaluables si le site n'a pas pu être analysé ; niveau C plafonnant l'hébergement derrière un CDN extra-européen ; mesure d'audience B = 70, C = 40. |
 

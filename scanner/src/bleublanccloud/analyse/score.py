@@ -100,9 +100,15 @@ def _evaluer_par_niveau(
     connus = [i for i in indexes if constats[i].niveau != "inconnu"]
     inconnus = len(indexes) - len(connus)
     if not connus:
+        transit = all("transitaire" in constats[i].preuve for i in indexes)
+        motif = (
+            "origine indéterminée (adresse annoncée par un opérateur de transit)"
+            if transit
+            else "fournisseur non identifié"
+        )
         return _Evaluation(
             None,
-            f"{sujet} : fournisseur non identifié, catégorie exclue du calcul (poids redistribué).",
+            f"{sujet} : {motif}, catégorie exclue du calcul (poids redistribué).",
             exclusion="inconnu",
         )
     niveau = pire_niveau(constats[i].niveau for i in connus)

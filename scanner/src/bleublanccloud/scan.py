@@ -103,7 +103,7 @@ class ContexteScan:
         serveurs_rdap: dict[str, str] | None = None,
         sonde_tls: FonctionTls | None = None,
     ) -> ContexteScan:
-        attributeur = Attributeur(referentiels.fournisseurs)
+        attributeur = Attributeur(referentiels.fournisseurs, referentiels.transitaires.values())
         return cls(
             parametres=parametres,
             referentiels=referentiels,

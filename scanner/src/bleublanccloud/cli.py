@@ -6,7 +6,7 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import Annotated, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import httpx
 import typer
@@ -23,6 +23,9 @@ from bleublanccloud.configuration import (
 from bleublanccloud.modeles import Constat, ResultatScan, Score
 from bleublanccloud.referentiels import referentiels_par_defaut
 from bleublanccloud.stockage.base import Base
+
+if TYPE_CHECKING:
+    from bleublanccloud.analyse.couverture import CouvertureObservatoire
 
 app = typer.Typer(
     help="Bleu Blanc Cloud — observatoire de la souveraineté numérique.",
@@ -42,6 +45,8 @@ app_demandes = typer.Typer(
     help="Analyses sur demande (tickets « Analyser mon site » sur Codeberg)."
 )
 app.add_typer(app_demandes, name="demandes")
+app_scores = typer.Typer(help="Scores : recalcul sans rescanner, couverture de l'observatoire.")
+app.add_typer(app_scores, name="scores")
 
 console = Console()
 console_erreur = Console(stderr=True)
@@ -509,6 +514,126 @@ def exporter(
         console.print(f"[yellow]Ignorée :[/] {ignoree}")
 
 
+# --------------------------------------------------------------------------- #
+# Scores : recalcul et couverture
+# --------------------------------------------------------------------------- #
+
+
+def _pourcentage(valeur: float) -> str:
+    return f"{valeur:.1f}".replace(".", ",") + " %"
+
+
+def afficher_couverture(couverture: CouvertureObservatoire, titre: str) -> None:
+    """Part du poids encore inconnue sur l'ensemble de l'observatoire, par catégorie."""
+    from bleublanccloud.analyse.score import LIBELLES, POIDS
+
+    if couverture.nombre_organisations == 0:
+        console.print("[yellow]Aucun scan noté dans l'observatoire.[/]")
+        return
+    console.print(f"[bold]{titre}[/] — {couverture.nombre_organisations} organisation(s)")
+    console.print(
+        f"  Poids inconnu (fournisseur non identifié) : "
+        f"[bold]{_pourcentage(couverture.part_inconnue)}[/]"
+    )
+    console.print(
+        f"  Poids indisponible (site ou DNS injoignable) : "
+        f"{_pourcentage(couverture.part_indisponible)}"
+    )
+    console.print(f"  Poids évalué : {_pourcentage(couverture.part_evaluee)}")
+    console.print(
+        f"  Notes provisoires (plus de 30 % non évalué) : {couverture.nombre_provisoires} "
+        f"({_pourcentage(100 * couverture.nombre_provisoires / couverture.nombre_organisations)})"
+    )
+    tableau = Table(expand=True)
+    tableau.add_column("Catégorie")
+    tableau.add_column("Poids", justify="right")
+    tableau.add_column("Inconnue", justify="right")
+    tableau.add_column("Indisponible", justify="right")
+    tableau.add_column("Sans objet", justify="right")
+    for categorie, compte in couverture.par_categorie.items():
+        applicable = compte.applicable or 1
+        tableau.add_row(
+            LIBELLES[categorie],
+            f"{POIDS[categorie]:.0f}",
+            f"{compte.inconnu} ({_pourcentage(100 * compte.inconnu / applicable)})",
+            f"{compte.indisponible} ({_pourcentage(100 * compte.indisponible / applicable)})",
+            str(compte.sans_objet),
+        )
+    console.print(tableau)
+
+
+@app_scores.command("recalculer")
+def scores_recalculer(
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Simule le recalcul sans rien écrire.")
+    ] = False,
+    tous: Annotated[
+        bool,
+        typer.Option("--tous", help="Recalcule tout l'historique, pas seulement le dernier scan."),
+    ] = False,
+) -> None:
+    """Réattribue les constats enregistrés avec les référentiels courants et recalcule les
+    scores, sans rescanner (à lancer après une mise à jour de fournisseurs.yaml)."""
+    from bleublanccloud.recalcul import recalculer_scores
+
+    parametres = obtenir_parametres()
+    referentiels = referentiels_par_defaut()
+    with Base(parametres.base_sqlite) as base:
+        bilan = recalculer_scores(base, referentiels, appliquer=not dry_run, tous=tous)
+        noms = {e.id: e.organisation.nom for e in base.organisations()}
+    prefixe = "[yellow]Simulation :[/] " if dry_run else "[green]✓[/] "
+    console.print(
+        f"{prefixe}{bilan.scans_examines} scan(s) examiné(s), {bilan.scans_modifies} "
+        f"{'à mettre' if dry_run else 'mis'} à jour, {bilan.constats_modifies} constat(s) "
+        f"réattribué(s), {len(bilan.notes_modifiees)} note(s) modifiée(s)."
+    )
+    if bilan.scores_impossibles:
+        console.print(f"[yellow]{bilan.scores_impossibles} scan(s) sans catégorie évaluable.[/]")
+    if bilan.changements:
+        tableau = Table(title="Principales évolutions", expand=True)
+        tableau.add_column("Organisation ou domaine")
+        tableau.add_column("Avant", justify="right")
+        tableau.add_column("Après", justify="right")
+        tableau.add_column("Constats", justify="right")
+        tri = sorted(
+            bilan.changements,
+            key=lambda c: (-abs(c.nouveau_score - c.ancien_score), -c.constats_modifies),
+        )
+        for changement in tri[:25]:
+            nom = noms.get(changement.organisation_id or -1, changement.domaine)
+            provisoire = {True: " (prov.)", False: ""}
+            tableau.add_row(
+                nom,
+                f"{changement.ancien_score} {changement.ancienne_note}"
+                f"{provisoire[changement.ancien_provisoire]}",
+                f"{changement.nouveau_score} {changement.nouvelle_note}"
+                f"{provisoire[changement.nouveau_provisoire]}",
+                str(changement.constats_modifies),
+            )
+        console.print(tableau)
+    afficher_couverture(bilan.couverture_avant, "Couverture avant")
+    afficher_couverture(bilan.couverture_apres, "Couverture après")
+    if bilan.rapports_obsoletes:
+        console.print(
+            f"[yellow]{bilan.rapports_obsoletes} rapport(s) IA décrivent d'anciens constats"
+            f"{' et seront' if dry_run else ' :'} retirés du site jusqu'à leur régénération "
+            "(« bbcloud rapports generer --dry-run » pour estimer le coût).[/]"
+        )
+    if not dry_run and bilan.scans_modifies:
+        console.print("Pensez à exporter puis publier le site (« bbcloud publier »).")
+
+
+@app_scores.command("couverture")
+def scores_couverture() -> None:
+    """Part du poids des catégories encore inconnue sur l'ensemble de l'observatoire."""
+    from bleublanccloud.recalcul import couverture_observatoire
+
+    parametres = obtenir_parametres()
+    with Base(parametres.base_sqlite) as base:
+        couverture = couverture_observatoire(base, referentiels_par_defaut())
+    afficher_couverture(couverture, "Couverture de l'observatoire")
+
+
 @app_photos.command("maj")
 def photos_maj(
     forcer: Annotated[
@@ -742,19 +867,35 @@ def referentiels_maj() -> None:
 def referentiels_inconnus(
     limite: Annotated[int, typer.Option("--limite")] = 30,
 ) -> None:
-    """Hébergeurs, MX et DNS non identifiés les plus fréquents (pour enrichir le référentiel)."""
+    """Hébergeurs, MX et DNS non identifiés les plus fréquents (pour enrichir le référentiel).
+
+    Les adresses annoncées par un opérateur de transit (transitaires.yaml) sont listées à
+    part : elles ne désignent pas l'hébergeur réel et ne doivent pas être ajoutées comme
+    fournisseurs.
+    """
     parametres = obtenir_parametres()
+    asn_transit = [a for t in referentiels_par_defaut().transitaires.values() for a in t.asn]
     with Base(parametres.base_sqlite) as base:
-        statistiques = base.statistiques_inconnus(limite)
-    tableau = Table(
-        title="Preuves non attribuées (dernier scan de chaque organisation)", expand=True
+        statistiques = base.statistiques_inconnus(limite, asn_transit)
+        transit = base.statistiques_transit(asn_transit, limite)
+    titres = [
+        ("Fournisseurs non référencés (dernier scan de chaque organisation)", statistiques),
+        ("Origines indéterminées : réseaux de transit (à ne pas ajouter)", transit),
+    ]
+    for titre, lignes in titres:
+        if not lignes and titre.startswith("Origines"):
+            continue
+        tableau = Table(title=titre, expand=True)
+        tableau.add_column("Catégorie")
+        tableau.add_column("ASN ou domaine")
+        tableau.add_column("Organisations", justify="right")
+        for categorie, cle, nombre in lignes:
+            tableau.add_row(LIBELLES_CATEGORIES.get(categorie, categorie), cle, str(nombre))
+        console.print(tableau)
+    console.print(
+        "[dim]Après un ajout dans fournisseurs.yaml, « bbcloud scores recalculer » met à jour "
+        "les constats enregistrés sans rescanner.[/]"
     )
-    tableau.add_column("Catégorie")
-    tableau.add_column("ASN ou domaine")
-    tableau.add_column("Organisations", justify="right")
-    for categorie, cle, nombre in statistiques:
-        tableau.add_row(LIBELLES_CATEGORIES.get(categorie, categorie), cle, str(nombre))
-    console.print(tableau)
 
 
 @app_referentiels.command("verifier")
@@ -765,7 +906,7 @@ def referentiels_verifier() -> None:
     console.print(
         f"[green]✓[/] {len(referentiels.fournisseurs)} fournisseurs, "
         f"{len(referentiels.regles)} règles, {len(referentiels.alternatives)} alternatives, "
-        f"{len(referentiels.retraits)} retraits."
+        f"{len(referentiels.transitaires)} transitaires, {len(referentiels.retraits)} retraits."
     )
     console.print(f"{len(a_verifier)} fournisseurs marqués « a_verifier ».")
     for fournisseur in a_verifier:
