@@ -39,8 +39,6 @@ app_campagne = typer.Typer(help="Campagnes de scan.")
 app.add_typer(app_campagne, name="campagne")
 app_rapports = typer.Typer(help="Rapports rédigés par l'IA (Mistral).")
 app.add_typer(app_rapports, name="rapports")
-app_photos = typer.Typer(help="Photos des organisations (Wikimedia Commons, auto-hébergées).")
-app.add_typer(app_photos, name="photos")
 app_demandes = typer.Typer(
     help="Analyses sur demande (tickets « Analyser mon site » sur Codeberg)."
 )
@@ -227,8 +225,13 @@ def cibles_importer(
     types: Annotated[
         str, typer.Option("--types", help="Types à importer, séparés par des virgules.")
     ] = "commune,departement,region",
+    sans_contours: Annotated[
+        bool,
+        typer.Option("--sans-contours", help="Ne télécharge pas les contours des communes."),
+    ] = False,
 ) -> None:
-    """Importe communes, départements et régions (API Annuaire + geo.api.gouv.fr)."""
+    """Importe communes, départements et régions (API Annuaire + geo.api.gouv.fr), puis les
+    contours des communes qui n'en ont pas encore (carte de situation des fiches)."""
     from bleublanccloud.cibles.importation import (
         bilan_mairies,
         construire_organisations,
@@ -274,6 +277,56 @@ def cibles_importer(
     )
     if rapport.sans_site:
         console.print(f"[yellow]{len(rapport.sans_site)} sans site web[/] (non analysables).")
+    if "commune" in liste_types and not sans_contours:
+        # Étape secondaire : son échec n'annule pas l'import (les fiches gardent leur
+        # illustration, les contours seront redemandés au prochain import)
+        try:
+            _mettre_a_jour_contours(forcer=False)
+        except (httpx.HTTPError, OSError) as erreur:
+            console_erreur.print(f"[yellow]⚠ Contours des communes non mis à jour : {erreur}[/]")
+
+
+def _mettre_a_jour_contours(forcer: bool) -> None:
+    """Contours des communes cibles (geo.api.gouv.fr, un par code INSEE, simplifiés)."""
+    from datetime import UTC, datetime
+
+    from bleublanccloud.cibles.contours import mettre_a_jour_contours
+
+    parametres = obtenir_parametres()
+    with Base(parametres.base_sqlite) as base:
+        codes = base.codes_communes_cibles()
+
+        async def executer() -> Any:
+            async with httpx.AsyncClient(
+                headers={"User-Agent": parametres.user_agent},
+                timeout=parametres.delai_expiration_s * 3,
+                follow_redirects=False,
+            ) as client:
+                return await mettre_a_jour_contours(
+                    base, client, codes, datetime.now(UTC), forcer=forcer
+                )
+
+        bilan = asyncio.run(executer())
+    console.print(
+        f"[green]✓[/] Contours des communes : {bilan.telecharges} téléchargé(s), "
+        f"{bilan.deja_presents} déjà présent(s), {len(bilan.introuvables)} introuvable(s), "
+        f"{len(bilan.erreurs)} en erreur."
+    )
+    for ligne in (bilan.introuvables + bilan.erreurs)[:20]:
+        console.print(f"[yellow]•[/] {ligne}")
+    if bilan.erreurs:
+        console.print("Les contours manquants seront redemandés au prochain import.")
+
+
+@app_cibles.command("contours")
+def cibles_contours(
+    forcer: Annotated[
+        bool, typer.Option("--forcer", help="Retélécharge aussi les contours déjà présents.")
+    ] = False,
+) -> None:
+    """Télécharge le contour des communes cibles qui n'en ont pas encore (carte de situation
+    des fiches ; source geo.api.gouv.fr / IGN, licence Etalab 2.0)."""
+    _mettre_a_jour_contours(forcer=forcer)
 
 
 @app_cibles.command("lister")
@@ -502,9 +555,7 @@ def exporter(
 
     parametres = obtenir_parametres()
     with Base(parametres.base_sqlite) as base:
-        rapport = exporter_site(
-            base, referentiels_par_defaut(), vers, dossier_photos=parametres.photos
-        )
+        rapport = exporter_site(base, referentiels_par_defaut(), vers)
     console.print(
         f"[green]✓[/] {rapport.nombre_organisations} organisation(s) exportée(s) vers {vers}"
     )
@@ -632,50 +683,6 @@ def scores_couverture() -> None:
     with Base(parametres.base_sqlite) as base:
         couverture = couverture_observatoire(base, referentiels_par_defaut())
     afficher_couverture(couverture, "Couverture de l'observatoire")
-
-
-@app_photos.command("maj")
-def photos_maj(
-    forcer: Annotated[
-        bool, typer.Option("--forcer", help="Revérifie aussi les photos récentes.")
-    ] = False,
-    limite: Annotated[
-        int | None, typer.Option("--limite", help="Nombre maximal d'organisations.")
-    ] = None,
-) -> None:
-    """Cherche la photo de chaque organisation (Wikidata → Commons, licence libre) et la
-    télécharge pour la publier avec le site. Les photos de plus de 30 jours sont revérifiées."""
-    from datetime import UTC, datetime
-
-    from rich.markup import escape
-
-    from bleublanccloud.photos import mettre_a_jour_photos
-
-    parametres = obtenir_parametres()
-
-    async def executer() -> Any:
-        async with httpx.AsyncClient(
-            headers={"User-Agent": parametres.user_agent},
-            timeout=parametres.delai_expiration_s * 3,
-            follow_redirects=False,
-        ) as client:
-            return await mettre_a_jour_photos(
-                base, parametres.photos, client, datetime.now(UTC), forcer=forcer, limite=limite
-            )
-
-    with Base(parametres.base_sqlite) as base:
-        try:
-            bilan = asyncio.run(executer())
-        except httpx.HTTPError as erreur:
-            console_erreur.print(f"[red]Wikimedia injoignable : {escape(str(erreur))}[/]")
-            raise typer.Exit(code=1) from None
-    console.print(
-        f"[green]✓[/] {bilan.trouvees} photo(s) téléchargée(s) · {bilan.absentes} sans photo · "
-        f"{len(bilan.refusees)} refusée(s) (licence) · {len(bilan.erreurs)} en erreur · "
-        f"{bilan.inchangees} déjà à jour"
-    )
-    for ligne in (bilan.refusees + bilan.erreurs)[:20]:
-        console.print(f"[yellow]•[/] {escape(ligne)}")
 
 
 @app_demandes.command("traiter")

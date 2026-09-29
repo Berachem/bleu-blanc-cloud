@@ -12,7 +12,8 @@
     "types": "node scripts/generer-types.mjs",
     "carte": "node scripts/preparer-carte.mjs",
     "verifier": "astro check && tsc --noEmit -p tsconfig.json",
-    "verifier:externe": "node scripts/verifier-requetes.mjs"
+    "verifier:externe": "node scripts/verifier-requetes.mjs",
+    "test": "node --experimental-strip-types --no-warnings --test src/lib/*.test.ts"
   },
   "engines": {
     "node": ">=22.12.0"

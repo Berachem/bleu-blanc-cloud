@@ -1,0 +1,57 @@
+---
+// Carte de situation de la fiche (SVG calculé au build, voir lib/situation.ts). Fiche sur
+// demande ou contour manquant : illustration maison à la place.
+import EtoilesEurope from "./EtoilesEurope.astro";
+import { carteSituation, HAUTEUR, LARGEUR } from "../lib/situation";
+import type { OrganisationExport } from "../lib/types";
+interface Props {
+  organisation: OrganisationExport;
+}
+const { organisation } = Astro.props;
+const situation = carteSituation(organisation);
+const URL_LICENCE = "https://www.etalab.gouv.fr/licence-ouverte-open-licence/";
+---
+<figure class="carte-situation">
+  <div class="carte-situation__cadre">
+    {
+      situation ? (
+        <svg viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`} role="img" aria-label={situation.libelle}>
+          {situation.encart && (
+            <rect
+              class="situation-encart"
+              x={situation.encart.x}
+              y={situation.encart.y}
+              width={situation.encart.largeur}
+              height={situation.encart.hauteur}
+              rx="6"
+            />
+          )}
+          <path class="situation-fond" d={situation.fond} />
+          {situation.limites && <path class="situation-limites" d={situation.limites} />}
+          <path class={`situation-cible remplissage-${organisation.score.note}`} d={situation.cible} />
+          {situation.repere && (
+            <circle
+              class="situation-repere"
+              cx={situation.repere.cx}
+              cy={situation.repere.cy}
+              r={situation.repere.r}
+            />
+          )}
+        </svg>
+      ) : (
+        <div class="illustration-organisation" aria-hidden="true">
+          <EtoilesEurope />
+          <strong>{organisation.nom}</strong>
+        </div>
+      )
+    }
+  </div>
+  {
+    situation && (
+      <figcaption>
+        {situation.source === "communes" ? "Contours : geo.api.gouv.fr / IGN" : "Contours : IGN Admin Express"},{" "}
+        <a href={URL_LICENCE}>licence Etalab 2.0</a>
+      </figcaption>
+    )
+  }
+</figure>

@@ -8,7 +8,8 @@
 #   4. si les tests passent : régénération et publication du site à partir des données déjà
 #      en base (export → build → push), SANS relancer de scan. Si les référentiels ou le
 #      calcul du score ont changé, les scores sont d'abord recalculés depuis les constats
-#      enregistrés (bbcloud scores recalculer).
+#      enregistrés (bbcloud scores recalculer), et les contours de communes manquants sont
+#      téléchargés (carte de situation des fiches).
 #
 # Un verrou (flock) partagé avec la campagne hebdomadaire garantit que les deux ne tournent
 # jamais en même temps : si la campagne est en cours, la mise à jour est reportée à l'heure
@@ -110,6 +111,12 @@ principal() {
     info "▶ Référentiels ou calcul du score modifiés : recalcul des scores (aucun scan)"
     (cd "$RACINE/scanner" && uv run bbcloud scores recalculer)
   fi
+
+  # Contours des communes (carte de situation) : seuls les manquants sont demandés à
+  # geo.api.gouv.fr ; aucune requête s'ils sont tous en base. Un échec n'empêche rien : la
+  # fiche garde son illustration jusqu'au prochain essai.
+  (cd "$RACINE/scanner" && uv run bbcloud cibles contours) \
+    || avertir "Contours des communes non mis à jour (geo.api.gouv.fr injoignable ?)."
 
   info "▶ Régénération et publication du site (données existantes, aucun scan)"
   NPM_CI=0 EXIGER_DONNEES=1 "$RACINE/deploy/publier.sh"

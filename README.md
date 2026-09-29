@@ -62,12 +62,12 @@ npm run dev                   # http://localhost:4321
 | `bbcloud scanner berachem.dev [--json] [--enregistrer]` | scan unitaire et score |
 | `bbcloud cibles importer --population-min 10000` | communes, départements, régions |
 | `bbcloud cibles lister` · `bbcloud cibles ajouter` | liste, ajout manuel |
+| `bbcloud cibles contours [--forcer]` | contours des communes pour la carte de situation des fiches (geo.api.gouv.fr, licence Etalab 2.0 ; aussi fait par `cibles importer`) |
 | `bbcloud campagne lancer [--limite N] [--dry-run] [--oui]` | campagne de scan (confirmation demandée) |
 | `bbcloud rapports generer [--max N] [--dry-run]` | rapports IA avec estimation du coût |
 | `bbcloud exporter --vers ../site/public/donnees` | fichiers JSON du site |
 | `bbcloud schemas` | schéma JSON du contrat de données (types TypeScript : `npm run types`) |
 | `bbcloud demo` | données de démonstration fictives |
-| `bbcloud photos maj [--forcer] [--limite N]` | photos des communes (Wikidata → Wikimedia Commons, licences libres), auto-hébergées |
 | `bbcloud publier` | export + build + publication sur Codeberg Pages |
 | `bbcloud demandes traiter` · `bbcloud demandes lister` | analyses sur demande (tickets « Analyser mon site » sur Codeberg) |
 
@@ -79,6 +79,7 @@ npm run dev                   # http://localhost:4321
 | Typage (strict sur `analyse/`) | `uv run mypy` |
 | Tests et couverture | `uv run pytest --cov` (≈ 730 tests) |
 | Types du site | `npm run verifier` |
+| Tests du site (tracés des cartes) | `npm test` |
 | Aucune requête externe, aucun cookie | `npm run build && npm run verifier:externe` |
 
 Le workflow [`qualite.yml`](.github/workflows/qualite.yml) lance l'ensemble à chaque push.

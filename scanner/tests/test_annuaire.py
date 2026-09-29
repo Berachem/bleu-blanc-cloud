@@ -206,9 +206,17 @@ def test_cli_affiche_le_bilan(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     respx.get(URL_EXPORT, params={"where": 'pivot like "mairie"'}).mock(
         return_value=httpx.Response(200, text=REPONSE_GRENOBLE)
     )
+    # Contour de la commune importée (carte de situation), demandé par code INSEE
+    contour = respx.get(f"{URL_GEO}/communes/38185").mock(
+        return_value=httpx.Response(
+            200, text=(Path(__file__).parent / "fixtures/geo/commune-38185.json").read_text()
+        )
+    )
     resultat = CliRunner().invoke(app, ["cibles", "importer", "--types", "commune"])
     configuration.obtenir_parametres.cache_clear()
     assert resultat.exit_code == 0, resultat.output
     assert "Mairies trouvées dans l'annuaire : 1" in resultat.output
     assert "Mairies rapprochées d'une commune ≥ 10000 hab. : 1 / 1" in resultat.output
     assert "Mairies avec site web : 1" in resultat.output
+    assert contour.call_count == 1
+    assert "Contours des communes : 1 téléchargé(s)" in resultat.output

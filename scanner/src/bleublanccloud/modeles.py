@@ -418,18 +418,6 @@ class RapportIAExport(ModeleStrict):
     genere_le: datetime
 
 
-class PhotoExport(ModeleStrict):
-    """Photo de l'organisation (Wikimedia Commons), servie par le site lui-même."""
-
-    url: str = Field(description="Chemin sur le site, ex. /donnees/photos/grenoble-38185.jpg")
-    largeur: int
-    hauteur: int
-    auteur: str
-    licence: str
-    url_licence: str | None = None
-    url_source: str = Field(description="Page du fichier sur Wikimedia Commons.")
-
-
 class OrganisationExport(ModeleStrict):
     """organisations/{slug}.json"""
 
@@ -451,7 +439,13 @@ class OrganisationExport(ModeleStrict):
     fournisseurs: dict[str, FournisseurExport]
     rapport_ia: RapportIAExport | None = None
     alternatives: list[AlternativeExport] = Field(default_factory=list)
-    photo: PhotoExport | None = None
+    contour: list[list[list[list[float]]]] | None = Field(
+        default=None,
+        description=(
+            "Contour simplifié de la commune (coordonnées GeoJSON MultiPolygon, WGS 84) pour "
+            "la carte de situation. Source : geo.api.gouv.fr / IGN, licence Etalab 2.0."
+        ),
+    )
 
 
 class DepartementExport(ModeleStrict):

@@ -252,9 +252,10 @@ cd /opt/bleu-blanc-cloud/scanner
    uv run bbcloud rapports generer --max 3 --dry-run      # nombre d'appels et coût estimés
    uv run bbcloud rapports generer --max 3
    ```
-6. **Photos des communes** (Wikidata → Wikimedia Commons, licences libres uniquement ; téléchargées dans `donnees/photos/` puis publiées avec le site, auteur et licence affichés) :
+6. **Contours des communes** (carte de situation des fiches) : téléchargés automatiquement par `cibles importer`, un par code INSEE sur `geo.api.gouv.fr` (licence Etalab 2.0), simplifiés puis stockés en base ; seuls les manquants sont redemandés. Pour les (re)télécharger à part :
    ```bash
-   uv run bbcloud photos maj --limite 10
+   uv run bbcloud cibles contours            # contours manquants seulement
+   uv run bbcloud cibles contours --forcer   # tout retélécharger (rarement utile)
    ```
 7. **Aperçu local du site** (depuis ton réseau, sur `http://<IP-du-conteneur>:4321`) :
    ```bash
@@ -281,7 +282,7 @@ systemctl list-timers 'bbcloud*'
 
 - Lancer la chaîne complète tout de suite : `systemctl start bbcloud-campagne.service`
 - Suivre les journaux : `journalctl -u bbcloud-campagne -f`
-- La chaîne hebdomadaire (`deploy/campagne-hebdomadaire.sh`) : `uv sync` → `referentiels maj` → `cibles importer` → `campagne lancer --oui` → `photos maj` → `rapports generer --oui` (seulement si la clé Mistral est présente ; le cache évite tout appel si rien n'a changé) → `publier`.
+- La chaîne hebdomadaire (`deploy/campagne-hebdomadaire.sh`) : `uv sync` → `referentiels maj` → `cibles importer` (et contours des nouvelles communes) → `campagne lancer --oui` → `scores recalculer` → `rapports generer --oui` (seulement si la clé Mistral est présente ; le cache évite tout appel si rien n'a changé) → `publier`.
 - Durée indicative d'une campagne complète (~1 000 organisations, 1 requête/s/domaine, 10 scans en parallèle) : **30 à 60 minutes**.
 
 ### Mise à jour automatique du code (toutes les heures)
@@ -291,7 +292,7 @@ systemctl list-timers 'bbcloud*'
 1. fait un `git fetch` et **s'arrête aussitôt s'il n'y a rien de nouveau** sur `main` ;
 2. sinon : `git merge --ff-only`, `uv sync`, puis `npm ci` **seulement si** `site/package-lock.json` a changé ;
 3. lance les tests (`pytest`) ;
-4. **uniquement s'ils passent**, régénère et publie le site à partir des données déjà en base (export → build → push), **sans relancer de scan**. Tant que la base ne contient aucune organisation notée, rien n'est publié.
+4. **uniquement s'ils passent**, régénère et publie le site à partir des données déjà en base (export → build → push), **sans relancer de scan**. Auparavant, les scores sont recalculés si les référentiels ont changé (`scores recalculer`), et les contours de communes manquants sont téléchargés (`cibles contours`, aucune requête s'ils sont tous en base). Tant que la base ne contient aucune organisation notée, rien n'est publié.
 
 Si les tests échouent, le serveur **revient à la version précédente**, rien n'est publié, le service passe en échec (`systemctl --failed`) et ce commit n'est plus retenté : il faut pousser un correctif.
 
@@ -433,8 +434,9 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur
 | Message mentionnant l'**« old pages server »** | la requête arrive sur l'ancien serveur Pages v2, fermé aux nouveaux comptes. Causes possibles : CNAME encore à l'ancienne forme (`bleublanccloud-pages.<ton-pseudo>.codeberg.page.`) au lieu de `codeberg.page.` ; TXT `_git-pages-repository.bleublanccloud` absent ou différent de l'URL HTTPS exacte du dépôt (avec `.git`) ; aucun déploiement git-pages encore effectué (webhook absent, filtré sur une autre branche que `pages`, ou jamais déclenché). Corriger le DNS (`dig`, étape 4.2), vérifier le webhook, puis redéclencher un déploiement (étape 4.4). |
 | **`tls: internal error`** (ou `tlsv1 alert internal error` avec curl, `SSL_ERROR_INTERNAL_ERROR_ALERT` dans Firefox) | le certificat HTTPS n'est pas (encore) émis. Il n'est demandé qu'après un **déploiement réussi par le webhook** : vérifier dans *Livraisons récentes* qu'une livraison a abouti (code 2xx) avec une URL cible en **`http://`** ; sinon corriger l'URL et relancer la livraison. Vérifier aussi : CNAME en « DNS only » chez Cloudflare, TXT présent, enregistrements CAA autorisant `letsencrypt.org`. Puis patienter quelques minutes. Outil officiel de diagnostic : `curl -fsSL https://troubleshoot.codeberg.page/verify.sh -o verify.sh`, relire le script, puis `bash verify.sh bleublanccloud.berachem.dev`. |
 | Le site affiche encore une ancienne version | contrôler la branche `pages` du dépôt Codeberg et la dernière livraison du webhook (une URL cible restée en `http://` après l'émission du certificat peut faire échouer les livraisons : la passer en `https://`). |
-| `photos maj` : « Wikimedia injoignable » | réseau sortant filtré vers `query.wikidata.org`, `commons.wikimedia.org` ou `upload.wikimedia.org` : autoriser ces domaines. Les fiches gardent leurs photos précédentes (ou l'illustration de repli). |
-| Une commune n'a pas de photo | pas d'image principale (P18) sur Wikidata, ou licence non libre (refusée) : `bbcloud photos maj` affiche la raison. Ajouter une photo libre sur Wikidata la fera apparaître lors de la revérification (30 jours, ou `--forcer`). |
+| Une fiche de commune affiche l'illustration au lieu de la carte | contour pas encore téléchargé (serveur installé avant la carte de situation, ou `geo.api.gouv.fr` injoignable lors de l'import) : `uv run bbcloud cibles contours`, puis `uv run bbcloud publier`. Si le réseau sortant est filtré, autoriser `geo.api.gouv.fr`. |
+| `cibles contours` : « introuvable » | code INSEE absent de `geo.api.gouv.fr` (commune fusionnée ou supprimée) : relancer `cibles importer` pour mettre la liste des cibles à jour. |
+| Anciennes photos Wikimedia sur le serveur | elles ne servent plus (remplacées par la carte de situation). Nettoyage facultatif : `rm -rf /opt/bleu-blanc-cloud/donnees/photos` et `sqlite3 /opt/bleu-blanc-cloud/donnees/bleublanccloud.db "DROP TABLE IF EXISTS photos"` (faire une sauvegarde avant). |
 | `npm run build` échoue par manque de mémoire | passer le conteneur à 3–4 Go de RAM. |
 | Beaucoup de « robots.txt injoignable » | réseau sortant filtré ou sites en panne : le robot n'analyse alors aucune page, par respect de la RFC 9309. |
 | `bbcloud-demandes` : « CODEBERG_JETON absent du fichier .env » | normal tant que la fonctionnalité n'est pas configurée (étape 6 bis). |

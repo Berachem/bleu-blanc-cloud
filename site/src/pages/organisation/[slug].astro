@@ -1,6 +1,6 @@
 ---
 import JaugeNote from "../../composants/JaugeNote.astro";
-import PhotoOrganisation from "../../composants/PhotoOrganisation.astro";
+import CarteSituation from "../../composants/CarteSituation.astro";
 import BarreScore from "../../composants/BarreScore.astro";
 import MentionIA from "../../composants/MentionIA.astro";
 import Niveau from "../../composants/Niveau.astro";
@@ -106,7 +106,7 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
         </ul>
       </div>
       <div class="fiche-entete__visuel">
-        <PhotoOrganisation organisation={org} />
+        <CarteSituation organisation={org} />
       </div>
     </header>
 

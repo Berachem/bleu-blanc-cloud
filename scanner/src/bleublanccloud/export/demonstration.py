@@ -6,6 +6,7 @@ calculés par le vrai moteur de score à partir de constats synthétiques.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -18,7 +19,6 @@ from bleublanccloud.modeles import (
     InformationsComplementaires,
     Organisation,
     OrganisationExport,
-    PhotoExport,
     RapportIA,
     ResultatScan,
     RisqueIA,
@@ -29,17 +29,34 @@ from bleublanccloud.stockage.base import RapportEnregistre, ScanEnregistre
 
 DATE_DEMO = datetime(2026, 9, 27, 3, 0, tzinfo=UTC)
 
-# Illustration FICTIVE (SVG maison, site/public/demo) pour prévisualiser une fiche avec photo ;
-# en production, les photos viennent de Wikimedia Commons (bbcloud photos maj).
-PHOTO_DEMO = PhotoExport(
-    url="/demo/exempleville.svg",
-    largeur=1280,
-    hauteur=960,
-    auteur="Illustration fictive de démonstration",
-    licence="CC0",
-    url_licence="https://creativecommons.org/publicdomain/zero/1.0/deed.fr",
-    url_source="https://bleublanccloud.berachem.dev/a-propos/",
-)
+# Points situés à l'intérieur de chaque département de démonstration (longitude, latitude) :
+# ils servent à placer un contour de commune INVENTÉ sur la carte de situation des fiches.
+CENTRES_DEMO: dict[str, tuple[float, float]] = {
+    "06": (7.116, 43.938), "13": (5.086, 43.543), "21": (4.773, 47.426),
+    "2A": (8.987, 41.864), "31": (1.175, 43.359), "33": (-0.583, 44.839),
+    "35": (-1.634, 48.151), "44": (-1.679, 47.363), "59": (3.216, 50.449),
+    "63": (3.14, 45.726), "67": (7.552, 48.671), "69": (4.641, 45.871),
+    "971": (-61.68, 16.159),
+}  # fmt: skip
+
+
+def contour_demo(nom: str, departement: str) -> list[list[list[list[float]]]]:
+    """Contour FICTIF d'une commune de démonstration : polygone irrégulier d'environ 8 km de
+    large, déterministe (dérivé du nom), centré sur un point du département."""
+    lon0, lat0 = CENTRES_DEMO[departement]
+    graine = sum(ord(c) for c in nom)
+    points: list[list[float]] = []
+    for rang in range(18):
+        angle = 2 * math.pi * rang / 18
+        rayon = 0.04 * (
+            1 + 0.25 * math.sin(3 * angle + graine) + 0.12 * math.cos(5 * angle + graine / 7)
+        )
+        points.append([
+            round(lon0 + rayon * math.cos(angle) / math.cos(math.radians(lat0)), 4),
+            round(lat0 + rayon * math.sin(angle), 4),
+        ])  # fmt: skip
+    return [[[*points, points[0]]]]
+
 
 # Noms officiels des départements utilisés par la démonstration (placement sur la carte).
 DEPARTEMENTS_DEMO: dict[str, tuple[str, str]] = {
@@ -432,7 +449,11 @@ def generer_demonstration(referentiels: Referentiels) -> list[OrganisationExport
                 rapport,
                 noms_departements,
                 {},
-                photo=PHOTO_DEMO if profil.domaine == "exempleville.example" else None,
+                contour=(
+                    contour_demo(profil.nom, profil.departement)
+                    if profil.type == "commune" and profil.departement
+                    else None
+                ),
             )
         )
     return organisations

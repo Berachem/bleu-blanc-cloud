@@ -70,6 +70,9 @@
   --note-a: #2f5fd8;
   --carte-vide: #1b2350;
   --carte-contour: #0a0f24;
+  --situation-cadre: #0d1330;
+  --situation-terre: #222c5e;
+  --situation-trait: rgb(255 255 255 / 34%);
   --piste: rgb(255 255 255 / 10%);
   --ombre: 0 1px 0 rgb(255 255 255 / 5%) inset, 0 24px 48px -28px rgb(0 0 0 / 70%),
     0 10px 20px -12px rgb(0 0 0 / 45%);
@@ -96,6 +99,9 @@
   --note-a: #003399;
   --carte-vide: #e3e8f5;
   --carte-contour: #fafafd;
+  --situation-cadre: #eef1f9;
+  --situation-terre: #ffffff;
+  --situation-trait: rgb(14 19 48 / 32%);
   --piste: rgb(14 19 48 / 8%);
   --ombre: 0 24px 48px -30px rgb(14 19 48 / 28%), 0 8px 18px -12px rgb(14 19 48 / 14%);
   --ombre-forte: 0 40px 80px -30px rgb(14 19 48 / 32%);
@@ -1398,29 +1404,70 @@ select:focus {
   }
 }
 
-/* Photo de la commune (Wikimedia Commons, servie par le site) ou illustration */
-.photo-organisation {
+/* Carte de situation (SVG calculé au build) ou illustration pour les fiches sur demande */
+.carte-situation {
   margin: 0;
 }
-.photo-organisation__cadre {
+.carte-situation__cadre {
   position: relative;
   overflow: hidden;
   border-radius: 28px;
   aspect-ratio: 4 / 3;
-  background: var(--surface-2);
+  background: var(--situation-cadre);
   box-shadow: var(--ombre-forte);
 }
-.photo-organisation img {
+.carte-situation svg {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 1.2s var(--adouci);
 }
-.photo-organisation__cadre:hover img {
-  transform: scale(1.03);
+.carte-situation path {
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
-.photo-organisation figcaption {
+.situation-fond {
+  fill: var(--situation-terre);
+  stroke: var(--situation-trait);
+  stroke-width: 1;
+}
+.situation-limites {
+  fill: none;
+  stroke: var(--situation-trait);
+  stroke-width: 0.6;
+}
+.situation-encart {
+  fill: none;
+  stroke: var(--situation-trait);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+/* Bordure au contraste du texte : le territoire reste visible quelle que soit la note,
+   en mode sombre comme en mode clair (WCAG 1.4.11) */
+.situation-cible {
+  stroke: var(--texte);
+  stroke-width: 1.5;
+}
+.situation-repere {
+  fill: none;
+  stroke: var(--texte);
+  stroke-width: 1.5;
+}
+.situation-cible.remplissage-A {
+  fill: var(--carte-a);
+}
+.situation-cible.remplissage-B {
+  fill: var(--carte-b);
+}
+.situation-cible.remplissage-C {
+  fill: var(--carte-c);
+}
+.situation-cible.remplissage-D {
+  fill: var(--carte-d);
+}
+.situation-cible.remplissage-E {
+  fill: var(--carte-e);
+}
+.carte-situation figcaption {
   margin-top: 0.6rem;
   font-size: 0.8rem;
   color: var(--texte-secondaire);

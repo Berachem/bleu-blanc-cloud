@@ -24,7 +24,9 @@ uv sync --frozen --quiet
 echo "▶ Mise à jour des référentiels (plages IP, base ASN, RDAP, SecNumCloud)"
 uv run bbcloud referentiels maj || echo "⚠ mise à jour partielle des référentiels"
 
-echo "▶ Mise à jour des cibles (communes ≥ 10 000 hab., départements, régions)"
+# Les contours des nouvelles communes (carte de situation) sont téléchargés au passage ;
+# ceux déjà en base ne sont pas redemandés.
+echo "▶ Mise à jour des cibles (communes ≥ 10 000 hab., départements, régions) et des contours"
 uv run bbcloud cibles importer --population-min "${POPULATION_MIN:-10000}" || echo "⚠ import des cibles impossible : on garde la liste existante"
 
 echo "▶ Campagne de scan"
@@ -34,9 +36,6 @@ uv run bbcloud campagne lancer --oui
 # il est réattribué avec les référentiels du jour, comme les nouveaux scans.
 echo "▶ Recalcul des scores des scans plus anciens (référentiels à jour, aucun scan)"
 uv run bbcloud scores recalculer
-
-echo "▶ Photos des organisations (Wikimedia Commons, licences libres, auto-hébergées)"
-uv run bbcloud photos maj || echo "⚠ photos non mises à jour : les fiches gardent les précédentes"
 
 echo "▶ Rapports IA (seuls les constats modifiés entraînent un appel)"
 if grep -qE '^MISTRAL_API_KEY=.+' "$RACINE/.env" 2>/dev/null; then

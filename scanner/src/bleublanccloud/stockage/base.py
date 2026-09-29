@@ -95,28 +95,6 @@ class DemandeEnregistree:
     cloturee_le: datetime | None = None
 
 
-StatutPhoto = Literal["ok", "absente", "refusee", "erreur"]
-
-
-@dataclass
-class PhotoEnregistree:
-    """Photo d'une organisation (Wikimedia Commons) et sa provenance."""
-
-    organisation_id: int
-    statut: StatutPhoto
-    maj_le: datetime
-    wikidata: str | None = None
-    fichier: str | None = None
-    auteur: str | None = None
-    licence: str | None = None
-    url_licence: str | None = None
-    url_source: str | None = None
-    largeur: int | None = None
-    hauteur: int | None = None
-    chemin: str | None = None
-    motif: str | None = None
-
-
 def _date_ou_rien(valeur: str | None) -> datetime | None:
     return datetime.fromisoformat(valeur) if valeur else None
 
@@ -597,32 +575,47 @@ class Base:
         return [self._demande(ligne) for ligne in lignes]
 
     # ------------------------------------------------------------------ #
-    # Photos (Wikimedia Commons)
+    # Contours des communes (carte de situation)
     # ------------------------------------------------------------------ #
 
-    def photo(self, organisation_id: int) -> PhotoEnregistree | None:
-        ligne = self.connexion.execute(
-            "SELECT * FROM photos WHERE organisation_id = ?", (organisation_id,)
-        ).fetchone()
-        if ligne is None:
-            return None
-        champs = {k: ligne[k] for k in ligne.keys()}  # noqa: SIM118
-        champs["maj_le"] = datetime.fromisoformat(champs["maj_le"])
-        return PhotoEnregistree(**champs)
-
-    def enregistrer_photo(self, photo: PhotoEnregistree) -> None:
-        colonnes = [
-            "organisation_id", "statut", "wikidata", "fichier", "auteur", "licence",
-            "url_licence", "url_source", "largeur", "hauteur", "chemin", "motif", "maj_le",
-        ]  # fmt: skip
-        valeurs = {c: getattr(photo, c) for c in colonnes}
-        valeurs["maj_le"] = photo.maj_le.astimezone(UTC).isoformat()
+    def enregistrer_contour(
+        self,
+        code_commune: str,
+        coordonnees: list[list[list[list[float]]]],
+        source: str,
+        maj_le: datetime,
+    ) -> None:
+        """Enregistre (ou remplace) le contour simplifié d'une commune (MultiPolygon)."""
         with self.transaction() as c:
             c.execute(
-                f"INSERT OR REPLACE INTO photos ({', '.join(colonnes)}) "
-                f"VALUES ({', '.join(':' + c for c in colonnes)})",
-                valeurs,
+                "INSERT OR REPLACE INTO contours (code_commune, geometrie_json, source, maj_le) "
+                "VALUES (?, ?, ?, ?)",
+                (
+                    code_commune,
+                    json.dumps(coordonnees, separators=(",", ":")),
+                    source,
+                    maj_le.astimezone(UTC).isoformat(),
+                ),
             )
+
+    def contour_commune(self, code_commune: str) -> list[list[list[list[float]]]] | None:
+        ligne = self.connexion.execute(
+            "SELECT geometrie_json FROM contours WHERE code_commune = ?", (code_commune,)
+        ).fetchone()
+        return json.loads(ligne["geometrie_json"]) if ligne else None
+
+    def codes_communes_avec_contour(self) -> set[str]:
+        return {
+            r["code_commune"] for r in self.connexion.execute("SELECT code_commune FROM contours")
+        }
+
+    def codes_communes_cibles(self) -> list[str]:
+        """Codes INSEE des organisations de type commune (cibles de l'observatoire)."""
+        lignes = self.connexion.execute(
+            "SELECT DISTINCT code_commune FROM organisations "
+            "WHERE type = 'commune' AND code_commune IS NOT NULL ORDER BY code_commune"
+        )
+        return [r["code_commune"] for r in lignes]
 
     # ------------------------------------------------------------------ #
     # Rapports IA

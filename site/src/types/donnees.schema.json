@@ -770,16 +770,30 @@
           "title": "Alternatives",
           "type": "array"
         },
-        "photo": {
+        "contour": {
           "anyOf": [
             {
-              "$ref": "#/$defs/PhotoExport"
+              "items": {
+                "items": {
+                  "items": {
+                    "items": {
+                      "type": "number"
+                    },
+                    "type": "array"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              "type": "array"
             },
             {
               "type": "null"
             }
           ],
-          "default": null
+          "default": null,
+          "description": "Contour simplifié de la commune (coordonnées GeoJSON MultiPolygon, WGS 84) pour la carte de situation. Source : geo.api.gouv.fr / IGN, licence Etalab 2.0.",
+          "title": "Contour"
         }
       },
       "required": [
@@ -801,64 +815,9 @@
         "fournisseurs",
         "rapport_ia",
         "alternatives",
-        "photo"
+        "contour"
       ],
       "title": "OrganisationExport",
-      "type": "object"
-    },
-    "PhotoExport": {
-      "additionalProperties": false,
-      "description": "Photo de l'organisation (Wikimedia Commons), servie par le site lui-même.",
-      "properties": {
-        "url": {
-          "description": "Chemin sur le site, ex. /donnees/photos/grenoble-38185.jpg",
-          "title": "Url",
-          "type": "string"
-        },
-        "largeur": {
-          "title": "Largeur",
-          "type": "integer"
-        },
-        "hauteur": {
-          "title": "Hauteur",
-          "type": "integer"
-        },
-        "auteur": {
-          "title": "Auteur",
-          "type": "string"
-        },
-        "licence": {
-          "title": "Licence",
-          "type": "string"
-        },
-        "url_licence": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Url Licence"
-        },
-        "url_source": {
-          "description": "Page du fichier sur Wikimedia Commons.",
-          "title": "Url Source",
-          "type": "string"
-        }
-      },
-      "required": [
-        "url",
-        "largeur",
-        "hauteur",
-        "auteur",
-        "licence",
-        "url_licence",
-        "url_source"
-      ],
-      "title": "PhotoExport",
       "type": "object"
     },
     "RapportIA": {
