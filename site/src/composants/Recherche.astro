@@ -38,6 +38,8 @@ const { identifiant = "recherche" } = Astro.props;
   const normaliser = (texte: string) =>
     texte.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
+  // Relancé après chaque transition de page (View Transitions)
+  document.addEventListener("astro:page-load", () => {
   for (const bloc of document.querySelectorAll<HTMLElement>("[data-recherche]")) {
     const champ = bloc.querySelector("input");
     const liste = bloc.querySelector("ul");
@@ -60,7 +62,7 @@ const { identifiant = "recherche" } = Astro.props;
       if (trouvees.length === 0) {
         const vide = document.createElement("li");
         vide.className = "texte-secondaire petit";
-        vide.style.padding = "0.5rem";
+        vide.style.padding = "0.8rem 1rem";
         vide.textContent = "Aucune organisation trouvée. ";
         const demande = document.createElement("a");
         demande.href = bloc.dataset.urlDemande ?? "/methodologie/";
@@ -91,4 +93,5 @@ const { identifiant = "recherche" } = Astro.props;
       }
     });
   }
+  });
 </script>

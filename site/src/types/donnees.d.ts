@@ -77,6 +77,7 @@ export interface OrganisationExport {
   };
   rapport_ia: RapportIAExport | null;
   alternatives: AlternativeExport[];
+  photo: PhotoExport | null;
 }
 /**
  * Score global et détail par catégorie.
@@ -271,6 +272,27 @@ export interface AlternativeExport {
   types_service: string[];
   description_courte: string;
   a_verifier: boolean;
+}
+/**
+ * Photo de l'organisation (Wikimedia Commons), servie par le site lui-même.
+ *
+ * This interface was referenced by `DonneesSite`'s JSON-Schema
+ * via the `definition` "PhotoExport".
+ */
+export interface PhotoExport {
+  /**
+   * Chemin sur le site, ex. /donnees/photos/grenoble-38185.jpg
+   */
+  url: string;
+  largeur: number;
+  hauteur: number;
+  auteur: string;
+  licence: string;
+  url_licence: string | null;
+  /**
+   * Page du fichier sur Wikimedia Commons.
+   */
+  url_source: string;
 }
 /**
  * Élément de departements.json (agrégats).

@@ -14,6 +14,9 @@ const TYPES = {
   ".json": "application/json",
   ".svg": "image/svg+xml",
   ".woff2": "font/woff2",
+  ".jpg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
   ".txt": "text/plain",
 };
 const CANDIDATS_CHROMIUM = [
@@ -58,6 +61,12 @@ const externes = [];
 let pagesVisitees = 0;
 for (const schema of ["light", "dark"]) {
   const contexte = await navigateur.newContext({ colorScheme: schema, viewport: { width: 390, height: 844 } });
+  // Le thème du site est choisi par le bouton (mémorisé), pas par la préférence système
+  await contexte.addInitScript((theme) => {
+    try {
+      localStorage.setItem("bbc-theme", theme);
+    } catch {}
+  }, schema);
   const onglet = await contexte.newPage();
   onglet.on("request", (requete) => {
     if (!requete.url().startsWith(origine) && !requete.url().startsWith("data:")) {

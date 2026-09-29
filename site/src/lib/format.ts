@@ -84,6 +84,18 @@ export function pourcentage(part: number, total: number): string {
   return `${nombre((part / total) * 100)} %`;
 }
 
+// Phrase courte affichée sous la note d'une fiche (ton factuel, jamais accusateur)
+export const DESCRIPTIONS_COURTES_NOTES: Record<string, string> = {
+  A: "Empreinte externe reposant sur des fournisseurs européens.",
+  B: "Dépendance limitée à des fournisseurs extra-européens.",
+  C: "Dépendance notable à des fournisseurs extra-européens.",
+  D: "Forte dépendance à des fournisseurs soumis au Cloud Act.",
+  E: "Très forte dépendance à des fournisseurs soumis au Cloud Act.",
+};
+export function descriptionCourteNote(note: string): string {
+  return DESCRIPTIONS_COURTES_NOTES[note] ?? "";
+}
+
 export function descriptionNote(note: string): string {
   return `Note ${note} sur une échelle de A (meilleure) à E`;
 }

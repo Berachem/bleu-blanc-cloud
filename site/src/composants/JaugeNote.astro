@@ -1,0 +1,33 @@
+---
+// Jauge circulaire du score (0 à 100), animée à l'apparition. Sans JavaScript ou avec
+// prefers-reduced-motion, elle s'affiche directement remplie.
+interface Props {
+  score: number;
+  note: string;
+  taille?: "petite" | "grande";
+  provisoire?: boolean;
+}
+const { score, note, taille = "petite", provisoire = false } = Astro.props;
+const libelle = `Score ${score} sur 100, note ${note}${provisoire ? " (provisoire)" : ""}`;
+---
+<div
+  class:list={["jauge", `jauge-${note}`, taille === "grande" && "jauge--grande"]}
+  style={`--valeur: ${Math.max(0, Math.min(100, score))}`}
+  role="img"
+  aria-label={libelle}
+>
+  <svg viewBox="0 0 64 64" focusable="false" aria-hidden="true">
+    <circle class="jauge__piste" cx="32" cy="32" r="27" pathLength="100"></circle>
+    <circle class="jauge__valeur" cx="32" cy="32" r="27" pathLength="100"></circle>
+  </svg>
+  {
+    taille === "grande" ? (
+      <span class="jauge__texte" aria-hidden="true">
+        <span class="jauge__note">{note}</span>
+        <span class="jauge__score">{score}/100</span>
+      </span>
+    ) : (
+      <span class="jauge__texte" aria-hidden="true">{score}</span>
+    )
+  }
+</div>

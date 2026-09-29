@@ -15,12 +15,15 @@ const groupes = ORDRE.map((categorie) => ({
   description="Référentiel public d'alternatives françaises et européennes aux services numériques extra-européens, par catégorie."
 >
   <div class="conteneur">
-    <h1>Alternatives françaises et européennes</h1>
-    <p class="texte-secondaire">
-      Ce référentiel public est la seule source d'alternatives utilisée dans les rapports. Il est
-      indicatif : aucun fournisseur ne rémunère le projet, et chaque fiche est sourcée. Le choix
-      d'une solution dépend des besoins, des marchés publics et des compétences disponibles.
-    </p>
+    <header class="entete-page">
+      <span class="surtitre">Pistes</span>
+      <h1>Alternatives françaises et européennes</h1>
+      <p class="chapeau">
+        Ce référentiel public est la seule source d'alternatives utilisée dans les rapports. Il est
+        indicatif : aucun fournisseur ne rémunère le projet, et chaque fiche est sourcée. Le choix
+        d'une solution dépend des besoins, des marchés publics et des compétences disponibles.
+      </p>
+    </header>
     <nav aria-label="Catégories">
       <ul>
         {groupes.map((g) => <li><a href={`#${g.categorie}`}>{LIBELLES_CATEGORIES[g.categorie]}</a></li>)}
@@ -32,7 +35,7 @@ const groupes = ORDRE.map((categorie) => ({
           <h2 id={`titre-${groupe.categorie}`}>{LIBELLES_CATEGORIES[groupe.categorie]}</h2>
           <ul class="grille">
             {groupe.alternatives.map((alternative) => (
-              <li class="carte" id={alternative.id}>
+              <li class="carte carte--survol apparition" id={alternative.id}>
                 <h3 style="margin-top: 0">
                   <a href={alternative.url} rel="noopener">{alternative.nom}</a>
                 </h3>

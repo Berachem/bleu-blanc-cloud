@@ -769,6 +769,17 @@
           },
           "title": "Alternatives",
           "type": "array"
+        },
+        "photo": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PhotoExport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -789,9 +800,65 @@
         "informations",
         "fournisseurs",
         "rapport_ia",
-        "alternatives"
+        "alternatives",
+        "photo"
       ],
       "title": "OrganisationExport",
+      "type": "object"
+    },
+    "PhotoExport": {
+      "additionalProperties": false,
+      "description": "Photo de l'organisation (Wikimedia Commons), servie par le site lui-même.",
+      "properties": {
+        "url": {
+          "description": "Chemin sur le site, ex. /donnees/photos/grenoble-38185.jpg",
+          "title": "Url",
+          "type": "string"
+        },
+        "largeur": {
+          "title": "Largeur",
+          "type": "integer"
+        },
+        "hauteur": {
+          "title": "Hauteur",
+          "type": "integer"
+        },
+        "auteur": {
+          "title": "Auteur",
+          "type": "string"
+        },
+        "licence": {
+          "title": "Licence",
+          "type": "string"
+        },
+        "url_licence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url Licence"
+        },
+        "url_source": {
+          "description": "Page du fichier sur Wikimedia Commons.",
+          "title": "Url Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "largeur",
+        "hauteur",
+        "auteur",
+        "licence",
+        "url_licence",
+        "url_source"
+      ],
+      "title": "PhotoExport",
       "type": "object"
     },
     "RapportIA": {

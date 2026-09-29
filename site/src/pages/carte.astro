@@ -13,13 +13,18 @@ const avecDonnees = liste.filter((d) => d.nombre_organisations > 0);
   description="Note moyenne de dépendance numérique des organisations publiques par département, avec tableau accessible."
 >
   <div class="conteneur">
-    <h1>Carte des départements</h1>
-    <p class="texte-secondaire">
-      Chaque département est coloré selon la note moyenne des organisations analysées.
-      Sélectionnez un département pour afficher ses organisations. Les mêmes données sont
-      présentées dans le tableau ci-dessous.
-    </p>
-    <CarteFrance departements={liste} titre="Note moyenne par département (carte interactive)" />
+    <header class="entete-page">
+      <span class="surtitre">Observatoire</span>
+      <h1>Carte des départements</h1>
+      <p class="chapeau">
+        Chaque département est coloré selon la note moyenne des organisations analysées.
+        Sélectionnez un département pour afficher ses organisations. Les mêmes données sont
+        présentées dans le tableau ci-dessous.
+      </p>
+    </header>
+    <div class="cadre-carte cadre-carte--large">
+      <CarteFrance departements={liste} titre="Note moyenne par département (carte interactive)" />
+    </div>
 
     <section class="section" aria-labelledby="titre-tableau">
       <h2 id="titre-tableau">Tableau des départements</h2>

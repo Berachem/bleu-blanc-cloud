@@ -8,7 +8,10 @@ import Base from "../mises-en-page/Base.astro";
   description="Qui porte Bleu Blanc Cloud, pourquoi, comment : un observatoire indépendant, open source et sans lien avec l'État."
 >
   <div class="conteneur prose">
-    <h1>À propos</h1>
+    <header class="entete-page">
+      <span class="surtitre">Le projet</span>
+      <h1>À propos</h1>
+    </header>
 
     <h2>Pourquoi cet observatoire&nbsp;?</h2>
     <p>
@@ -69,6 +72,10 @@ import Base from "../mises-en-page/Base.astro";
     <ul>
       <li>Site statique hébergé en Allemagne par Codeberg, association à but non lucratif.</li>
       <li>Aucun cookie, aucun traceur, aucune mesure d'audience, aucune ressource externe.</li>
+      <li>
+        Photos des communes auto-hébergées : récupérées sur Wikimedia Commons par notre serveur,
+        elles sont servies par le site lui-même, sans aucune requête vers un service tiers.
+      </li>
       <li>Police <strong>Luciole</strong> (conçue en France pour les personnes malvoyantes), auto-hébergée.</li>
       <li>Rapports rédigés avec <strong>Mistral</strong>, entreprise française.</li>
     </ul>
@@ -95,6 +102,12 @@ import Base from "../mises-en-page/Base.astro";
       <li>
         Données des organisations : API Annuaire de l'administration (Service-Public) et
         API Découpage administratif (geo.api.gouv.fr), Licence Ouverte.
+      </li>
+      <li>
+        Photos des communes, départements et régions : <a href="https://commons.wikimedia.org">Wikimedia Commons</a>
+        (image principale de <a href="https://www.wikidata.org">Wikidata</a>), sous licences libres
+        uniquement (CC0, domaine public, CC BY, CC BY-SA) ; l'auteur et la licence sont indiqués
+        sous chaque photo.
       </li>
     </ul>
   </div>

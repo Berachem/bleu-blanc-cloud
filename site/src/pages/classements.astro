@@ -25,12 +25,15 @@ const parType = types.map((type) => {
   description="Toutes les organisations analysées, filtrables par département et par type, avec leur score de dépendance numérique."
 >
   <div class="conteneur">
-    <h1>Classements</h1>
-    <p class="texte-secondaire">
-      Un score élevé indique une empreinte numérique externe reposant sur des fournisseurs
-      européens. Un score faible signale une dépendance, pas une faute : consultez chaque fiche
-      pour les preuves et les pistes d'alternatives.
-    </p>
+    <header class="entete-page">
+      <span class="surtitre">Observatoire</span>
+      <h1>Classements</h1>
+      <p class="chapeau">
+        Un score élevé indique une empreinte numérique externe reposant sur des fournisseurs
+        européens. Un score faible signale une dépendance, pas une faute : consultez chaque fiche
+        pour les preuves et les pistes d'alternatives.
+      </p>
+    </header>
 
     <section class="section" aria-labelledby="titre-organisations">
       <h2 id="titre-organisations">Organisations</h2>
@@ -54,7 +57,7 @@ const parType = types.map((type) => {
           </select>
         </div>
       </form>
-      <p class="texte-secondaire petit" aria-live="polite" data-compteur>
+      <p class="texte-secondaire petit" aria-live="polite" data-nombre-resultats>
         {entrees.length} organisation(s)
       </p>
       <div class="carte" data-aucun-resultat hidden>
@@ -132,9 +135,11 @@ const parType = types.map((type) => {
 </Base>
 
 <script>
+  // Relancé après chaque transition de page (View Transitions)
+  document.addEventListener("astro:page-load", () => {
   const formulaire = document.querySelector<HTMLFormElement>("[data-filtres]");
   const tableau = document.querySelector<HTMLTableElement>("[data-tableau]");
-  const compteur = document.querySelector<HTMLElement>("[data-compteur]");
+  const compteur = document.querySelector<HTMLElement>("[data-nombre-resultats]");
   if (formulaire && tableau && compteur) {
     const corps = tableau.tBodies[0];
     const lignes = [...corps.rows];
@@ -181,4 +186,5 @@ const parType = types.map((type) => {
       });
     }
   }
+  });
 </script>

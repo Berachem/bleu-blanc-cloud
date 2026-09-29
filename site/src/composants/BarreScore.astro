@@ -5,16 +5,16 @@ interface Props {
   categorie: ScoreCategorie;
 }
 const { categorie } = Astro.props;
-const valeur = categorie.score ?? 0;
 const EXCLUSIONS: Record<string, string> = {
   inconnu: "fournisseur non identifié",
   indisponible: "données indisponibles",
   sans_objet: "sans objet",
 };
 const exclusion = categorie.exclusion ? EXCLUSIONS[categorie.exclusion] : null;
+const valeur = categorie.score ?? 0;
 const note = valeur >= 85 ? "A" : valeur >= 70 ? "B" : valeur >= 50 ? "C" : valeur >= 30 ? "D" : "E";
 ---
-<li>
+<li class="barre">
   <div class="barre__entete">
     <span>{categorie.libelle}</span>
     <span>
@@ -31,7 +31,7 @@ const note = valeur >= 85 ? "A" : valeur >= 70 ? "B" : valeur >= 50 ? "C" : vale
         aria-valuenow={valeur}
         aria-label={`${categorie.libelle} : ${nombre(valeur)} sur 100`}
       >
-        <div class={`barre__remplissage note-${note}`} style={`width: ${Math.max(valeur, 2)}%`} />
+        <div class={`barre__remplissage note-${note}`} style={`--valeur: ${valeur}`} />
       </div>
     )
   }

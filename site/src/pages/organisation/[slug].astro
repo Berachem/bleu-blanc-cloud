@@ -1,5 +1,6 @@
 ---
-import BadgeNote from "../../composants/BadgeNote.astro";
+import JaugeNote from "../../composants/JaugeNote.astro";
+import PhotoOrganisation from "../../composants/PhotoOrganisation.astro";
 import BarreScore from "../../composants/BarreScore.astro";
 import MentionIA from "../../composants/MentionIA.astro";
 import Niveau from "../../composants/Niveau.astro";
@@ -11,6 +12,7 @@ import {
   LIBELLES_TYPES,
   LIBELLES_TYPES_SERVICE,
   date,
+  descriptionCourteNote as descriptionNote,
   nombre,
   pays,
 } from "../../lib/format";
@@ -69,23 +71,37 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
         <li aria-current="page">{org.nom}</li>
       </ol>
     </nav>
-
     <header class="fiche-entete">
-      <BadgeNote note={score.note} taille="grand" provisoire={score.provisoire} />
       <div>
+        <span class="surtitre">
+          {LIBELLES_TYPES[org.type]}{org.departement_nom && ` · ${org.departement_nom}`}
+        </span>
         <h1>{org.nom}</h1>
-        <p class="score-global">
-          Score : {score.score_global}/100{score.provisoire && " (note provisoire)"}
-        </p>
+        <div class="fiche-entete__score">
+          <JaugeNote
+            score={score.score_global}
+            note={score.note}
+            taille="grande"
+            provisoire={score.provisoire}
+          />
+          <div>
+            <p class="score-global">
+              Note {score.note} · {score.score_global}/100{score.provisoire && " (provisoire)"}
+            </p>
+            <p class="texte-secondaire" style="margin: 0; max-width: 28rem">{descriptionNote(score.note)}</p>
+            {score.provisoire && <p style="margin: 0.6rem 0 0"><span class="etiquette-provisoire">note provisoire</span></p>}
+          </div>
+        </div>
         <ul class="meta-fiche">
-          <li>{LIBELLES_TYPES[org.type]}</li>
-          {org.departement_nom && <li>{org.departement_nom} ({org.departement})</li>}
           {org.population != null && <li>{nombre(org.population)} habitants</li>}
-          <li>Domaine : <code>{org.domaine}</code></li>
+          <li>Domaine : <span class="mono">{org.domaine}</span></li>
           <li>Scan du {date(org.date_scan)}</li>
           <li>Couverture : {nombre(score.couverture)} %</li>
           <li><a href="/methodologie/">Méthodologie v{score.version_methodo}</a></li>
         </ul>
+      </div>
+      <div class="fiche-entete__visuel">
+        <PhotoOrganisation organisation={org} />
       </div>
     </header>
 
@@ -122,7 +138,7 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
       </p>
     </div>
 
-    <div class="colonnes section">
+    <div class="colonnes section apparition">
       <section aria-labelledby="titre-detail">
         <h2 id="titre-detail">Détail par catégorie</h2>
         <ul class="barres">
@@ -171,7 +187,7 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
       </section>
     </div>
 
-    <section class="section" aria-labelledby="titre-constats">
+    <section class="section apparition" aria-labelledby="titre-constats">
       <h2 id="titre-constats">Constats et preuves</h2>
       <p class="texte-secondaire">
         Chaque point retiré est rattaché à un constat. Dépliez un constat pour voir la preuve
@@ -231,7 +247,7 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
 
     {
       org.rapport_ia && (
-        <section class="section" aria-labelledby="titre-rapport">
+        <section class="section apparition" aria-labelledby="titre-rapport">
           <h2 id="titre-rapport">Synthèse et plan d'action</h2>
           <MentionIA />
           <div class="carte prose">
@@ -289,7 +305,7 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
 
     {
       org.alternatives.length > 0 && (
-        <section class="section" aria-labelledby="titre-alternatives">
+        <section class="section apparition" aria-labelledby="titre-alternatives">
           <h2 id="titre-alternatives">Pistes : alternatives françaises et européennes</h2>
           <p class="texte-secondaire">
             Suggestions issues de notre <a href="/alternatives/">référentiel public</a>, sans
@@ -297,7 +313,7 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
           </p>
           <ul class="grille">
             {org.alternatives.map((alternative) => (
-              <li class="carte" id={`alt-${alternative.id}`}>
+              <li class="carte carte--survol" id={`alt-${alternative.id}`}>
                 <h3 style="margin-top: 0">
                   <a href={alternative.url} rel="noopener">{alternative.nom}</a>
                 </h3>
