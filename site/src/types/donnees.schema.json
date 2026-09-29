@@ -1,0 +1,989 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DonneesSite",
+  "description": "Contrat de données entre le scanner Bleu Blanc Cloud et le site.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/MetaExport"
+    },
+    "index": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EntreeIndex"
+      }
+    },
+    "organisation": {
+      "$ref": "#/$defs/OrganisationExport"
+    },
+    "departements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/DepartementExport"
+      }
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AlternativeExport"
+      }
+    }
+  },
+  "required": [
+    "meta",
+    "index",
+    "organisation",
+    "departements",
+    "alternatives"
+  ],
+  "$defs": {
+    "AlternativeExport": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "nom": {
+          "title": "Nom",
+          "type": "string"
+        },
+        "pays": {
+          "title": "Pays",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "categorie": {
+          "enum": [
+            "hebergement",
+            "messagerie",
+            "dns",
+            "suites_saas",
+            "services_tiers",
+            "mesure_audience"
+          ],
+          "title": "Categorie",
+          "type": "string"
+        },
+        "types_service": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Types Service",
+          "type": "array"
+        },
+        "description_courte": {
+          "title": "Description Courte",
+          "type": "string"
+        },
+        "a_verifier": {
+          "title": "A Verifier",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "nom",
+        "pays",
+        "url",
+        "categorie",
+        "types_service",
+        "description_courte",
+        "a_verifier"
+      ],
+      "title": "AlternativeExport",
+      "type": "object"
+    },
+    "Constat": {
+      "additionalProperties": false,
+      "description": "Élément observé lors d'un scan, rattaché si possible à un fournisseur.",
+      "properties": {
+        "sonde": {
+          "description": "Sonde à l'origine du constat : dns, ip, http, tls, rdap.",
+          "title": "Sonde",
+          "type": "string"
+        },
+        "categorie": {
+          "enum": [
+            "hebergement",
+            "messagerie",
+            "dns",
+            "suites_saas",
+            "services_tiers",
+            "mesure_audience",
+            "informatif"
+          ],
+          "title": "Categorie",
+          "type": "string"
+        },
+        "cle": {
+          "description": "Nature du constat, ex. « mx », « script_tiers ».",
+          "title": "Cle",
+          "type": "string"
+        },
+        "valeur": {
+          "description": "Valeur observée, ex. un nom d'hôte MX ou un service.",
+          "title": "Valeur",
+          "type": "string"
+        },
+        "fournisseur_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Identifiant dans fournisseurs.yaml, None si inconnu.",
+          "title": "Fournisseur Id"
+        },
+        "niveau": {
+          "default": "inconnu",
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "inconnu"
+          ],
+          "title": "Niveau",
+          "type": "string"
+        },
+        "preuve": {
+          "additionalProperties": true,
+          "description": "Élément brut qui justifie le constat.",
+          "title": "Preuve",
+          "type": "object"
+        }
+      },
+      "required": [
+        "sonde",
+        "categorie",
+        "cle",
+        "valeur"
+      ],
+      "title": "Constat",
+      "type": "object"
+    },
+    "DepartementExport": {
+      "additionalProperties": false,
+      "description": "Élément de departements.json (agrégats).",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "nom": {
+          "title": "Nom",
+          "type": "string"
+        },
+        "region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region"
+        },
+        "nombre_organisations": {
+          "title": "Nombre Organisations",
+          "type": "integer"
+        },
+        "score_moyen": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score Moyen"
+        },
+        "note_moyenne": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Note Moyenne"
+        },
+        "repartition_notes": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Repartition Notes",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "nom",
+        "nombre_organisations",
+        "score_moyen",
+        "note_moyenne",
+        "repartition_notes"
+      ],
+      "title": "DepartementExport",
+      "type": "object"
+    },
+    "EntreeIndex": {
+      "additionalProperties": false,
+      "description": "Élément de index.json (liste légère).",
+      "properties": {
+        "slug": {
+          "title": "Slug",
+          "type": "string"
+        },
+        "nom": {
+          "title": "Nom",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "commune",
+            "departement",
+            "region",
+            "autre"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "departement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Departement"
+        },
+        "departement_nom": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Departement Nom"
+        },
+        "region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region"
+        },
+        "population": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Population"
+        },
+        "domaine": {
+          "title": "Domaine",
+          "type": "string"
+        },
+        "score": {
+          "title": "Score",
+          "type": "integer"
+        },
+        "note": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ],
+          "title": "Note",
+          "type": "string"
+        },
+        "date_scan": {
+          "format": "date-time",
+          "title": "Date Scan",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slug",
+        "nom",
+        "type",
+        "departement",
+        "domaine",
+        "score",
+        "note",
+        "date_scan"
+      ],
+      "title": "EntreeIndex",
+      "type": "object"
+    },
+    "EtapeMigration": {
+      "additionalProperties": false,
+      "properties": {
+        "ordre": {
+          "title": "Ordre",
+          "type": "integer"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "alternative_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Doit exister dans alternatives.yaml.",
+          "title": "Alternative Id"
+        },
+        "effort": {
+          "enum": [
+            "faible",
+            "moyen",
+            "eleve"
+          ],
+          "title": "Effort",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ordre",
+        "action",
+        "effort"
+      ],
+      "title": "EtapeMigration",
+      "type": "object"
+    },
+    "FournisseurExport": {
+      "additionalProperties": false,
+      "description": "Résumé d'un fournisseur cité dans une page organisation.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "nom": {
+          "title": "Nom",
+          "type": "string"
+        },
+        "pays_siege": {
+          "title": "Pays Siege",
+          "type": "string"
+        },
+        "maison_mere": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Maison Mere"
+        },
+        "pays_maison_mere": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pays Maison Mere"
+        },
+        "soumis_cloud_act": {
+          "title": "Soumis Cloud Act",
+          "type": "boolean"
+        },
+        "autre_loi_extraterritoriale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Autre Loi Extraterritoriale"
+        },
+        "propose_offre_secnumcloud": {
+          "title": "Propose Offre Secnumcloud",
+          "type": "boolean"
+        },
+        "niveau": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "inconnu"
+          ],
+          "title": "Niveau",
+          "type": "string"
+        },
+        "a_verifier": {
+          "title": "A Verifier",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "nom",
+        "pays_siege",
+        "maison_mere",
+        "pays_maison_mere",
+        "soumis_cloud_act",
+        "propose_offre_secnumcloud",
+        "niveau",
+        "a_verifier"
+      ],
+      "title": "FournisseurExport",
+      "type": "object"
+    },
+    "InformationsComplementaires": {
+      "additionalProperties": false,
+      "description": "Informations affichées mais non notées en v1.",
+      "properties": {
+        "bureau_enregistrement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bureau Enregistrement"
+        },
+        "autorite_certification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Autorite Certification"
+        },
+        "fournisseurs_secnumcloud": {
+          "description": "Fournisseurs détectés qui proposent une offre qualifiée SecNumCloud.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Fournisseurs Secnumcloud",
+          "type": "array"
+        },
+        "domaines_tiers_inconnus": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Domaines Tiers Inconnus",
+          "type": "array"
+        }
+      },
+      "title": "InformationsComplementaires",
+      "type": "object"
+    },
+    "Justification": {
+      "additionalProperties": false,
+      "description": "Rattache une perte de points à un constat (index dans la liste des constats).",
+      "properties": {
+        "constat_index": {
+          "title": "Constat Index",
+          "type": "integer"
+        },
+        "points_retires": {
+          "description": "Points retirés au score de la catégorie (sur 100).",
+          "title": "Points Retires",
+          "type": "number"
+        },
+        "raison": {
+          "title": "Raison",
+          "type": "string"
+        }
+      },
+      "required": [
+        "constat_index",
+        "points_retires",
+        "raison"
+      ],
+      "title": "Justification",
+      "type": "object"
+    },
+    "MetaExport": {
+      "additionalProperties": false,
+      "description": "meta.json",
+      "properties": {
+        "date_campagne": {
+          "format": "date-time",
+          "title": "Date Campagne",
+          "type": "string"
+        },
+        "date_export": {
+          "format": "date-time",
+          "title": "Date Export",
+          "type": "string"
+        },
+        "version_methodo": {
+          "title": "Version Methodo",
+          "type": "string"
+        },
+        "nombre_organisations": {
+          "title": "Nombre Organisations",
+          "type": "integer"
+        },
+        "donnees_demonstration": {
+          "default": false,
+          "title": "Donnees Demonstration",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "date_campagne",
+        "date_export",
+        "version_methodo",
+        "nombre_organisations"
+      ],
+      "title": "MetaExport",
+      "type": "object"
+    },
+    "OrganisationExport": {
+      "additionalProperties": false,
+      "description": "organisations/{slug}.json",
+      "properties": {
+        "slug": {
+          "title": "Slug",
+          "type": "string"
+        },
+        "nom": {
+          "title": "Nom",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "commune",
+            "departement",
+            "region",
+            "autre"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "departement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Departement"
+        },
+        "departement_nom": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Departement Nom"
+        },
+        "region": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region"
+        },
+        "region_nom": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region Nom"
+        },
+        "population": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Population"
+        },
+        "site_web": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Site Web"
+        },
+        "domaine": {
+          "title": "Domaine",
+          "type": "string"
+        },
+        "date_scan": {
+          "format": "date-time",
+          "title": "Date Scan",
+          "type": "string"
+        },
+        "statut_scan": {
+          "title": "Statut Scan",
+          "type": "string"
+        },
+        "score": {
+          "$ref": "#/$defs/Score"
+        },
+        "constats": {
+          "items": {
+            "$ref": "#/$defs/Constat"
+          },
+          "title": "Constats",
+          "type": "array"
+        },
+        "informations": {
+          "$ref": "#/$defs/InformationsComplementaires"
+        },
+        "fournisseurs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/FournisseurExport"
+          },
+          "title": "Fournisseurs",
+          "type": "object"
+        },
+        "rapport_ia": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RapportIAExport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "alternatives": {
+          "items": {
+            "$ref": "#/$defs/AlternativeExport"
+          },
+          "title": "Alternatives",
+          "type": "array"
+        }
+      },
+      "required": [
+        "slug",
+        "nom",
+        "type",
+        "departement",
+        "domaine",
+        "date_scan",
+        "statut_scan",
+        "score",
+        "constats",
+        "informations",
+        "fournisseurs"
+      ],
+      "title": "OrganisationExport",
+      "type": "object"
+    },
+    "RapportIA": {
+      "additionalProperties": false,
+      "properties": {
+        "resume_decideur": {
+          "description": "5 phrases maximum, sans jargon.",
+          "title": "Resume Decideur",
+          "type": "string"
+        },
+        "points_forts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Points Forts",
+          "type": "array"
+        },
+        "risques": {
+          "items": {
+            "$ref": "#/$defs/RisqueIA"
+          },
+          "title": "Risques",
+          "type": "array"
+        },
+        "plan_migration": {
+          "items": {
+            "$ref": "#/$defs/EtapeMigration"
+          },
+          "title": "Plan Migration",
+          "type": "array"
+        }
+      },
+      "required": [
+        "resume_decideur",
+        "points_forts",
+        "risques",
+        "plan_migration"
+      ],
+      "title": "RapportIA",
+      "type": "object"
+    },
+    "RapportIAExport": {
+      "additionalProperties": false,
+      "properties": {
+        "contenu": {
+          "$ref": "#/$defs/RapportIA"
+        },
+        "modele": {
+          "title": "Modele",
+          "type": "string"
+        },
+        "version_invite": {
+          "title": "Version Invite",
+          "type": "string"
+        },
+        "genere_le": {
+          "format": "date-time",
+          "title": "Genere Le",
+          "type": "string"
+        }
+      },
+      "required": [
+        "contenu",
+        "modele",
+        "version_invite",
+        "genere_le"
+      ],
+      "title": "RapportIAExport",
+      "type": "object"
+    },
+    "RisqueIA": {
+      "additionalProperties": false,
+      "properties": {
+        "titre": {
+          "title": "Titre",
+          "type": "string"
+        },
+        "explication": {
+          "title": "Explication",
+          "type": "string"
+        },
+        "gravite": {
+          "enum": [
+            "faible",
+            "moyenne",
+            "elevee"
+          ],
+          "title": "Gravite",
+          "type": "string"
+        }
+      },
+      "required": [
+        "titre",
+        "explication",
+        "gravite"
+      ],
+      "title": "RisqueIA",
+      "type": "object"
+    },
+    "Score": {
+      "additionalProperties": false,
+      "description": "Score global et détail par catégorie.",
+      "properties": {
+        "score_global": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Score Global",
+          "type": "integer"
+        },
+        "note": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ],
+          "title": "Note",
+          "type": "string"
+        },
+        "version_methodo": {
+          "title": "Version Methodo",
+          "type": "string"
+        },
+        "detail": {
+          "items": {
+            "$ref": "#/$defs/ScoreCategorie"
+          },
+          "title": "Detail",
+          "type": "array"
+        },
+        "categories_non_evaluables": {
+          "items": {
+            "enum": [
+              "hebergement",
+              "messagerie",
+              "dns",
+              "suites_saas",
+              "services_tiers",
+              "mesure_audience"
+            ],
+            "type": "string"
+          },
+          "title": "Categories Non Evaluables",
+          "type": "array"
+        }
+      },
+      "required": [
+        "score_global",
+        "note",
+        "version_methodo",
+        "detail"
+      ],
+      "title": "Score",
+      "type": "object"
+    },
+    "ScoreCategorie": {
+      "additionalProperties": false,
+      "description": "Score d'une catégorie de la méthodologie.",
+      "properties": {
+        "categorie": {
+          "enum": [
+            "hebergement",
+            "messagerie",
+            "dns",
+            "suites_saas",
+            "services_tiers",
+            "mesure_audience"
+          ],
+          "title": "Categorie",
+          "type": "string"
+        },
+        "libelle": {
+          "title": "Libelle",
+          "type": "string"
+        },
+        "poids": {
+          "description": "Poids nominal de la catégorie (sur 100).",
+          "title": "Poids",
+          "type": "number"
+        },
+        "poids_effectif": {
+          "description": "Poids après redistribution (sur 100).",
+          "title": "Poids Effectif",
+          "type": "number"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Score sur 100, None si non évaluable.",
+          "title": "Score"
+        },
+        "evaluable": {
+          "title": "Evaluable",
+          "type": "boolean"
+        },
+        "points_perdus_global": {
+          "default": 0.0,
+          "description": "Points retirés au score global par cette catégorie.",
+          "title": "Points Perdus Global",
+          "type": "number"
+        },
+        "explication": {
+          "title": "Explication",
+          "type": "string"
+        },
+        "justifications": {
+          "items": {
+            "$ref": "#/$defs/Justification"
+          },
+          "title": "Justifications",
+          "type": "array"
+        }
+      },
+      "required": [
+        "categorie",
+        "libelle",
+        "poids",
+        "poids_effectif",
+        "score",
+        "evaluable",
+        "explication"
+      ],
+      "title": "ScoreCategorie",
+      "type": "object"
+    }
+  }
+}

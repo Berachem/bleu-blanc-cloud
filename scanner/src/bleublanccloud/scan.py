@@ -8,6 +8,7 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from typing import Literal
 from urllib.parse import urlsplit
 
 import httpx
@@ -274,11 +275,15 @@ async def scanner_domaine(entree: str, contexte: ContexteScan) -> ResultatScan:
     )
     aucune_donnee = not donnees_dns.resolutions and not donnees_dns.ns and not donnees_dns.mx
     statut = "erreur" if aucune_donnee else ("partiel" if erreurs else "termine")
+    sondes_reussies: list[Literal["dns", "http"]] = [] if aucune_donnee else ["dns"]
+    if donnees_http is not None and donnees_http.html_pages:
+        sondes_reussies.append("http")
     return ResultatScan(
         domaine=cible.domaine,
         debut=debut,
         fin=datetime.now(UTC),
         statut=statut,
+        sondes_reussies=sondes_reussies,
         constats=constats,
         informations=informations,
         erreurs=erreurs,

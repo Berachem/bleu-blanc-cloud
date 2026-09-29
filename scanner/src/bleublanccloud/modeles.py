@@ -194,6 +194,20 @@ class Retrait(ModeleStrict):
     motif: str | None = None
 
 
+class Organisation(ModeleStrict):
+    """Organisation analysée (commune, département, région…)."""
+
+    slug: str
+    nom: str
+    type: TypeOrganisation
+    code_commune: str | None = None
+    departement: str | None = None
+    region: str | None = None
+    population: int | None = None
+    site_web: str | None = None
+    source: str
+
+
 # --------------------------------------------------------------------------- #
 # Résultats de scan et score
 # --------------------------------------------------------------------------- #
@@ -218,6 +232,10 @@ class ResultatScan(ModeleStrict):
     debut: datetime
     fin: datetime
     statut: Literal["termine", "partiel", "erreur", "exclu"]
+    sondes_reussies: list[Literal["dns", "http"]] = Field(
+        default_factory=list,
+        description="Sondes ayant fourni des données (conditionne les catégories évaluables).",
+    )
     constats: list[Constat] = Field(default_factory=list)
     informations: InformationsComplementaires = Field(default_factory=InformationsComplementaires)
     erreurs: list[str] = Field(default_factory=list)
@@ -240,6 +258,9 @@ class ScoreCategorie(ModeleStrict):
     poids_effectif: float = Field(description="Poids après redistribution (sur 100).")
     score: float | None = Field(description="Score sur 100, None si non évaluable.")
     evaluable: bool
+    points_perdus_global: float = Field(
+        default=0.0, description="Points retirés au score global par cette catégorie."
+    )
     explication: str
     justifications: list[Justification] = Field(default_factory=list)
 

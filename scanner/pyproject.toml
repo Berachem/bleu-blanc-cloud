@@ -63,6 +63,10 @@ ignore = [
     "ASYNC240",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# Données de démonstration : lignes longues assumées pour la lisibilité des profils
+"src/bleublanccloud/export/demonstration.py" = ["E501"]
+
 [tool.mypy]
 python_version = "3.12"
 plugins = ["pydantic.mypy"]
