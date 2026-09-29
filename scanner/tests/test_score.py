@@ -1,4 +1,4 @@
-"""Tests de la méthodologie de score (version 1.0) et de ses cas limites."""
+"""Tests de la méthodologie de score (version 1.2) et de ses cas limites."""
 
 from __future__ import annotations
 
@@ -9,7 +9,9 @@ from bleublanccloud.analyse.score import (
     VERSION_METHODO,
     ScoreImpossible,
     arrondir,
+    calculer_couverture,
     calculer_score,
+    est_provisoire,
     note_depuis_score,
 )
 from bleublanccloud.modeles import Constat, Niveau
@@ -217,3 +219,75 @@ def test_arrondi_commercial() -> None:
 
 def test_poids_totaux() -> None:
     assert sum(POIDS.values()) == 100
+
+
+# --------------------------------------------------------------------------- #
+# Couverture et note provisoire (v1.2)
+# --------------------------------------------------------------------------- #
+
+
+def test_version_1_2() -> None:
+    assert VERSION_METHODO == "1.2"
+
+
+def test_couverture_complete() -> None:
+    score = calculer_score(socle_a())
+    assert (score.couverture, score.provisoire) == (100.0, False)
+    assert all(d.exclusion is None for d in score.detail)
+
+
+def test_hebergement_inconnu_non_provisoire() -> None:
+    # 25 % du poids inconnu : sous le seuil de 30 %
+    constats = [c("hebergement", "inconnu"), *socle_a()[1:]]
+    score = calculer_score(constats)
+    assert detail(score, "hebergement").exclusion == "inconnu"
+    assert (score.couverture, score.provisoire) == (75.0, False)
+
+
+def test_hebergement_et_dns_inconnus_provisoire() -> None:
+    # 25 + 10 = 35 % du poids inconnu : note provisoire
+    constats = [c("hebergement", "inconnu"), c("messagerie", "A", cle="mx"), c("dns", "inconnu")]
+    score = calculer_score(constats)
+    assert (score.couverture, score.provisoire) == (65.0, True)
+    assert score.note == "A"  # la note reste calculée, seulement marquée provisoire
+
+
+def test_site_injoignable_provisoire() -> None:
+    # Services tiers + mesure d'audience indisponibles (25 %) + DNS inconnu (10 %)
+    constats = [c("hebergement", "A"), c("messagerie", "A", cle="mx"), c("dns", "inconnu")]
+    score = calculer_score(constats, sondes_reussies=("dns",))
+    assert detail(score, "services_tiers").exclusion == "indisponible"
+    assert score.provisoire
+
+
+def test_messagerie_sans_objet_hors_couverture() -> None:
+    # Pas de MX : la catégorie est sans objet et sort du poids applicable (75)
+    constats = [c("hebergement", "A"), c("dns", "A", cle="ns")]
+    score = calculer_score(constats)
+    assert detail(score, "messagerie").exclusion == "sans_objet"
+    assert (score.couverture, score.provisoire) == (100.0, False)
+    # Hébergement inconnu en plus : 25 / 75 = 33 % → provisoire
+    score = calculer_score([c("hebergement", "inconnu"), c("dns", "A", cle="ns")])
+    assert score.couverture == pytest.approx(66.7)
+    assert score.provisoire
+
+
+def test_seuil_strictement_superieur_a_30() -> None:
+    assert not est_provisoire(70.0)
+    assert est_provisoire(69.9)
+
+
+def test_calculer_couverture_cas_limites() -> None:
+    assert calculer_couverture({"hebergement": None, "messagerie": "sans_objet"}) == 100.0
+    assert calculer_couverture({"messagerie": "sans_objet"}) == 0.0
+    assert calculer_couverture({"hebergement": "indisponible", "dns": None}) == pytest.approx(28.6)
+
+
+def test_ancien_score_sans_couverture_reste_lisible() -> None:
+    from bleublanccloud.modeles import Score
+
+    ancien = calculer_score(socle_a()).model_dump(exclude={"couverture", "provisoire"})
+    for categorie in ancien["detail"]:
+        del categorie["exclusion"]
+    relu = Score.model_validate(ancien)
+    assert (relu.couverture, relu.provisoire) == (100.0, False)

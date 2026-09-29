@@ -287,3 +287,29 @@ def test_cli_export_demo_schemas(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     assert resultat_export.exit_code == 0, resultat_export.output
     assert "0 organisation" in resultat_export.output
     configuration.obtenir_parametres.cache_clear()
+
+
+def test_exporter_recalcule_un_score_d_une_ancienne_methodologie(
+    base: Base, referentiels: Referentiels, tmp_path: Path
+) -> None:
+    org_id = base.enregistrer_organisation(organisation())
+    res = resultat()
+    res.constats = [
+        Constat(sonde="ip", categorie="hebergement", cle="hebergeur", valeur="192.0.2.1",
+                niveau="inconnu"),
+        Constat(sonde="dns", categorie="messagerie", cle="mx", valeur="mx.ovh.net",
+                fournisseur_id="ovhcloud", niveau="A"),
+        Constat(sonde="dns", categorie="dns", cle="ns", valeur="ns.inconnu.fr", niveau="inconnu"),
+    ]  # fmt: skip
+    ancien = calculer_score(res.constats).model_copy(update={"version_methodo": "1.0"})
+    ancien = ancien.model_copy(update={"provisoire": False, "couverture": 100.0})
+    base.enregistrer_scan(org_id, res, ancien, "1.0")
+
+    exporter(base, referentiels, tmp_path)
+    detail = OrganisationExport.model_validate_json(
+        (tmp_path / "organisations" / "exempleville-99999.json").read_text()
+    )
+    assert detail.score.version_methodo == VERSION_METHODO
+    assert detail.score.provisoire and detail.score.couverture == 65.0
+    [entree] = json.loads((tmp_path / "index.json").read_text())
+    assert entree["note_provisoire"] is True

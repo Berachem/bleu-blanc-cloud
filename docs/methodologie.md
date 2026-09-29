@@ -1,10 +1,10 @@
 ---
 titre: Méthodologie
-version: "1.0"
+version: "1.2"
 date: 2026-09-29
 ---
 
-# Méthodologie — version 1.0
+# Méthodologie — version 1.2
 
 Bleu Blanc Cloud mesure la **dépendance numérique externe** des organisations publiques françaises vis-à-vis de fournisseurs extra-européens, en particulier ceux soumis au **Cloud Act** américain ou à une loi extraterritoriale équivalente.
 
@@ -39,7 +39,10 @@ Chaque élément observé est rattaché, lorsque c'est possible, à un fournisse
 
 1. **nom d'hôte** (alias CNAME, serveur MX ou NS, domaine d'une ressource) comparé aux motifs connus du fournisseur ;
 2. **plages IP publiées** par les grands clouds (AWS, Microsoft Azure, Google, Cloudflare, Oracle, Fastly, GitHub) ;
-3. **système autonome (ASN)** de l'adresse IP.
+3. **système autonome (ASN)** de l'adresse IP ;
+4. à défaut, **nom du système autonome** : un réseau dont le nom désigne un organisme public français (« Ville de… », « Métropole », « Conseil départemental », « Groupement d'intérêt public »…) est classé **auto-hébergement public**, niveau A. Cette présomption n'est appliquée que si le pays connu de l'adresse IP est la France, jamais pour une société commerciale (SA, SAS, SARL…), et elle est signalée comme telle dans la preuve. Les réseaux publics confirmés (ex. Ville de Paris, Ville et Eurométropole de Strasbourg, GIP Gigalis) sont recensés par leur ASN.
+
+Un serveur de messagerie ou DNS qui n'est pas reconnu par son nom est résolu en adresses IP : toutes ses adresses (IPv4 puis IPv6) sont essayées jusqu'à identifier l'opérateur, et une requête DNS en échec est relancée une fois. Un serveur MX qui ne résout vers **aucune adresse** est signalé (il ne peut pas recevoir de courriel) et reste « inconnu ».
 
 Chaque fait du référentiel (pays du siège, maison mère, exposition au Cloud Act, offre SecNumCloud) est accompagné d'au moins une source. Tant qu'un fait n'a pas été relu, il est marqué « à vérifier ».
 
@@ -85,6 +88,16 @@ Une catégorie est exclue du calcul, et son poids redistribué proportionnelleme
 
 Lorsque plusieurs serveurs MX ou NS existent, les serveurs non identifiés sont ignorés et le moins bon niveau parmi les serveurs identifiés est retenu.
 
+### Couverture et note provisoire
+
+La **couverture** est la part du poids applicable qui a réellement pu être évaluée. Le poids applicable est la somme des poids des catégories, sans les catégories **sans objet** (par exemple la messagerie lorsqu'aucun MX n'est déclaré).
+
+> Couverture = poids des catégories évaluées ÷ poids applicable
+
+Si **plus de 30 %** du poids applicable est non évalué (fournisseur inconnu ou données indisponibles), autrement dit si la couverture est inférieure à 70 %, la note est affichée comme **provisoire**. Elle reste calculée de la même façon, mais elle repose sur trop peu d'éléments pour être considérée comme stable et pourra évoluer lorsque les fournisseurs manquants seront identifiés.
+
+Exemples : hébergeur inconnu seul (25 %) → couverture 75 %, note définitive ; hébergeur et DNS inconnus (35 %) → couverture 65 %, note provisoire ; sans MX, hébergeur inconnu (25 sur 75) → couverture 67 %, note provisoire.
+
 ### Détection des services
 
 Les services tiers, suites SaaS et outils de mesure d'audience sont détectés par un [référentiel de règles](https://github.com/Berachem/bleu-blanc-cloud/blob/main/scanner/src/bleublanccloud/referentiels/regles_detection.yaml) (domaines des scripts et ressources, noms de cookies, enregistrements TXT et SPF, serveurs MX, extraits de code). Chaque service n'est compté qu'une seule fois. Les ressources tierces qui ne correspondent à aucune règle mais proviennent d'un fournisseur connu sont regroupées en un service par fournisseur ; les ressources de la plateforme qui héberge le site lui-même ne sont pas comptées comme des services tiers.
@@ -120,6 +133,8 @@ Bleu Blanc Cloud est un projet personnel et bénévole, **sans aucun lien avec l
 
 | Version | Date | Modifications |
 |---|---|---|
+| 1.2 | 2026-09-29 | Indicateur de **couverture** : note affichée comme **provisoire** si plus de 30 % du poids applicable n'a pas pu être évalué (fournisseur inconnu ou données indisponibles) ; les catégories sans objet sont exclues de ce calcul. |
+| 1.1 | 2026-09-29 | Attribution : réseaux d'organismes publics français classés A « auto-hébergement public » (ASN recensés, ou présomption sur le nom du système autonome) ; résolution des serveurs MX et NS plus robuste (toutes les adresses IPv4 et IPv6, nouvelle tentative en cas d'échec DNS, signalement des MX sans adresse) ; 15 fournisseurs ajoutés au référentiel après la première campagne de test. Les règles de calcul du score sont inchangées. |
 | 1.0 | 2026-09-29 | Première version publique. Précisions : catégorie messagerie sans objet en l'absence de MX ; catégories web non évaluables si le site n'a pas pu être analysé ; niveau C plafonnant l'hébergement derrière un CDN extra-européen ; mesure d'audience B = 70, C = 40. |
 
 Toute modification des règles de calcul donne lieu à une nouvelle version, enregistrée avec chaque score.

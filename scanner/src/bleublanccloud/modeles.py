@@ -34,6 +34,9 @@ Categorie = Literal[
 ]
 """Catégorie d'un constat : une catégorie notée, ou « informatif » (affiché, non noté)."""
 
+MotifExclusion = Literal["inconnu", "indisponible", "sans_objet"]
+"""Raison pour laquelle une catégorie n'est pas évaluée."""
+
 TypeOrganisation = Literal["commune", "departement", "region", "autre"]
 
 
@@ -103,6 +106,20 @@ class Fournisseur(ModeleStrict):
     )
     plages_cdn: bool = Field(
         default=False, description="Toutes les plages IP publiées par ce fournisseur sont un CDN."
+    )
+    motifs_nom_as: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Regex sur le nom du système autonome (comparé sans accents, en minuscules), "
+            "pour les réseaux sans ASN recensé (ex. organismes publics)."
+        ),
+    )
+    exclusions_nom_as: list[str] = Field(
+        default_factory=list, description="Regex de noms d'AS écartés malgré un motif positif."
+    )
+    pays_nom_as: list[str] = Field(
+        default_factory=list,
+        description="Si renseigné, le pays connu de l'IP doit en faire partie (motifs_nom_as).",
     )
     en_tetes_origine: dict[str, str] = Field(
         default_factory=dict,
@@ -260,6 +277,13 @@ class ScoreCategorie(ModeleStrict):
     poids_effectif: float = Field(description="Poids après redistribution (sur 100).")
     score: float | None = Field(description="Score sur 100, None si non évaluable.")
     evaluable: bool
+    exclusion: MotifExclusion | None = Field(
+        default=None,
+        description=(
+            "Raison de l'exclusion d'une catégorie non évaluable : fournisseur inconnu, "
+            "données indisponibles ou catégorie sans objet (ex. aucun MX)."
+        ),
+    )
     points_perdus_global: float = Field(
         default=0.0, description="Points retirés au score global par cette catégorie."
     )
@@ -275,6 +299,16 @@ class Score(ModeleStrict):
     version_methodo: str
     detail: list[ScoreCategorie]
     categories_non_evaluables: list[CategorieScore] = Field(default_factory=list)
+    couverture: float = Field(
+        default=100.0,
+        ge=0,
+        le=100,
+        description="Part du poids applicable effectivement évaluée (en %), depuis la v1.2.",
+    )
+    provisoire: bool = Field(
+        default=False,
+        description="Note provisoire : plus de 30 % du poids applicable est inconnu (v1.2).",
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -332,6 +366,7 @@ class EntreeIndex(ModeleStrict):
     domaine: str
     score: int
     note: Note
+    note_provisoire: bool = False
     date_scan: datetime
 
 

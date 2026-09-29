@@ -57,9 +57,10 @@ const alternativesParId = new Map(org.alternatives.map((a) => [a.id, a]));
 const fournisseurs = Object.values(org.fournisseurs);
 const infos = org.informations;
 const sujetCorrection = encodeURIComponent(`Bleu Blanc Cloud — correction : ${org.nom} (${org.domaine})`);
-const description = `${org.nom} : note ${score.note}, score ${score.score_global}/100. Dépendance numérique vis-à-vis des fournisseurs extra-européens et pistes d'alternatives.`;
+const mentionProvisoire = score.provisoire ? " (provisoire)" : "";
+const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score ${score.score_global}/100. Dépendance numérique vis-à-vis des fournisseurs extra-européens et pistes d'alternatives.`;
 ---
-<Base titre={`${org.nom} — note ${score.note}`} description={description}>
+<Base titre={`${org.nom} — note ${score.note}${mentionProvisoire}`} description={description}>
   <div class="conteneur">
     <nav class="fil-ariane" aria-label="Fil d'Ariane">
       <ol>
@@ -70,20 +71,36 @@ const description = `${org.nom} : note ${score.note}, score ${score.score_global
     </nav>
 
     <header class="fiche-entete">
-      <BadgeNote note={score.note} taille="grand" />
+      <BadgeNote note={score.note} taille="grand" provisoire={score.provisoire} />
       <div>
         <h1>{org.nom}</h1>
-        <p class="score-global">Score : {score.score_global}/100</p>
+        <p class="score-global">
+          Score : {score.score_global}/100{score.provisoire && " (note provisoire)"}
+        </p>
         <ul class="meta-fiche">
           <li>{LIBELLES_TYPES[org.type]}</li>
           {org.departement_nom && <li>{org.departement_nom} ({org.departement})</li>}
           {org.population != null && <li>{nombre(org.population)} habitants</li>}
           <li>Domaine : <code>{org.domaine}</code></li>
           <li>Scan du {date(org.date_scan)}</li>
+          <li>Couverture : {nombre(score.couverture)} %</li>
           <li><a href="/methodologie/">Méthodologie v{score.version_methodo}</a></li>
         </ul>
       </div>
     </header>
+
+    {
+      score.provisoire && (
+        <div class="alerte alerte--attention">
+          <p>
+            <strong>Note provisoire.</strong> Seuls {nombre(score.couverture)} % du poids
+            applicable ont pu être évalués : plus de 30 % correspondent à des fournisseurs non
+            encore identifiés ou à des données indisponibles. La note pourra évoluer lorsque ces
+            éléments seront identifiés. <a href="/methodologie/#couverture-et-note-provisoire">En savoir plus</a>
+          </p>
+        </div>
+      )
+    }
 
     <div class="alerte">
       <p>

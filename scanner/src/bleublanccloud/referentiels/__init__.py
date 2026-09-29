@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -68,6 +69,22 @@ def charger_referentiels(dossier: Path = DOSSIER_REFERENTIELS) -> Referentiels:
     _verifier_unicite([a.id for a in alternatives], "alternatives.yaml")
 
     index_fournisseurs = {f.id: f for f in fournisseurs}
+    proprietaires_asn: dict[int, str] = {}
+    for fournisseur in fournisseurs:
+        for asn in [*fournisseur.asn, *fournisseur.asn_cdn]:
+            if asn in proprietaires_asn and proprietaires_asn[asn] != fournisseur.id:
+                raise ErreurReferentiel(
+                    f"AS{asn} rattaché à deux fournisseurs : "
+                    f"{proprietaires_asn[asn]} et {fournisseur.id}."
+                )
+            proprietaires_asn[asn] = fournisseur.id
+        for motif in [*fournisseur.motifs_nom_as, *fournisseur.exclusions_nom_as]:
+            try:
+                re.compile(motif)
+            except re.error as erreur:
+                raise ErreurReferentiel(
+                    f"Fournisseur {fournisseur.id} : motif de nom d'AS invalide « {motif} »."
+                ) from erreur
     for regle in regles:
         if regle.fournisseur_id is not None and regle.fournisseur_id not in index_fournisseurs:
             raise ErreurReferentiel(

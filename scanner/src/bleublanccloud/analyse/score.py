@@ -1,4 +1,4 @@
-"""Calcul du score (0 à 100) et de la note (A à E) — méthodologie version 1.0.
+"""Calcul du score (0 à 100) et de la note (A à E) — méthodologie version 1.2.
 
 Voir docs/methodologie.md. Toute modification de ce fichier qui change un résultat doit
 s'accompagner d'une nouvelle version de la méthodologie.
@@ -6,7 +6,7 @@ s'accompagner d'une nouvelle version de la méthodologie.
 
 from __future__ import annotations
 
-from collections.abc import Collection, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Final
 
@@ -15,13 +15,14 @@ from bleublanccloud.modeles import (
     CategorieScore,
     Constat,
     Justification,
+    MotifExclusion,
     Niveau,
     Note,
     Score,
     ScoreCategorie,
 )
 
-VERSION_METHODO: Final = "1.0"
+VERSION_METHODO: Final = "1.2"
 
 POIDS: Final[dict[CategorieScore, float]] = {
     "hebergement": 25,
@@ -43,6 +44,8 @@ POINTS_NIVEAUX: Final[dict[Niveau, float]] = {"A": 100, "B": 70, "C": 40, "D": 0
 PENALITE_SUITES_SAAS: Final = 25.0
 PENALITE_SERVICES_TIERS: Final = 20.0
 SEUILS_NOTES: Final[tuple[tuple[float, Note], ...]] = ((85, "A"), (70, "B"), (50, "C"), (30, "D"))
+SEUIL_PROVISOIRE: Final = 30.0
+"""Au-delà de cette part (en %) du poids applicable non évaluée, la note est provisoire."""
 
 # Sondes dont dépend chaque catégorie : sans données, la catégorie n'est pas évaluable.
 SONDES_REQUISES: Final[dict[CategorieScore, str]] = {
@@ -64,6 +67,7 @@ class _Evaluation:
     score: float | None
     explication: str
     justifications: list[Justification] = field(default_factory=list)
+    exclusion: MotifExclusion | None = None
 
 
 def note_depuis_score(score: float) -> Note:
@@ -84,17 +88,22 @@ def _indexes(constats: Sequence[Constat], categorie: CategorieScore) -> list[int
 
 
 def _evaluer_par_niveau(
-    constats: Sequence[Constat], indexes: list[int], sujet: str, absence: str
+    constats: Sequence[Constat],
+    indexes: list[int],
+    sujet: str,
+    absence: str,
+    exclusion_absence: MotifExclusion,
 ) -> _Evaluation:
     """Hébergement, messagerie, DNS : niveau du fournisseur (le moins bon si plusieurs)."""
     if not indexes:
-        return _Evaluation(None, absence)
+        return _Evaluation(None, absence, exclusion=exclusion_absence)
     connus = [i for i in indexes if constats[i].niveau != "inconnu"]
     inconnus = len(indexes) - len(connus)
     if not connus:
         return _Evaluation(
             None,
             f"{sujet} : fournisseur non identifié, catégorie exclue du calcul (poids redistribué).",
+            exclusion="inconnu",
         )
     niveau = pire_niveau(constats[i].niveau for i in connus)
     score = POINTS_NIVEAUX[niveau]
@@ -189,11 +198,19 @@ def _evaluer(
 ) -> _Evaluation:
     if SONDES_REQUISES[categorie] not in sondes_reussies:
         sonde = "le site web" if SONDES_REQUISES[categorie] == "http" else "le DNS"
-        return _Evaluation(None, f"Données indisponibles ({sonde} n'a pas pu être analysé).")
+        return _Evaluation(
+            None,
+            f"Données indisponibles ({sonde} n'a pas pu être analysé).",
+            exclusion="indisponible",
+        )
     indexes = _indexes(constats, categorie)
     if categorie == "hebergement":
         return _evaluer_par_niveau(
-            constats, indexes, "Hébergement du site", "Adresse IP du site introuvable."
+            constats,
+            indexes,
+            "Hébergement du site",
+            "Adresse IP du site introuvable.",
+            "indisponible",
         )
     if categorie == "messagerie":
         return _evaluer_par_niveau(
@@ -201,10 +218,11 @@ def _evaluer(
             indexes,
             "Messagerie",
             "Aucun serveur de messagerie (MX) déclaré : catégorie non applicable.",
+            "sans_objet",
         )
     if categorie == "dns":
         return _evaluer_par_niveau(
-            constats, indexes, "Serveurs DNS", "Aucun serveur DNS (NS) trouvé."
+            constats, indexes, "Serveurs DNS", "Aucun serveur DNS (NS) trouvé.", "indisponible"
         )
     if categorie == "suites_saas":
         return _evaluer_par_penalite(constats, indexes, PENALITE_SUITES_SAAS, "service SaaS")
@@ -220,6 +238,9 @@ def calculer_score(
 
     Une catégorie non évaluable (fournisseur inconnu, données indisponibles, absence de
     messagerie) est exclue : son poids est redistribué proportionnellement.
+
+    Couverture (v1.2) : part du poids applicable (hors catégories sans objet) réellement
+    évaluée. Si plus de 30 % de ce poids est inconnu ou indisponible, la note est provisoire.
     """
     evaluations = {c: _evaluer(c, constats, sondes_reussies) for c in POIDS}
     poids_evaluables = sum(POIDS[c] for c, e in evaluations.items() if e.score is not None)
@@ -243,26 +264,49 @@ def calculer_score(
                 poids_effectif=round(poids_effectif, 2),
                 score=evaluation.score,
                 evaluable=evaluable,
+                exclusion=evaluation.exclusion,
                 points_perdus_global=round(points_perdus, 2),
                 explication=evaluation.explication,
                 justifications=evaluation.justifications,
             )
         )
     score_global = min(100, max(0, arrondir(total)))
+    couverture = calculer_couverture(
+        {c: e.exclusion if e.score is None else None for c, e in evaluations.items()}
+    )
     return Score(
         score_global=score_global,
         note=note_depuis_score(score_global),
         version_methodo=VERSION_METHODO,
         detail=detail,
         categories_non_evaluables=[c for c, e in evaluations.items() if e.score is None],
+        couverture=couverture,
+        provisoire=est_provisoire(couverture),
     )
+
+
+def calculer_couverture(exclusions: Mapping[CategorieScore, MotifExclusion | None]) -> float:
+    """Part (en %) du poids applicable évaluée ; les catégories sans objet ne comptent pas."""
+    applicable = sum(POIDS[c] for c, motif in exclusions.items() if motif != "sans_objet")
+    if applicable == 0:
+        return 0.0
+    evalue = sum(POIDS[c] for c, motif in exclusions.items() if motif is None)
+    return round(evalue / applicable * 100, 1)
+
+
+def est_provisoire(couverture: float) -> bool:
+    """Provisoire si la part non évaluée dépasse strictement 30 % du poids applicable."""
+    return 100 - couverture > SEUIL_PROVISOIRE
 
 
 __all__ = [
     "LIBELLES",
     "POIDS",
+    "SEUIL_PROVISOIRE",
     "VERSION_METHODO",
     "ScoreImpossible",
+    "calculer_couverture",
     "calculer_score",
+    "est_provisoire",
     "note_depuis_score",
 ]

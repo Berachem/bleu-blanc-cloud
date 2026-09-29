@@ -127,9 +127,15 @@ class ResolveurDnsPython:
         return valeurs
 
     async def resoudre(self, nom: str) -> ChaineResolution:
+        """A puis AAAA : l'échec d'un seul des deux types n'empêche pas d'utiliser l'autre."""
         chaine = ChaineResolution(nom=normaliser_nom(nom))
+        echecs: list[ErreurDns] = []
         for type_enregistrement, cible in (("A", chaine.ipv4), ("AAAA", chaine.ipv6)):
-            reponse = await self._resolve(nom, type_enregistrement)
+            try:
+                reponse = await self._resolve(nom, type_enregistrement)
+            except ErreurDns as erreur:
+                echecs.append(erreur)
+                continue
             if reponse is None:
                 continue
             if not chaine.cnames:
@@ -137,6 +143,8 @@ class ResolveurDnsPython:
                     chaine.cnames.extend(normaliser_nom(r.target.to_text()) for r in rrset)
             if reponse.rrset is not None:
                 cible.extend(donnee.to_text() for donnee in reponse.rrset)
+        if len(echecs) == 2:
+            raise echecs[0]
         return chaine
 
     async def zone_de(self, nom: str) -> str | None:

@@ -84,7 +84,7 @@ const parType = types.map((type) => {
                   <td>{LIBELLES_TYPES[e.type]}</td>
                   <td class="nombre">{e.population != null ? nombre(e.population) : "—"}</td>
                   <td class="nombre">{e.score}/100</td>
-                  <td><BadgeNote note={e.note} /></td>
+                  <td><BadgeNote note={e.note} provisoire={e.note_provisoire} /></td>
                 </tr>
               ))
             }

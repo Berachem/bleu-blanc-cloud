@@ -8,7 +8,7 @@ interface Props {
 const { entree } = Astro.props;
 ---
 <a class="carte carte-organisation" href={`/organisation/${entree.slug}/`}>
-  <BadgeNote note={entree.note} taille="moyen" />
+  <BadgeNote note={entree.note} taille="moyen" provisoire={entree.note_provisoire} />
   <span>
     <span class="carte-organisation__nom">{entree.nom}</span>
     <span class="texte-secondaire petit">

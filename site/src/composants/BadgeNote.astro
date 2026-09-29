@@ -3,10 +3,29 @@ import { descriptionNote } from "../lib/format";
 interface Props {
   note: string;
   taille?: "petit" | "moyen" | "grand";
+  /** Note provisoire (méthodologie v1.2) : plus de 30 % du poids applicable est inconnu. */
+  provisoire?: boolean;
 }
-const { note, taille = "petit" } = Astro.props;
-const classes = ["badge", `note-${note}`, taille !== "petit" && `badge--${taille}`];
+const { note, taille = "petit", provisoire = false } = Astro.props;
+const classes = [
+  "badge",
+  `note-${note}`,
+  taille !== "petit" && `badge--${taille}`,
+  provisoire && "badge--provisoire",
+];
+const description = provisoire ? `${descriptionNote(note)} (provisoire)` : descriptionNote(note);
 ---
-<span class:list={classes} role="img" aria-label={descriptionNote(note)} title={descriptionNote(note)}>
-  {note}
-</span>
+{
+  provisoire ? (
+    <span class:list={["badge-groupe", `badge-groupe--${taille}`]}>
+      <span class:list={classes} role="img" aria-label={description} title={description}>
+        {note}
+      </span>
+      <span class="etiquette-provisoire" aria-hidden="true">provisoire</span>
+    </span>
+  ) : (
+    <span class:list={classes} role="img" aria-label={description} title={description}>
+      {note}
+    </span>
+  )
+}

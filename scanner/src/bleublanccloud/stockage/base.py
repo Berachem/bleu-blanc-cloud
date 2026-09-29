@@ -23,6 +23,11 @@ from bleublanccloud.modeles import (
 )
 
 DOSSIER_MIGRATIONS = Path(__file__).parent / "migrations"
+LIBELLES_RESOLUTION = {
+    "sans_adresse": "aucune adresse IP",
+    "echec_dns": "échec DNS",
+    "asn_introuvable": "opérateur de l'IP introuvable",
+}
 
 
 def _maintenant() -> str:
@@ -312,6 +317,9 @@ class Base:
             preuve: dict[str, Any] = json.loads(ligne["preuve_json"])
             if preuve.get("asn"):
                 cle = f"AS{preuve['asn']} {preuve.get('nom_as') or ''}".strip()
+            elif preuve.get("resolution") in LIBELLES_RESOLUTION:
+                # Échec de résolution : le nom complet aide à diagnostiquer
+                cle = f"{ligne['valeur']} ({LIBELLES_RESOLUTION[preuve['resolution']]})"
             else:
                 cle = ".".join(str(ligne["valeur"]).split(".")[-2:])
             compteur[(ligne["categorie"], cle)] = compteur.get((ligne["categorie"], cle), 0) + 1

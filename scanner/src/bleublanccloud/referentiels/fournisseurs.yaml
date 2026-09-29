@@ -290,10 +290,13 @@
   nom: Nameshield
   pays_siege: FR
   soumis_cloud_act: false
+  asn: [20756, 209510]
   motifs_domaines: ["nameshield.net", "nameshield.com"]
   categories: [dns, bureau_enregistrement]
   sources:
     - "https://www.nameshield.com/"
+    - "https://bgp.tools/as/20756"
+    - "https://ipinfo.io/AS209510"
   a_verifier: true
 
 - id: orange
@@ -696,6 +699,161 @@
   remarque: "Réseau servi en partie par des CDN américains (Cloudflare, Fastly) : juridiction effective à vérifier."
   a_verifier: true
 
+# --------------------------------------------------------------------------- #
+# Ajouts après la campagne de test (sortie de « referentiels inconnus »)
+# --------------------------------------------------------------------------- #
+
+- id: ovea
+  nom: OVEA
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [29608]
+  motifs_domaines: ["ovea.com"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.ovea.com/qui-sommes-nous"
+    - "https://www.peeringdb.com/net/190"
+  a_verifier: true
+
+- id: ecritel
+  nom: Ecritel
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [8304]
+  motifs_domaines: ["ecritel.net", "ecritel.fr"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.ecritel.fr/en/"
+    - "https://www.ecritel-group.com/fr/direction--management/actionnariat/"
+    - "https://bgp.tools/as/8304"
+  remarque: "Détenue à 100 % par ses fondateurs depuis avril 2024 (auparavant liée au groupe Econocom) ; filiales hors UE (dont Ecritel US) sans incidence sur l'entité française, à vérifier."
+  a_verifier: true
+
+- id: alienor-net
+  nom: Aliénor.net
+  pays_siege: FR
+  maison_mere: Groupe Aquitem
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [9180]
+  motifs_domaines: ["alienor.net"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://www.alienor.net/"
+    - "https://groupe-aquitem.fr/hebergement/nos-solutions/hebergement-web"
+    - "https://bgp.tools/as/9180"
+  a_verifier: true
+
+- id: agora-calyce
+  nom: Agora Calyce
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [47833]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.ripe.net/membership/indices/data/fr.agora.html"
+    - "https://bgpview.io/asn/47833"
+  remarque: "Hébergeur strasbourgeois (5 rue Hannah Arendt) ; maison mère éventuelle à vérifier."
+  a_verifier: true
+
+- id: nfrance
+  nom: NFrance
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [15826]
+  motifs_domaines: ["nfrance.com"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.nfrance.com/en"
+    - "https://www.peeringdb.com/net/3457"
+  a_verifier: true
+
+- id: ims-networks
+  nom: IMS Networks
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [20900]
+  motifs_domaines: ["imsnetworks.com"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.peeringdb.com/asn/20900"
+    - "https://www.verif.com/en/company/IMS-NETWORKS-68d9c0411299230338ba2df9/"
+  remarque: "Opérateur de Castres (Tarn) ; actionnariat à vérifier."
+  a_verifier: true
+
+- id: dri
+  nom: DRI
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [6738]
+  motifs_domaines: ["dri.fr"]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://www.dri.fr/"
+    - "https://bgp.he.net/AS6738"
+  remarque: "Société détenue par ses salariés selon son site, à vérifier."
+  a_verifier: true
+
+- id: etix-everywhere
+  nom: Etix Everywhere
+  pays_siege: FR
+  maison_mere: Eurazeo (co-contrôle avec Infranity)
+  pays_maison_mere: FR
+  soumis_cloud_act: false
+  asn: [197816]
+  motifs_domaines: ["etixeverywhere.com"]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.etixeverywhere.com/data-centers-in-nantes/"
+    - "https://www.cfnewsinfra.net/Les-Alertes-de-CFNEWS-INFRA/Etix-Everywhere-connecte-un-second-fonds-tricolore-500073"
+    - "https://bgp.tools/as/197816"
+  a_verifier: true
+
+- id: mk-netzdienste
+  nom: MK Netzdienste
+  pays_siege: DE
+  soumis_cloud_act: false
+  asn: [25394]
+  categories: [hebergement, messagerie]
+  sources:
+    - "https://www.peeringdb.com/net/1268"
+    - "https://bgp.he.net/AS25394"
+  remarque: "Opérateur de Minden (Allemagne) ; service de messagerie précis (filtrage ?) à identifier."
+  a_verifier: true
+
+- id: auto-hebergement-public
+  nom: Auto-hébergement public (collectivité ou groupement public)
+  pays_siege: FR
+  soumis_cloud_act: false
+  # ASN confirmés d'organismes publics français
+  asn:
+    - 48799   # Ville et Eurométropole de Strasbourg
+    - 49566   # Ville de Paris
+    - 47608   # GIP Gigalis (Pays de la Loire)
+  # Règle générique : nom d'AS d'un organisme public (texte comparé sans accents,
+  # en minuscules) ; appliquée seulement si le pays connu de l'IP est la France.
+  motifs_nom_as:
+    - "\\b(ville|commune|mairie) (de |d'|du |des )"
+    - "\\b(euro)?metropole\\b"
+    - "\\bcommunaute (urbaine|d'agglomeration|de communes)\\b"
+    - "\\bconseil (departemental|regional|general)\\b"
+    - "\\b(departement|region) (de |d'|du |des )"
+    - "\\bgroupement d'interet public\\b"
+    - "^gip\\b"
+    - "\\bsyndicat (mixte|intercommunal)\\b"
+  # Formes juridiques de sociétés : écartées (ex. « Metropole Television SA »)
+  exclusions_nom_as:
+    - "\\b(sa|sas|sasu|sarl|eurl|sca|gmbh|ltd|llc|inc|bv|spa)\\b"
+  pays_nom_as: [FR]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://bgpview.io/asn/48799"
+    - "https://bgpview.io/asn/49566"
+    - "https://bgp.tools/as/47608"
+    - "https://gigalis.org/actualites/gigalis-devient-un-groupement-d-interet-public-gip-une-nouvelle-ere-pour-la-transformation-numerique-en-pays-de-la-loire/"
+  remarque: "Infrastructure exploitée par l'organisme public lui-même (ou un groupement public) : niveau A. La règle générique sur le nom d'AS est une présomption signalée comme telle dans la preuve."
+  a_verifier: true
+
 # =========================================================================== #
 # Hors UE — non soumis au Cloud Act (niveau B)
 # =========================================================================== #
@@ -719,6 +877,19 @@
   sources:
     - "https://matomo.org/matomo-cloud/"
     - "https://en.wikipedia.org/wiki/Matomo_(software)"
+  a_verifier: true
+
+- id: ip-max
+  nom: IP-Max
+  pays_siege: CH
+  soumis_cloud_act: false
+  asn: [25091]
+  motifs_domaines: ["ip-max.net"]
+  categories: [hebergement, messagerie]
+  sources:
+    - "https://www.peeringdb.com/asn/25091"
+    - "https://www.ip-max.net/"
+  remarque: "Opérateur genevois ; service de messagerie précis (filtrage ?) à identifier."
   a_verifier: true
 
 # =========================================================================== #
@@ -891,9 +1062,12 @@
   pays_maison_mere: FR
   soumis_cloud_act: true
   motifs_cdn: ["incapdns.net"]
+  asn_cdn: [19551]
   categories: [cdn]
   sources:
     - "https://en.wikipedia.org/wiki/Imperva"
+    - "https://www.thalesgroup.com/en/news-centre/press-releases/thales-completes-acquisition-imperva-creating-global-leader"
+    - "https://bgp.tools/as/19551"
   remarque: "Société américaine rachetée par Thales (France) fin 2023 : exposition au Cloud Act via l'entité américaine, à vérifier."
   a_verifier: true
 
@@ -1555,4 +1729,47 @@
   sources:
     - "https://en.wikipedia.org/wiki/OpenJS_Foundation"
   remarque: "Organisation américaine ; applicabilité du Cloud Act à un CDN de bibliothèques à vérifier."
+  a_verifier: true
+
+- id: dnsmadeeasy
+  nom: DNS Made Easy (Tiggee LLC)
+  pays_siege: US
+  maison_mere: DigiCert
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn: [16552]
+  motifs_domaines: ["dnsmadeeasy.com", "constellix.com", "constellix.net"]
+  categories: [dns]
+  sources:
+    - "https://www.digicert.com/news/digicert-acquires-dns-made-easy-extending-leadership-in-digital-trust-with-enterprise-grade-managed-dns-services"
+    - "https://bgp.tools/as/16552"
+  a_verifier: true
+
+- id: mimecast
+  nom: Mimecast
+  pays_siege: GB
+  maison_mere: Mimecast Limited (fonds Permira)
+  soumis_cloud_act: true
+  asn: [39588]
+  motifs_domaines: ["mimecast.com", "mimecast.co.za", "mimecast-offshore.com"]
+  categories: [messagerie]
+  sources:
+    - "https://en.wikipedia.org/wiki/Mimecast"
+    - "https://www.permira.com/news-and-insights/announcements/permira-completes-acquisition-of-mimecast"
+    - "https://bgp.tools/as/39588"
+  remarque: "Filtrage de messagerie. Entité britannique, mais siège opérationnel à Lexington (Massachusetts) : exposition au Cloud Act présumée, à vérifier."
+  a_verifier: true
+
+- id: f5
+  nom: F5 (Distributed Cloud)
+  pays_siege: US
+  maison_mere: F5, Inc.
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn_cdn: [35280]
+  categories: [cdn]
+  sources:
+    - "https://www.peeringdb.com/net/10569"
+    - "https://www.f5.com/company/news/press-releases/f5-completes-acquisition-of-volterra"
+  remarque: "Réseau mondial F5 Distributed Cloud (ex-Volterra) placé devant le site : hébergeur réel masqué."
   a_verifier: true

@@ -25,7 +25,15 @@ const { identifiant = "recherche" } = Astro.props;
 </div>
 
 <script>
-  type Ligne = [slug: string, nom: string, departement: string, note: string, score: number, domaine: string];
+  type Ligne = [
+    slug: string,
+    nom: string,
+    departement: string,
+    note: string,
+    score: number,
+    domaine: string,
+    provisoire: 0 | 1,
+  ];
   const normaliser = (texte: string) =>
     texte.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
@@ -56,16 +64,16 @@ const { identifiant = "recherche" } = Astro.props;
         liste.append(vide);
         return;
       }
-      for (const [slug, nom, departement, note, score] of trouvees) {
+      for (const [slug, nom, departement, note, score, , provisoire] of trouvees) {
         const element = document.createElement("li");
         const lien = document.createElement("a");
         lien.href = `/organisation/${slug}/`;
         const badge = document.createElement("span");
-        badge.className = `badge note-${note}`;
+        badge.className = `badge note-${note}${provisoire ? " badge--provisoire" : ""}`;
         badge.textContent = note;
         badge.setAttribute("aria-hidden", "true");
         const texte = document.createElement("span");
-        texte.textContent = `${nom}${departement ? ` · ${departement}` : ""} — ${score}/100 (note ${note})`;
+        texte.textContent = `${nom}${departement ? ` · ${departement}` : ""} — ${score}/100 (note ${note}${provisoire ? " provisoire" : ""})`;
         lien.append(badge, texte);
         element.append(lien);
         liste.append(element);

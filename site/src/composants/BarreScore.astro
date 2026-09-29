@@ -6,13 +6,19 @@ interface Props {
 }
 const { categorie } = Astro.props;
 const valeur = categorie.score ?? 0;
+const EXCLUSIONS: Record<string, string> = {
+  inconnu: "fournisseur non identifié",
+  indisponible: "données indisponibles",
+  sans_objet: "sans objet",
+};
+const exclusion = categorie.exclusion ? EXCLUSIONS[categorie.exclusion] : null;
 const note = valeur >= 85 ? "A" : valeur >= 70 ? "B" : valeur >= 50 ? "C" : valeur >= 30 ? "D" : "E";
 ---
 <li>
   <div class="barre__entete">
     <span>{categorie.libelle}</span>
     <span>
-      {categorie.evaluable ? `${nombre(valeur)}/100` : "non évaluée"}
+      {categorie.evaluable ? `${nombre(valeur)}/100` : `non évaluée${exclusion ? ` (${exclusion})` : ""}`}
     </span>
   </div>
   {

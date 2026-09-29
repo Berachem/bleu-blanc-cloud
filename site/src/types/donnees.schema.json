@@ -339,6 +339,11 @@
           "title": "Note",
           "type": "string"
         },
+        "note_provisoire": {
+          "default": false,
+          "title": "Note Provisoire",
+          "type": "boolean"
+        },
         "date_scan": {
           "format": "date-time",
           "title": "Date Scan",
@@ -356,6 +361,7 @@
         "domaine",
         "score",
         "note",
+        "note_provisoire",
         "date_scan"
       ],
       "title": "EntreeIndex",
@@ -921,6 +927,20 @@
           },
           "title": "Categories Non Evaluables",
           "type": "array"
+        },
+        "couverture": {
+          "default": 100.0,
+          "description": "Part du poids applicable effectivement évaluée (en %), depuis la v1.2.",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Couverture",
+          "type": "number"
+        },
+        "provisoire": {
+          "default": false,
+          "description": "Note provisoire : plus de 30 % du poids applicable est inconnu (v1.2).",
+          "title": "Provisoire",
+          "type": "boolean"
         }
       },
       "required": [
@@ -928,7 +948,9 @@
         "note",
         "version_methodo",
         "detail",
-        "categories_non_evaluables"
+        "categories_non_evaluables",
+        "couverture",
+        "provisoire"
       ],
       "title": "Score",
       "type": "object"
@@ -979,6 +1001,24 @@
           "title": "Evaluable",
           "type": "boolean"
         },
+        "exclusion": {
+          "anyOf": [
+            {
+              "enum": [
+                "inconnu",
+                "indisponible",
+                "sans_objet"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Raison de l'exclusion d'une catégorie non évaluable : fournisseur inconnu, données indisponibles ou catégorie sans objet (ex. aucun MX).",
+          "title": "Exclusion"
+        },
         "points_perdus_global": {
           "default": 0.0,
           "description": "Points retirés au score global par cette catégorie.",
@@ -1004,6 +1044,7 @@
         "poids_effectif",
         "score",
         "evaluable",
+        "exclusion",
         "points_perdus_global",
         "explication",
         "justifications"

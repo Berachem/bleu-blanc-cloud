@@ -1,0 +1,13 @@
+{
+  "_commentaire": "Métropole fictive calquée sur un cas réel (campagne de test) : le seul MX déclaré ne résout vers aucune adresse (ni A ni AAAA). Serveurs DNS dans le réseau de la collectivité (AS au nom d'une commune).",
+  "zones": {"metropole-exemple.fr": "metropole-exemple.fr"},
+  "resolutions": {
+    "metropole-exemple.fr": {"cnames": [], "ipv4": ["51.91.10.20"], "ipv6": []},
+    "ns1.metropole-exemple.fr": {"cnames": [], "ipv4": ["185.20.30.40"], "ipv6": []},
+    "ns2.metropole-exemple.fr": {"cnames": [], "ipv4": ["192.0.2.99"], "ipv6": ["2001:db8::53"]}
+  },
+  "enregistrements": {
+    "metropole-exemple.fr|NS": ["ns1.metropole-exemple.fr", "ns2.metropole-exemple.fr"],
+    "metropole-exemple.fr|MX": ["20 smtp1bis.metropole-exemple.fr"]
+  }
+}

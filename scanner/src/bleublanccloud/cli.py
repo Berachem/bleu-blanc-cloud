@@ -141,8 +141,17 @@ def afficher_score(score: Score) -> None:
             detail.explication,
         )
     console.print(tableau)
+    provisoire = " [yellow](provisoire)[/]" if score.provisoire else ""
     console.print(
-        f"Score global : [bold]{score.score_global}/100[/]  Note : {_badge(score.note)}\n"
+        f"Score global : [bold]{score.score_global}/100[/]  Note : {_badge(score.note)}"
+        f"{provisoire}  Couverture : {score.couverture:.0f} %\n"
+    )
+    if score.provisoire:
+        console.print(
+            "[yellow]Plus de 30 % du poids applicable n'a pas pu être évalué (fournisseurs "
+            "inconnus ou données indisponibles) : la note est provisoire.[/]"
+        )
+    console.print(
         "[grey50]Le score ne reflète que l'empreinte externe et visible publiquement, "
         "pas les outils internes.[/]"
     )

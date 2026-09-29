@@ -512,6 +512,31 @@ th {
   color: #ffffff;
 }
 
+/* Note provisoire (méthodologie v1.2) : contour pointillé + étiquette textuelle */
+.badge-groupe {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+}
+.badge-groupe--grand {
+  flex-direction: column;
+}
+.badge--provisoire {
+  outline: 2px dashed var(--texte-secondaire);
+  outline-offset: 2px;
+}
+.etiquette-provisoire {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--texte-secondaire);
+  border: 1px dashed currentColor;
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+  white-space: nowrap;
+}
+
 .niveau {
   display: inline-block;
   font-weight: 700;

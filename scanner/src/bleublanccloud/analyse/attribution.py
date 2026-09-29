@@ -4,6 +4,7 @@ niveau de juridiction (méthodologie, section 9)."""
 from __future__ import annotations
 
 import re
+import unicodedata
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Final, Literal
@@ -53,13 +54,21 @@ def correspond_motif(nom: str, motif: str) -> bool:
     return nom == motif or nom.endswith("." + motif)
 
 
+def normaliser_nom_as(nom: str) -> str:
+    """Nom d'AS comparable : sans accents, en minuscules, apostrophes et espaces unifiés."""
+    decompose = unicodedata.normalize("NFKD", nom)
+    sans_accents = "".join(c for c in decompose if not unicodedata.combining(c))
+    texte = sans_accents.lower().replace("\u2019", "'").replace("`", "'")
+    return " ".join(texte.split())
+
+
 @dataclass(frozen=True)
 class Correspondance:
     """Résultat d'une attribution."""
 
     fournisseur: Fournisseur
     role: Role
-    methode: Literal["nom_hote", "plage_publiee", "asn", "en_tete"]
+    methode: Literal["nom_hote", "plage_publiee", "asn", "nom_as", "en_tete"]
     element: str
     motif: str | None = None
 
@@ -86,6 +95,15 @@ class Attributeur:
                 self._par_asn[asn] = (fournisseur, "hebergement")
             for asn in fournisseur.asn_cdn:
                 self._par_asn[asn] = (fournisseur, "cdn")
+        self._par_nom_as = [
+            (
+                fournisseur,
+                [re.compile(m) for m in fournisseur.motifs_nom_as],
+                [re.compile(m) for m in fournisseur.exclusions_nom_as],
+            )
+            for fournisseur in fournisseurs.values()
+            if fournisseur.motifs_nom_as
+        ]
         # Les suffixes les plus longs (les plus spécifiques) sont testés en premier,
         # les expressions régulières en dernier.
         motifs.sort(key=lambda m: (m[0].startswith("re:"), -len(m[0])))
@@ -129,6 +147,23 @@ class Attributeur:
         if info.asn is not None and info.asn in self._par_asn:
             fournisseur, role = self._par_asn[info.asn]
             return Correspondance(fournisseur, role, "asn", info.ip, f"AS{info.asn}")
+        return self.par_nom_as(info)
+
+    def par_nom_as(self, info: InfoIp) -> Correspondance | None:
+        """Présomption à partir du nom de l'AS (ex. « Ville de Paris »), en dernier recours."""
+        if not info.nom_as:
+            return None
+        nom = normaliser_nom_as(info.nom_as)
+        for fournisseur, motifs, exclusions in self._par_nom_as:
+            pays_attendus = fournisseur.pays_nom_as
+            if pays_attendus and info.pays and info.pays.upper() not in pays_attendus:
+                continue
+            if any(e.search(nom) for e in exclusions):
+                continue
+            motif = next((m for m in motifs if m.search(nom)), None)
+            if motif is not None:
+                element = f"{info.ip} (AS{info.asn} {info.nom_as})" if info.asn else info.ip
+                return Correspondance(fournisseur, "hebergement", "nom_as", element, motif.pattern)
         return None
 
     def par_en_tetes(self, en_tetes: Mapping[str, str]) -> list[Correspondance]:
@@ -234,14 +269,20 @@ def constats_serveurs(
     hotes: Sequence[tuple[str, int | None]],
     infos_ip: Mapping[str, InfoIp | None],
     attributeur: Attributeur,
+    diagnostics: Mapping[str, Mapping[str, str | None]] | None = None,
 ) -> list[Constat]:
-    """Constats de messagerie (MX) ou d'hébergement DNS (NS), un par serveur."""
+    """Constats de messagerie (MX) ou d'hébergement DNS (NS), un par serveur.
+
+    `diagnostics` décrit, par hôte, un échec de résolution (serveur sans adresse IP…).
+    """
     categorie: Literal["messagerie", "dns"] = "messagerie" if cle == "mx" else "dns"
     constats: list[Constat] = []
     for hote, priorite in hotes:
         info = infos_ip.get(hote)
         correspondance = attributeur.par_nom(hote) or attributeur.par_ip(info)
         preuve: dict[str, object] = {"hote": hote, **_preuve_ip(info)}
+        if diagnostics and hote in diagnostics:
+            preuve.update(diagnostics[hote])
         if priorite is not None:
             preuve["priorite"] = priorite
         if correspondance is not None:

@@ -210,7 +210,8 @@ def profils(referentiels: Referentiels) -> list[ProfilDemo]:
             [
                 _hebergement("", "inconnu", "192.0.2.40 (AS64500 PETIT HEBERGEUR)"),
                 _serveur("messagerie", "mx", "spool.mail.gandi.net", "gandi", "A"),
-                _serveur("dns", "ns", "ns-101-a.gandi.net", "gandi", "A"),
+                # DNS chez un prestataire non référencé : 35 % du poids inconnu → note provisoire
+                _serveur("dns", "ns", "ns1.prestataire-fictif.example", None, "inconnu"),
                 s("google-fonts", "https://fonts.googleapis.com/css2?family=Lato"),
                 s("openstreetmap", "https://tile.openstreetmap.org/12/2072/1409.png"),
                 *_informatifs("v=spf1 include:_mailcust.gandi.net ?all", "v=DMARC1; p=none"),

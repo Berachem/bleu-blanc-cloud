@@ -41,6 +41,8 @@ class ResolveurFactice:
         self.resolutions: dict[str, dict[str, list[str]]] = scenario.get("resolutions", {})
         self.enregistrements: dict[str, list[str]] = scenario.get("enregistrements", {})
         self.erreurs: set[str] = set(scenario.get("erreurs", []))
+        # Erreurs levées une seule fois (délai dépassé passager), puis la requête réussit
+        self.erreurs_passageres: set[str] = set(scenario.get("erreurs_passageres", []))
         self.appels: list[str] = []
 
     @classmethod
@@ -62,7 +64,13 @@ class ResolveurFactice:
         return list(self.enregistrements.get(cle, []))
 
     async def resoudre(self, nom: str) -> ChaineResolution:
-        self.appels.append(f"{nom}|A")
+        cle = f"{nom}|A"
+        self.appels.append(cle)
+        if cle in self.erreurs:
+            raise ErreurDns(f"A {nom} : délai dépassé")
+        if cle in self.erreurs_passageres:
+            self.erreurs_passageres.discard(cle)
+            raise ErreurDns(f"A {nom} : délai dépassé (passager)")
         donnees = self.resolutions.get(nom, {})
         return ChaineResolution(
             nom=nom,
@@ -86,6 +94,12 @@ class LecteurMmdbFactice:
         "185.10.20.30": {"asn": "AS64500", "as_name": "PETIT HEBERGEUR", "country_code": "FR"},
         "185.10.20.31": {"asn": "AS64500", "as_name": "PETIT HEBERGEUR", "country_code": "FR"},
         "217.197.84.141": {"asn": "AS64501", "as_name": "HEBERGEUR BERLIN", "country_code": "DE"},
+        "185.20.30.40": {
+            "asn": "AS64510",
+            "as_name": "COMMUNE DE METROPOLE-EXEMPLE",
+            "country_code": "FR",
+        },
+        "2001:db8::53": {"asn": "AS25091", "as_name": "IP-Max SA", "country_code": "CH"},
     }
 
     def get(self, ip: str) -> dict[str, str] | None:

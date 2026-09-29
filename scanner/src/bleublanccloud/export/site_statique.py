@@ -22,7 +22,12 @@ from pydantic import BaseModel
 
 from bleublanccloud.analyse.alternatives import choisir_alternatives
 from bleublanccloud.analyse.attribution import niveau_juridiction
-from bleublanccloud.analyse.score import VERSION_METHODO, note_depuis_score
+from bleublanccloud.analyse.score import (
+    VERSION_METHODO,
+    ScoreImpossible,
+    calculer_score,
+    note_depuis_score,
+)
 from bleublanccloud.modeles import (
     Alternative,
     AlternativeExport,
@@ -33,6 +38,7 @@ from bleublanccloud.modeles import (
     Organisation,
     OrganisationExport,
     RapportIAExport,
+    Score,
 )
 from bleublanccloud.referentiels import Referentiels
 from bleublanccloud.scan import normaliser_cible
@@ -82,6 +88,18 @@ def fournisseurs_cites(
     return resultat
 
 
+def score_a_jour(scan: ScanEnregistre) -> Score:
+    """Score du scan, recalculé à partir des constats enregistrés si la méthodologie a changé
+    depuis (ex. indicateur de couverture de la v1.2 absent d'un score v1.0)."""
+    assert scan.score is not None
+    if scan.score.version_methodo == VERSION_METHODO:
+        return scan.score
+    try:
+        return calculer_score(scan.resultat.constats, scan.resultat.sondes_reussies)
+    except ScoreImpossible:
+        return scan.score
+
+
 def construire_organisation(
     organisation: Organisation,
     scan: ScanEnregistre,
@@ -90,9 +108,9 @@ def construire_organisation(
     noms_departements: dict[str, str],
     noms_regions: dict[str, str],
 ) -> OrganisationExport:
-    assert scan.score is not None
+    score = score_a_jour(scan)
     resultat = scan.resultat
-    alternatives = choisir_alternatives(scan.score, resultat.constats, referentiels.alternatives)
+    alternatives = choisir_alternatives(score, resultat.constats, referentiels.alternatives)
     return OrganisationExport(
         slug=organisation.slug,
         nom=organisation.nom,
@@ -106,7 +124,7 @@ def construire_organisation(
         domaine=resultat.domaine,
         date_scan=resultat.debut,
         statut_scan=resultat.statut,
-        score=scan.score,
+        score=score,
         constats=resultat.constats,
         informations=resultat.informations,
         fournisseurs=fournisseurs_cites(
@@ -138,6 +156,7 @@ def entree_index(organisation: OrganisationExport) -> EntreeIndex:
         domaine=organisation.domaine,
         score=organisation.score.score_global,
         note=organisation.score.note,
+        note_provisoire=organisation.score.provisoire,
         date_scan=organisation.date_scan,
     )
 

@@ -40,6 +40,7 @@ export interface EntreeIndex {
   domaine: string;
   score: number;
   note: "A" | "B" | "C" | "D" | "E";
+  note_provisoire: boolean;
   date_scan: string;
 }
 /**
@@ -84,6 +85,14 @@ export interface Score {
   categories_non_evaluables: (
     "hebergement" | "messagerie" | "dns" | "suites_saas" | "services_tiers" | "mesure_audience"
   )[];
+  /**
+   * Part du poids applicable effectivement évaluée (en %), depuis la v1.2.
+   */
+  couverture: number;
+  /**
+   * Note provisoire : plus de 30 % du poids applicable est inconnu (v1.2).
+   */
+  provisoire: boolean;
 }
 /**
  * Score d'une catégorie de la méthodologie.
@@ -107,6 +116,10 @@ export interface ScoreCategorie {
    */
   score: number | null;
   evaluable: boolean;
+  /**
+   * Raison de l'exclusion d'une catégorie non évaluable : fournisseur inconnu, données indisponibles ou catégorie sans objet (ex. aucun MX).
+   */
+  exclusion: ("inconnu" | "indisponible" | "sans_objet") | null;
   /**
    * Points retirés au score global par cette catégorie.
    */

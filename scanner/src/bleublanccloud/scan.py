@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import re
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
@@ -37,6 +38,9 @@ from bleublanccloud.sondes.rdap import DonneesRdap, charger_amorcage, sonder_rda
 from bleublanccloud.sondes.tls import DonneesTls, sonder_tls
 
 MOTIF_NOM_HOTE = re.compile(r"^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$")
+
+
+StatutResolution = Literal["ip_litterale", "echec_dns", "sans_adresse", "asn_introuvable"]
 
 
 class CibleInvalide(ValueError):
@@ -122,21 +126,98 @@ async def _info_ip_principale(
     return await contexte.resolveur_asn.informer(resolution.ip_principale)
 
 
-async def _infos_serveurs(hotes: list[str], contexte: ContexteScan) -> dict[str, InfoIp | None]:
-    """Résout et situe les serveurs MX/NS qui ne sont pas attribuables par leur nom."""
-    a_resoudre = [h for h in hotes if contexte.attributeur.par_nom(h) is None]
+NOMBRE_MAX_IP_SERVEUR = 4
 
-    async def informer(hote: str) -> tuple[str, InfoIp | None]:
-        if contexte.referentiels.est_retire(hote):
-            return hote, None
+
+@dataclass(frozen=True)
+class SituationServeur:
+    """Résultat de la localisation d'un serveur MX ou NS."""
+
+    info: InfoIp | None
+    resolution: StatutResolution | None = None
+    diagnostic: str | None = None
+
+
+def _est_ip(texte: str) -> bool:
+    try:
+        ipaddress.ip_address(texte)
+    except ValueError:
+        return False
+    return True
+
+
+async def _premiere_info_utile(ips: list[str], contexte: ContexteScan) -> InfoIp | None:
+    """Première IP dont l'ASN (ou la plage cloud) est connu ; à défaut, la première IP."""
+    premiere: InfoIp | None = None
+    for ip in ips[:NOMBRE_MAX_IP_SERVEUR]:
+        info = await contexte.resolveur_asn.informer(ip)
+        if info.asn is not None or info.plage_cloud is not None:
+            return info
+        premiere = premiere or info
+    return premiere
+
+
+async def situer_serveur(hote: str, contexte: ContexteScan) -> SituationServeur:
+    """Résout un serveur MX/NS en adresses IP puis en ASN, avec diagnostic en cas d'échec.
+
+    - un enregistrement contenant directement une adresse IP est accepté tel quel ;
+    - une requête DNS en échec (délai dépassé) est relancée une fois ;
+    - toutes les adresses (IPv4 puis IPv6) sont essayées jusqu'à obtenir un ASN.
+    """
+    if contexte.referentiels.est_retire(hote):
+        return SituationServeur(None)
+    if _est_ip(hote):
+        info_ip = await contexte.resolveur_asn.informer(hote)
+        return SituationServeur(
+            info_ip, "ip_litterale", "L'enregistrement désigne une adresse IP et non un nom d'hôte."
+        )
+    resolution: ChaineResolution | None = None
+    derniere_erreur: ErreurDns | None = None
+    for _ in range(2):
         try:
             resolution = await contexte.resolveur_dns.resoudre(hote)
-        except ErreurDns:
-            return hote, None
-        return hote, await _info_ip_principale(resolution, contexte)
+            break
+        except ErreurDns as erreur:
+            derniere_erreur = erreur
+    if resolution is None:
+        return SituationServeur(
+            None, "echec_dns", f"Échec de la résolution DNS : {derniere_erreur}"
+        )
+    ips = resolution.ipv4 + resolution.ipv6
+    if not ips:
+        return SituationServeur(
+            None,
+            "sans_adresse",
+            "Le nom ne résout vers aucune adresse IPv4 ni IPv6 : serveur injoignable.",
+        )
+    info = await _premiere_info_utile(ips, contexte)
+    if info is not None and info.asn is None and info.plage_cloud is None:
+        return SituationServeur(info, "asn_introuvable", "Opérateur de l'adresse IP introuvable.")
+    return SituationServeur(info)
 
-    resultats = await asyncio.gather(*(informer(h) for h in a_resoudre))
-    return dict(resultats)
+
+async def _situer_serveurs(hotes: list[str], contexte: ContexteScan) -> dict[str, SituationServeur]:
+    """Situe les serveurs MX/NS qui ne sont pas attribuables par leur nom."""
+    a_resoudre = list(dict.fromkeys(h for h in hotes if contexte.attributeur.par_nom(h) is None))
+    situations = await asyncio.gather(*(situer_serveur(h, contexte) for h in a_resoudre))
+    return dict(zip(a_resoudre, situations, strict=True))
+
+
+def constats_mx_injoignables(
+    hotes_mx: list[str], situations: dict[str, SituationServeur]
+) -> list[Constat]:
+    """Constat informatif pour chaque MX qui ne résout vers aucune adresse."""
+    return [
+        Constat(
+            sonde="dns",
+            categorie="informatif",
+            cle="mx_sans_adresse",
+            valeur=f"Le serveur de messagerie {hote} ne résout vers aucune adresse IP",
+            preuve={"hote": hote, "resolution": "sans_adresse"},
+        )
+        for hote in hotes_mx
+        if hote in situations and situations[hote].resolution == "sans_adresse"
+    ]
 
 
 def choisir_nom_hote_site(donnees: DonneesDns, url_site: str) -> str:
@@ -232,16 +313,28 @@ async def scanner_domaine(entree: str, contexte: ContexteScan) -> ResultatScan:
 
     # Messagerie (MX) et DNS (NS)
     hotes_mx = [mx.hote for mx in donnees_dns.mx]
-    infos_serveurs = await _infos_serveurs(hotes_mx + donnees_dns.ns, contexte)
+    situations = await _situer_serveurs(hotes_mx + donnees_dns.ns, contexte)
+    infos_serveurs = {hote: s.info for hote, s in situations.items()}
+    diagnostics = {
+        hote: {"resolution": s.resolution, "diagnostic": s.diagnostic}
+        for hote, s in situations.items()
+        if s.resolution is not None and s.diagnostic is not None
+    }
     constats += constats_serveurs(
         "mx",
         [(mx.hote, mx.priorite) for mx in donnees_dns.mx],
         infos_serveurs,
         contexte.attributeur,
+        diagnostics,
     )
     constats += constats_serveurs(
-        "ns", [(ns, None) for ns in donnees_dns.ns], infos_serveurs, contexte.attributeur
+        "ns",
+        [(ns, None) for ns in donnees_dns.ns],
+        infos_serveurs,
+        contexte.attributeur,
+        diagnostics,
     )
+    constats += constats_mx_injoignables(hotes_mx, situations)
     constats += constats_dns_informatifs(donnees_dns)
 
     # Services tiers, suites SaaS, mesure d'audience
