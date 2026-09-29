@@ -1,9 +1,9 @@
 {
-  "_commentaire": "Configuration cible du site publié : CNAME vers Codeberg Pages (enregistrement « DNS only », non proxifié), zone berachem.dev chez Cloudflare, aucun MX.",
+  "_commentaire": "Configuration cible du site publié (git-pages) : CNAME vers codeberg.page (enregistrement « DNS only », non proxifié), zone berachem.dev chez Cloudflare, aucun MX.",
   "zones": {"bleublanccloud.berachem.dev": "berachem.dev"},
   "resolutions": {
     "bleublanccloud.berachem.dev": {
-      "cnames": ["bleublanccloud-pages.berachem.codeberg.page"],
+      "cnames": ["codeberg.page"],
       "ipv4": ["217.197.84.141"],
       "ipv6": []
     }

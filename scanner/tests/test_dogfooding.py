@@ -1,7 +1,7 @@
 """Dogfooding : le site Bleu Blanc Cloud doit obtenir la note A sur son propre scan.
 
 Le scénario reproduit la configuration de production décrite dans deploy/README.md :
-CNAME vers Codeberg Pages (non proxifié), aucun service tiers, aucun cookie, aucun MX.
+CNAME vers codeberg.page (git-pages, non proxifié), aucun service tiers, aucun cookie, aucun MX.
 La page analysée est la vraie page d'accueil construite par Astro.
 """
 

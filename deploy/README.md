@@ -147,20 +147,69 @@ Les autres valeurs (politesse du robot, chemins) peuvent rester telles quelles.
 
 ---
 
-## 4. Codeberg Pages et nom de domaine
+## 4. Codeberg Pages (git-pages) et nom de domaine
 
-1. Sur Codeberg, crée un dépôt **public et vide** nommé `bleublanccloud-pages`.
-2. *Paramètres du dépôt → Deploy Keys → Add Key* : colle la clé publique affichée par l'installateur
-   (ou `cat /home/bbcloud/.ssh/id_ed25519_codeberg.pub`) et coche **Enable write access**.
-3. Dans la zone DNS de `berachem.dev`, ajoute :
+Codeberg impose désormais **git-pages** aux nouveaux comptes : l'ancien serveur Pages v2 (fichier `.domains`) ne fonctionne plus pour eux. Avec git-pages, le domaine est **autorisé par le DNS** (enregistrement TXT) et chaque déploiement est **déclenché par un webhook** sur la branche `pages`.
 
-   | Type | Nom | Cible |
-   |---|---|---|
-   | `CNAME` | `bleublanccloud` | `bleublanccloud-pages.<ton-pseudo>.codeberg.page.` |
+Fais ces étapes **dans l'ordre, avant la première publication** (étape 5) : le certificat HTTPS n'est demandé qu'au premier déploiement réussi.
 
-   ⚠️ **Chez Cloudflare, mets l'enregistrement en « DNS only » (nuage gris)**. Proxifié (nuage orange), le site serait servi par Cloudflare : Codeberg ne pourrait pas émettre le certificat, et le site perdrait sa note A sur son propre scan (hébergement masqué par un CDN américain → niveau C).
+### 4.1 Dépôt de publication
 
-4. Le script `publier.sh` pousse le site sur la branche `pages` et écrit le fichier `.domains` ; Codeberg obtient ensuite automatiquement le certificat HTTPS (quelques minutes après la propagation DNS).
+1. Sur Codeberg, crée un dépôt **public et vide** nommé `bleublanccloud-pages` (git-pages le clone en HTTPS, sans identifiant).
+2. *Paramètres du dépôt → Clés de déploiement → Ajouter une clé* : colle la clé publique affichée par l'installateur
+   (ou `cat /home/bbcloud/.ssh/id_ed25519_codeberg.pub`) et coche **Activer l'accès en écriture** : c'est elle que `publier.sh` utilise pour pousser.
+
+### 4.2 Enregistrements DNS
+
+Dans la zone DNS de `berachem.dev`, ajoute :
+
+| Type | Nom | Valeur |
+|---|---|---|
+| `CNAME` | `bleublanccloud` | `codeberg.page.` |
+| `TXT` | `_git-pages-repository.bleublanccloud` | `https://codeberg.org/<ton-pseudo>/bleublanccloud-pages.git` |
+
+- Le **CNAME pointe vers `codeberg.page.`** tout court, et non plus vers `bleublanccloud-pages.<ton-pseudo>.codeberg.page.` (forme de l'ancien serveur).
+- Le **TXT** se place sur le sous-domaine `_git-pages-repository.<sous-domaine>`, soit ici `_git-pages-repository.bleublanccloud.berachem.dev`. Il contient l'**URL HTTPS de clonage** du dépôt (avec `.git`) : c'est lui qui autorise ce dépôt à publier sur ce domaine.
+- ⚠️ **Chez Cloudflare, mets le CNAME en « DNS only » (nuage gris)**. Proxifié (nuage orange), le site serait servi par Cloudflare : Codeberg ne pourrait pas émettre le certificat, et le site perdrait sa note A sur son propre scan (hébergement masqué par un CDN américain → niveau C).
+- Si la zone contient des enregistrements **CAA**, ils doivent autoriser Let's Encrypt (`0 issue "letsencrypt.org"`).
+
+Vérifie la propagation (depuis n'importe quelle machine ; dans le conteneur : `apt-get install -y dnsutils`) :
+
+```bash
+dig +short CNAME bleublanccloud.berachem.dev                    # → codeberg.page.
+dig +short TXT _git-pages-repository.bleublanccloud.berachem.dev # → "https://codeberg.org/<ton-pseudo>/bleublanccloud-pages.git"
+```
+
+### 4.3 Webhook de déploiement
+
+Dans le dépôt `bleublanccloud-pages` : *Paramètres → Webhooks → Ajouter un webhook → **Forgejo***.
+
+| Champ | Valeur |
+|---|---|
+| URL cible | `http://bleublanccloud.berachem.dev/` (**http://** pour le tout premier déploiement, voir ci-dessous) |
+| Méthode HTTP | `POST` |
+| Type de contenu | `application/json` |
+| Déclencheur | *Évènements de push* uniquement |
+| Filtre de branche | `pages` |
+| Actif | coché |
+
+- **Pourquoi `http://` ?** Au premier déploiement, le certificat HTTPS du domaine **n'existe pas encore** : une URL en `https://` ferait échouer la livraison (erreur TLS), donc aucun déploiement, donc jamais de certificat.
+- N'utilise **pas** le bouton *Tester la livraison* : il échoue toujours avec git-pages, c'est normal. Le vrai test est un push sur `pages`.
+- Le **filtre de branche** évite qu'un push sur une autre branche ne déclenche un déploiement.
+
+### 4.4 Premier déploiement et passage en HTTPS
+
+1. Lance la première publication (étape 5, point 7 : `uv run bbcloud publier`). Le push sur `pages` déclenche le webhook : git-pages récupère le site, le publie et demande le certificat Let's Encrypt.
+2. Contrôle la livraison dans *Paramètres → Webhooks → (ton webhook) → Livraisons récentes* : un code **2xx** est attendu.
+3. Après quelques minutes, `https://bleublanccloud.berachem.dev` doit répondre avec un certificat valide (`curl -sI https://bleublanccloud.berachem.dev`).
+4. **Modifie alors l'URL cible du webhook en `https://bleublanccloud.berachem.dev/`** : une fois le certificat émis, le serveur peut rediriger le HTTP vers le HTTPS, ce qui ferait échouer les livraisons suivantes.
+
+> 💡 **Publication faite avant le webhook ?** Le site n'est alors pas déployé et une nouvelle publication sans changement ne pousse rien. Relance la dernière livraison depuis *Livraisons récentes* (bouton de renvoi), ou pousse un commit vide sur `pages` :
+> ```bash
+> su - bbcloud -c 'cd /opt/bleu-blanc-cloud/donnees/depot-pages && git commit --allow-empty -qm "redéploiement" && git push -q origin pages'
+> ```
+
+> ℹ️ `publier.sh` écrit toujours un fichier `.domains` : git-pages l'ignore (l'autorisation passe par le TXT), il ne sert qu'aux comptes encore sur l'ancien serveur. git-pages ne redirige plus `/page` vers `/page.html`, ce qui ne gêne pas le site : Astro génère des dossiers (`/methodologie/index.html`) et les liens internes se terminent par `/`.
 
 > 💡 Pour un **100/100** au lieu de 87/100 (A) : héberger la zone DNS de `berachem.dev` chez un fournisseur européen (deSEC, Gandi, OVHcloud…) plutôt que chez Cloudflare. Ce n'est pas obligatoire pour obtenir la note A.
 
@@ -210,6 +259,7 @@ cd /opt/bleu-blanc-cloud/scanner
    uv run bbcloud publier
    uv run bbcloud scanner bleublanccloud.berachem.dev
    ```
+   Au premier push, vérifie la livraison du webhook puis repasse son URL en `https://` (étape 4.4).
 
 ---
 
@@ -278,6 +328,7 @@ Tant que le dépôt GitHub est privé, renseigne dans le formulaire de migration
 - [ ] **Référentiels** : relire les faits marqués « à vérifier » (`uv run bbcloud referentiels verifier` liste les remarques), puis passer `a_verifier: false` fait par fait.
 - [ ] **Campagne de test** (10 organisations) relue sur le site local.
 - [ ] **Première campagne complète** lancée puis publiée.
+- [ ] **Webhook Codeberg** repassé en `https://` après l'émission du certificat (étape 4.4).
 - [ ] **Dogfooding** : `bbcloud scanner bleublanccloud.berachem.dev` donne A.
 - [ ] **Dépôt GitHub passé en public** : le site renvoie vers le code source, la méthodologie et les référentiels.
 
@@ -306,7 +357,9 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur
 | `Permission denied (publickey)` sur **github.com** (dépôt privé) | la clé de déploiement n'est pas (ou plus) dans *Settings → Deploy keys* du dépôt. Clé à ajouter : `cat /home/bbcloud/.ssh/id_ed25519_github.pub`. Test : `su - bbcloud -c 'ssh -T git@github.com'` (réponse attendue : « successfully authenticated »). |
 | L'installateur choisit le mauvais mode (public/privé) | relancer avec `DEPOT_PRIVE=1 bash installer.sh` ou `DEPOT_PRIVE=0 bash installer.sh`. |
 | `Permission denied (publickey)` à la publication | la clé de déploiement Codeberg n'a pas l'accès en écriture, ou `DEPOT_PAGES` n'est pas en SSH. Test : `su - bbcloud -c 'ssh -T git@codeberg.org'`. |
-| Le site affiche encore une ancienne version / pas de HTTPS | vérifier le CNAME (« DNS only »), patienter quelques minutes, contrôler la branche `pages` du dépôt Codeberg. |
+| Message mentionnant l'**« old pages server »** | la requête arrive sur l'ancien serveur Pages v2, fermé aux nouveaux comptes. Causes possibles : CNAME encore à l'ancienne forme (`bleublanccloud-pages.<ton-pseudo>.codeberg.page.`) au lieu de `codeberg.page.` ; TXT `_git-pages-repository.bleublanccloud` absent ou différent de l'URL HTTPS exacte du dépôt (avec `.git`) ; aucun déploiement git-pages encore effectué (webhook absent, filtré sur une autre branche que `pages`, ou jamais déclenché). Corriger le DNS (`dig`, étape 4.2), vérifier le webhook, puis redéclencher un déploiement (étape 4.4). |
+| **`tls: internal error`** (ou `tlsv1 alert internal error` avec curl, `SSL_ERROR_INTERNAL_ERROR_ALERT` dans Firefox) | le certificat HTTPS n'est pas (encore) émis. Il n'est demandé qu'après un **déploiement réussi par le webhook** : vérifier dans *Livraisons récentes* qu'une livraison a abouti (code 2xx) avec une URL cible en **`http://`** ; sinon corriger l'URL et relancer la livraison. Vérifier aussi : CNAME en « DNS only » chez Cloudflare, TXT présent, enregistrements CAA autorisant `letsencrypt.org`. Puis patienter quelques minutes. Outil officiel de diagnostic : `curl -fsSL https://troubleshoot.codeberg.page/verify.sh -o verify.sh`, relire le script, puis `bash verify.sh bleublanccloud.berachem.dev`. |
+| Le site affiche encore une ancienne version | contrôler la branche `pages` du dépôt Codeberg et la dernière livraison du webhook (une URL cible restée en `http://` après l'émission du certificat peut faire échouer les livraisons : la passer en `https://`). |
 | `npm run build` échoue par manque de mémoire | passer le conteneur à 3–4 Go de RAM. |
 | Beaucoup de « robots.txt injoignable » | réseau sortant filtré ou sites en panne : le robot n'analyse alors aucune page, par respect de la RFC 9309. |
 | `bbcloud-maj-auto` en échec : « Tests en échec » | le serveur est resté sur l'ancienne version. Lire `journalctl -u bbcloud-maj-auto -p warning`, corriger dans le dépôt et pousser : le nouveau commit est testé à l'heure suivante. |

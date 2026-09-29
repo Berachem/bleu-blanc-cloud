@@ -62,6 +62,8 @@ fi
 # Remplace tout le contenu publié par le nouveau build (l'historique git est conservé)
 find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 cp -a "$RACINE/site/dist/." .
+# .domains : ignoré par git-pages (domaine autorisé par l'enregistrement TXT
+# _git-pages-repository), conservé pour les comptes encore sur l'ancien serveur Pages v2.
 printf '%s\n' "$DOMAINE_SITE" > .domains
 git add --all
 if git diff --cached --quiet; then
