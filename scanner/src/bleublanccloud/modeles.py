@@ -40,7 +40,9 @@ TypeOrganisation = Literal["commune", "departement", "region", "autre"]
 class ModeleStrict(BaseModel):
     """Base commune : refuse les champs inconnus pour détecter les erreurs de saisie."""
 
-    model_config = ConfigDict(extra="forbid")
+    # Les champs ayant une valeur par défaut sont toujours présents dans les fichiers exportés :
+    # le schéma de sérialisation les déclare donc obligatoires (types TypeScript plus stricts).
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
 
 
 # --------------------------------------------------------------------------- #

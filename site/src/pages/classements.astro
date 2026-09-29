@@ -1,0 +1,173 @@
+---
+import BadgeNote from "../composants/BadgeNote.astro";
+import Base from "../mises-en-page/Base.astro";
+import { departements, index } from "../lib/donnees";
+import { LIBELLES_TYPES, nombre } from "../lib/format";
+
+const entrees = [...index()].sort((a, b) => b.score - a.score || a.nom.localeCompare(b.nom, "fr"));
+const listeDepartements = departements()
+  .filter((d) => d.nombre_organisations > 0)
+  .sort((a, b) => a.code.localeCompare(b.code, "fr", { numeric: true }));
+const types = [...new Set(entrees.map((e) => e.type))];
+const parType = types.map((type) => {
+  const membres = entrees.filter((e) => e.type === type);
+  return {
+    type,
+    nombre: membres.length,
+    moyenne: membres.reduce((s, e) => s + e.score, 0) / membres.length,
+  };
+});
+---
+<Base
+  titre="Classements"
+  description="Toutes les organisations analysées, filtrables par département et par type, avec leur score de dépendance numérique."
+>
+  <div class="conteneur">
+    <h1>Classements</h1>
+    <p class="texte-secondaire">
+      Un score élevé indique une empreinte numérique externe reposant sur des fournisseurs
+      européens. Un score faible signale une dépendance, pas une faute : consultez chaque fiche
+      pour les preuves et les pistes d'alternatives.
+    </p>
+
+    <section class="section" aria-labelledby="titre-organisations">
+      <h2 id="titre-organisations">Organisations</h2>
+      <form class="filtres" data-filtres onsubmit="return false">
+        <div class="champ">
+          <label for="filtre-texte">Nom ou domaine</label>
+          <input id="filtre-texte" type="search" name="texte" autocomplete="off" />
+        </div>
+        <div class="champ">
+          <label for="filtre-departement">Département</label>
+          <select id="filtre-departement" name="departement">
+            <option value="">Tous les départements</option>
+            {listeDepartements.map((d) => <option value={d.code}>{d.code} — {d.nom}</option>)}
+          </select>
+        </div>
+        <div class="champ">
+          <label for="filtre-type">Type</label>
+          <select id="filtre-type" name="type">
+            <option value="">Tous les types</option>
+            {types.map((type) => <option value={type}>{LIBELLES_TYPES[type]}</option>)}
+          </select>
+        </div>
+      </form>
+      <p class="texte-secondaire petit" aria-live="polite" data-compteur>
+        {entrees.length} organisation(s)
+      </p>
+      <div class="tableau-defilant">
+        <table data-tableau>
+          <caption class="visuellement-cache">Organisations analysées, triées par score décroissant</caption>
+          <thead>
+            <tr>
+              <th scope="col" data-tri="nom"><button type="button">Organisation</button></th>
+              <th scope="col" data-tri="departement"><button type="button">Département</button></th>
+              <th scope="col">Type</th>
+              <th scope="col" class="nombre" data-tri="population"><button type="button">Population</button></th>
+              <th scope="col" class="nombre" data-tri="score" aria-sort="descending"><button type="button">Score</button></th>
+              <th scope="col">Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              entrees.map((e) => (
+                <tr
+                  data-nom={e.nom}
+                  data-texte={`${e.nom} ${e.domaine}`.toLowerCase()}
+                  data-departement={e.departement ?? ""}
+                  data-type={e.type}
+                  data-population={e.population ?? 0}
+                  data-score={e.score}
+                >
+                  <td><a href={`/organisation/${e.slug}/`}>{e.nom}</a></td>
+                  <td>{e.departement_nom ?? "—"}</td>
+                  <td>{LIBELLES_TYPES[e.type]}</td>
+                  <td class="nombre">{e.population != null ? nombre(e.population) : "—"}</td>
+                  <td class="nombre">{e.score}/100</td>
+                  <td><BadgeNote note={e.note} /></td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="titre-types">
+      <h2 id="titre-types">Par type d'organisation</h2>
+      <div class="tableau-defilant">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Type</th>
+              <th scope="col" class="nombre">Organisations</th>
+              <th scope="col" class="nombre">Score moyen</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              parType.map((ligne) => (
+                <tr>
+                  <td>{LIBELLES_TYPES[ligne.type]}</td>
+                  <td class="nombre">{ligne.nombre}</td>
+                  <td class="nombre">{nombre(ligne.moyenne, 1)}/100</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p><a href="/carte/">Moyennes par département (carte et tableau)</a></p>
+    </section>
+  </div>
+</Base>
+
+<script>
+  const formulaire = document.querySelector<HTMLFormElement>("[data-filtres]");
+  const tableau = document.querySelector<HTMLTableElement>("[data-tableau]");
+  const compteur = document.querySelector<HTMLElement>("[data-compteur]");
+  if (formulaire && tableau && compteur) {
+    const corps = tableau.tBodies[0];
+    const lignes = [...corps.rows];
+    const parametres = new URLSearchParams(location.search);
+    const champDepartement = formulaire.elements.namedItem("departement") as HTMLSelectElement;
+    const champType = formulaire.elements.namedItem("type") as HTMLSelectElement;
+    const champTexte = formulaire.elements.namedItem("texte") as HTMLInputElement;
+    champDepartement.value = parametres.get("departement") ?? "";
+    champType.value = parametres.get("type") ?? "";
+
+    const normaliser = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const filtrer = () => {
+      const texte = normaliser(champTexte.value.trim());
+      let visibles = 0;
+      for (const ligne of lignes) {
+        const visible =
+          (!champDepartement.value || ligne.dataset.departement === champDepartement.value) &&
+          (!champType.value || ligne.dataset.type === champType.value) &&
+          (!texte || normaliser(ligne.dataset.texte ?? "").includes(texte));
+        ligne.hidden = !visible;
+        if (visible) visibles += 1;
+      }
+      compteur.textContent = `${visibles} organisation(s)`;
+    };
+    formulaire.addEventListener("input", filtrer);
+    filtrer();
+
+    for (const entete of tableau.querySelectorAll<HTMLTableCellElement>("th[data-tri]")) {
+      entete.querySelector("button")?.addEventListener("click", () => {
+        const cle = entete.dataset.tri as string;
+        const descendant = entete.getAttribute("aria-sort") !== "descending";
+        for (const autre of tableau.querySelectorAll("th[data-tri]")) autre.removeAttribute("aria-sort");
+        entete.setAttribute("aria-sort", descendant ? "descending" : "ascending");
+        const numerique = cle === "score" || cle === "population";
+        lignes.sort((a, b) => {
+          const va = a.dataset[cle] ?? "";
+          const vb = b.dataset[cle] ?? "";
+          const comparaison = numerique ? Number(va) - Number(vb) : va.localeCompare(vb, "fr", { numeric: true });
+          return descendant ? -comparaison : comparaison;
+        });
+        corps.append(...lignes);
+      });
+    }
+  }
+</script>

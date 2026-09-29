@@ -1,0 +1,47 @@
+---
+import Base from "../mises-en-page/Base.astro";
+import { MENTIONS_LEGALES, SITE } from "../config";
+const { editeur, hebergeur, directeurPublication } = MENTIONS_LEGALES;
+---
+<Base titre="Mentions légales" description="Éditeur, hébergeur et informations légales du site Bleu Blanc Cloud.">
+  <div class="conteneur prose">
+    <h1>Mentions légales</h1>
+
+    <h2>Éditeur</h2>
+    <p>
+      {editeur.nom} — {editeur.statut}<br />
+      Adresse : {editeur.adresse}<br />
+      Contact : <a href={`mailto:${editeur.contact}`}>{editeur.contact}</a>
+    </p>
+    <p>Directeur de la publication : {directeurPublication}</p>
+
+    <h2>Hébergeur</h2>
+    <p>
+      {hebergeur.nom}<br />
+      {hebergeur.adresse}<br />
+      <a href={hebergeur.site}>{hebergeur.site}</a>
+    </p>
+
+    <h2>Nature du site</h2>
+    <p>
+      {SITE.nom} est un projet personnel, indépendant et non commercial. Il n'est pas un site
+      officiel et n'a <strong>aucun lien avec l'État, une administration ou l'Union européenne</strong>.
+      Les scores publiés sont indicatifs et fondés uniquement sur des informations publiquement
+      accessibles.
+    </p>
+
+    <h2>Données personnelles et cookies</h2>
+    <p>
+      Ce site ne dépose aucun cookie, n'utilise aucun traceur ni aucune mesure d'audience, et ne
+      charge aucune ressource externe. Aucune donnée personnelle n'est collectée lors de la
+      consultation.
+    </p>
+
+    <h2>Propriété intellectuelle</h2>
+    <p>
+      Le code source est publié sous licence <a href={SITE.depot}>EUPL-1.2</a>. Les données
+      publiées peuvent être réutilisées en citant la source « Bleu Blanc Cloud ». La police
+      Luciole est distribuée sous licence CC-BY 4.0.
+    </p>
+  </div>
+</Base>

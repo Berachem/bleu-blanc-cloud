@@ -1,0 +1,36 @@
+---
+import type { ScoreCategorie } from "../lib/types";
+import { nombre } from "../lib/format";
+interface Props {
+  categorie: ScoreCategorie;
+}
+const { categorie } = Astro.props;
+const valeur = categorie.score ?? 0;
+const note = valeur >= 85 ? "A" : valeur >= 70 ? "B" : valeur >= 50 ? "C" : valeur >= 30 ? "D" : "E";
+---
+<li>
+  <div class="barre__entete">
+    <span>{categorie.libelle}</span>
+    <span>
+      {categorie.evaluable ? `${nombre(valeur)}/100` : "non évaluée"}
+    </span>
+  </div>
+  {
+    categorie.evaluable && (
+      <div
+        class="barre__piste"
+        role="meter"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow={valeur}
+        aria-label={`${categorie.libelle} : ${nombre(valeur)} sur 100`}
+      >
+        <div class={`barre__remplissage note-${note}`} style={`width: ${Math.max(valeur, 2)}%`} />
+      </div>
+    )
+  }
+  <p class="barre__explication">
+    {categorie.explication}
+    {categorie.evaluable && ` Poids : ${nombre(categorie.poids_effectif)} %.`}
+  </p>
+</li>

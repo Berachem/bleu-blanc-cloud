@@ -1,6 +1,129 @@
 ---
+import BadgeNote from "../composants/BadgeNote.astro";
+import CarteFrance from "../composants/CarteFrance.astro";
+import CarteOrganisation from "../composants/CarteOrganisation.astro";
+import EtoilesEurope from "../composants/EtoilesEurope.astro";
+import Recherche from "../composants/Recherche.astro";
+import Base from "../mises-en-page/Base.astro";
+import { departements, index, meta, organisations } from "../lib/donnees";
+import { date, nombre, pourcentage } from "../lib/format";
+
+const entrees = index();
+const toutes = organisations();
+const total = entrees.length;
+const moyenne = total ? entrees.reduce((somme, e) => somme + e.score, 0) / total : 0;
+const scoreCategorie = (slug: string, categorie: string) =>
+  toutes.find((o) => o.slug === slug)?.score.detail.find((d) => d.categorie === categorie);
+const messagerieD = entrees.filter((e) => scoreCategorie(e.slug, "messagerie")?.score === 0).length;
+const audienceD = entrees.filter((e) => scoreCategorie(e.slug, "mesure_audience")?.score === 0).length;
+const europeens = entrees.filter((e) => e.note === "A").length;
+const recents = [...entrees].sort((a, b) => b.date_scan.localeCompare(a.date_scan)).slice(0, 6);
+const repartition = ["A", "B", "C", "D", "E"].map((note) => ({
+  note,
+  nombre: entrees.filter((e) => e.note === note).length,
+}));
+const infos = meta();
 ---
-<html lang="fr">
-  <head><meta charset="utf-8" /><title>Bleu Blanc Cloud</title></head>
-  <body><h1>Bleu Blanc Cloud</h1></body>
-</html>
+<Base titre="Bleu Blanc Cloud">
+  <section class="accroche" aria-labelledby="titre-accueil">
+    <EtoilesEurope />
+    <div class="conteneur">
+      <div class="accroche__texte">
+        <h1 id="titre-accueil">Nos services publics dépendent-ils du cloud américain&nbsp;?</h1>
+        <p>
+          Bleu Blanc Cloud analyse, de façon passive et transparente, où sont hébergés les sites,
+          la messagerie et les services numériques des collectivités françaises, et propose des
+          pistes vers des alternatives françaises et européennes.
+        </p>
+        <Recherche />
+      </div>
+      <div>
+        <p class="texte-secondaire petit">
+          Campagne du {date(infos.date_campagne)} · méthodologie v{infos.version_methodo}
+        </p>
+        <ul class="legende" aria-label="Répartition des notes">
+          {
+            repartition.map((r) => (
+              <li>
+                <BadgeNote note={r.note} />
+                <span>{r.nombre}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="conteneur">
+    <section class="section" aria-labelledby="titre-chiffres">
+      <h2 id="titre-chiffres" class="visuellement-cache">Chiffres clés</h2>
+      <ul class="chiffres">
+        <li class="chiffre">
+          <span class="chiffre__valeur">{nombre(total)}</span>
+          <span class="chiffre__libelle">organisations analysées</span>
+        </li>
+        <li class="chiffre">
+          <span class="chiffre__valeur">{nombre(moyenne)}/100</span>
+          <span class="chiffre__libelle">score moyen</span>
+        </li>
+        <li class="chiffre">
+          <span class="chiffre__valeur">{pourcentage(messagerieD, total)}</span>
+          <span class="chiffre__libelle">ont une messagerie soumise au Cloud Act</span>
+        </li>
+        <li class="chiffre">
+          <span class="chiffre__valeur">{pourcentage(audienceD, total)}</span>
+          <span class="chiffre__libelle">utilisent une mesure d'audience extra-européenne</span>
+        </li>
+        <li class="chiffre">
+          <span class="chiffre__valeur">{pourcentage(europeens, total)}</span>
+          <span class="chiffre__libelle">obtiennent la note A</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="titre-carte">
+      <h2 id="titre-carte">Carte par département</h2>
+      <p class="texte-secondaire">
+        Couleur : note moyenne des organisations analysées dans le département.
+        <a href="/carte/">Voir la carte détaillée et son tableau</a>.
+      </p>
+      <CarteFrance departements={departements()} titre="Note moyenne par département" />
+    </section>
+
+    <section class="section" aria-labelledby="titre-recents">
+      <h2 id="titre-recents">Derniers scans</h2>
+      <ul class="grille">
+        {recents.map((entree) => <li><CarteOrganisation entree={entree} /></li>)}
+      </ul>
+      <p><a class="bouton bouton--secondaire" href="/classements/">Toutes les organisations</a></p>
+    </section>
+
+    <section class="section" aria-labelledby="titre-limites">
+      <h2 id="titre-limites">Ce que mesure (et ne mesure pas) le score</h2>
+      <div class="grille">
+        <div class="carte">
+          <h3>Une analyse passive</h3>
+          <p>
+            Seules les informations publiques sont consultées : enregistrements DNS, adresses IP,
+            quelques pages du site. Aucun formulaire n'est soumis, aucune faille n'est testée.
+          </p>
+        </div>
+        <div class="carte">
+          <h3>Une empreinte externe</h3>
+          <p>
+            Le score ne dit rien des logiciels internes ni des contrats. Il indique une
+            <strong>dépendance</strong> visible, pas une faute : ce sont des pistes de réflexion.
+          </p>
+        </div>
+        <div class="carte">
+          <h3>Une méthode ouverte</h3>
+          <p>
+            Chaque point retiré est justifié par une preuve. La <a href="/methodologie/">méthodologie</a>
+            et le code sont publics et versionnés.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>

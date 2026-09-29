@@ -1,0 +1,299 @@
+---
+import BadgeNote from "../../composants/BadgeNote.astro";
+import BarreScore from "../../composants/BarreScore.astro";
+import MentionIA from "../../composants/MentionIA.astro";
+import Niveau from "../../composants/Niveau.astro";
+import { SITE } from "../../config";
+import Base from "../../mises-en-page/Base.astro";
+import { index, organisation as lireOrganisation } from "../../lib/donnees";
+import {
+  LIBELLES_CATEGORIES,
+  LIBELLES_TYPES,
+  LIBELLES_TYPES_SERVICE,
+  date,
+  nombre,
+  pays,
+} from "../../lib/format";
+import type { Constat } from "../../lib/types";
+
+export function getStaticPaths() {
+  return index().map((entree) => ({ params: { slug: entree.slug } }));
+}
+
+const { slug } = Astro.params;
+const org = lireOrganisation(slug as string);
+const score = org.score;
+
+// Points retirés rattachés à chaque constat (index dans la liste des constats)
+const retraits = new Map<number, { points: number; raison: string }[]>();
+for (const categorie of score.detail) {
+  for (const justification of categorie.justifications ?? []) {
+    const liste = retraits.get(justification.constat_index) ?? [];
+    liste.push({ points: justification.points_retires, raison: justification.raison });
+    retraits.set(justification.constat_index, liste);
+  }
+}
+const ORDRE = [
+  "hebergement",
+  "messagerie",
+  "dns",
+  "suites_saas",
+  "services_tiers",
+  "mesure_audience",
+  "informatif",
+] as const;
+const groupes = ORDRE.map((categorie) => ({
+  categorie,
+  constats: org.constats
+    .map((constat, rang) => ({ constat, rang }))
+    .filter(({ constat }) => constat.categorie === categorie),
+})).filter((groupe) => groupe.constats.length > 0);
+
+const nomFournisseur = (constat: Constat) =>
+  constat.fournisseur_id ? (org.fournisseurs[constat.fournisseur_id]?.nom ?? constat.fournisseur_id) : null;
+const preuve = (constat: Constat) => JSON.stringify(constat.preuve, null, 2);
+const signalPositif = (constat: Constat) => constat.preuve?.signal_positif === true;
+const alternativesParId = new Map(org.alternatives.map((a) => [a.id, a]));
+const fournisseurs = Object.values(org.fournisseurs);
+const infos = org.informations;
+const sujetCorrection = encodeURIComponent(`Bleu Blanc Cloud — correction : ${org.nom} (${org.domaine})`);
+const description = `${org.nom} : note ${score.note}, score ${score.score_global}/100. Dépendance numérique vis-à-vis des fournisseurs extra-européens et pistes d'alternatives.`;
+---
+<Base titre={`${org.nom} — note ${score.note}`} description={description}>
+  <div class="conteneur">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a href="/">Accueil</a></li>
+        <li><a href="/classements/">Organisations</a></li>
+        <li aria-current="page">{org.nom}</li>
+      </ol>
+    </nav>
+
+    <header class="fiche-entete">
+      <BadgeNote note={score.note} taille="grand" />
+      <div>
+        <h1>{org.nom}</h1>
+        <p class="score-global">Score : {score.score_global}/100</p>
+        <ul class="meta-fiche">
+          <li>{LIBELLES_TYPES[org.type]}</li>
+          {org.departement_nom && <li>{org.departement_nom} ({org.departement})</li>}
+          {org.population != null && <li>{nombre(org.population)} habitants</li>}
+          <li>Domaine : <code>{org.domaine}</code></li>
+          <li>Scan du {date(org.date_scan)}</li>
+          <li><a href="/methodologie/">Méthodologie v{score.version_methodo}</a></li>
+        </ul>
+      </div>
+    </header>
+
+    <div class="alerte">
+      <p>
+        Ce score ne reflète que l'empreinte <strong>externe et visible publiquement</strong> de
+        l'organisation (site web et DNS), pas ses outils internes. Il est indicatif.
+      </p>
+    </div>
+
+    <div class="colonnes section">
+      <section aria-labelledby="titre-detail">
+        <h2 id="titre-detail">Détail par catégorie</h2>
+        <ul class="barres">
+          {score.detail.map((categorie) => <BarreScore categorie={categorie} />)}
+        </ul>
+      </section>
+
+      <section aria-labelledby="titre-infos">
+        <h2 id="titre-infos">Informations</h2>
+        <dl class="definitions carte">
+          <dt>Bureau d'enregistrement</dt>
+          <dd>{infos.bureau_enregistrement ?? "non déterminé"}</dd>
+          <dt>Autorité de certification</dt>
+          <dd>{infos.autorite_certification ?? "non déterminée"}</dd>
+          <dt>SecNumCloud</dt>
+          <dd>
+            {
+              infos.fournisseurs_secnumcloud?.length
+                ? `${infos.fournisseurs_secnumcloud.join(", ")} propose(nt) une offre qualifiée (son usage n'est pas vérifiable de l'extérieur)`
+                : "aucun fournisseur détecté ne propose d'offre qualifiée"
+            }
+          </dd>
+        </dl>
+        {
+          fournisseurs.length > 0 && (
+            <>
+              <h3>Fournisseurs identifiés</h3>
+              <ul class="constats">
+                {fournisseurs.map((f) => (
+                  <li class="carte">
+                    <strong>{f.nom}</strong> <Niveau niveau={f.niveau} />
+                    <br />
+                    <span class="texte-secondaire petit">
+                      Siège : {pays(f.pays_siege)}
+                      {f.maison_mere && ` · maison mère : ${f.maison_mere}${f.pays_maison_mere ? ` (${pays(f.pays_maison_mere)})` : ""}`}
+                      {f.soumis_cloud_act && " · soumis au Cloud Act"}
+                      {f.autre_loi_extraterritoriale && ` · ${f.autre_loi_extraterritoriale}`}
+                      {f.a_verifier && " · fait à vérifier"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )
+        }
+      </section>
+    </div>
+
+    <section class="section" aria-labelledby="titre-constats">
+      <h2 id="titre-constats">Constats et preuves</h2>
+      <p class="texte-secondaire">
+        Chaque point retiré est rattaché à un constat. Dépliez un constat pour voir la preuve
+        technique qui le justifie.
+      </p>
+      {
+        groupes.map((groupe) => (
+          <>
+            <h3>{LIBELLES_CATEGORIES[groupe.categorie]}</h3>
+            <ul class="constats">
+              {groupe.constats.map(({ constat, rang }) => (
+                <li>
+                  <details class="constat">
+                    <summary>
+                      {constat.categorie !== "informatif" && <Niveau niveau={constat.niveau} />}
+                      <span class="constat__valeur">{constat.valeur}</span>
+                      {nomFournisseur(constat) && constat.valeur !== nomFournisseur(constat) && (
+                        <span class="texte-secondaire">{nomFournisseur(constat)}</span>
+                      )}
+                      {signalPositif(constat) && <span class="constat__positif">Solution européenne ou libre</span>}
+                      {retraits.has(rang) && (
+                        <span class="texte-secondaire petit">
+                          −{nombre(retraits.get(rang)!.reduce((s, r) => s + r.points, 0))} pts dans la catégorie
+                        </span>
+                      )}
+                    </summary>
+                    <div class="constat__corps">
+                      {retraits.get(rang)?.map((r) => <p class="petit">{r.raison}</p>)}
+                      <p class="petit texte-secondaire">
+                        Sonde : {constat.sonde} · Constat : {constat.cle}
+                        {typeof constat.preuve?.type_service === "string" &&
+                          ` · ${LIBELLES_TYPES_SERVICE[constat.preuve.type_service as string] ?? constat.preuve.type_service}`}
+                      </p>
+                      <pre><code>{preuve(constat)}</code></pre>
+                    </div>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          </>
+        ))
+      }
+      {
+        infos.domaines_tiers_inconnus && infos.domaines_tiers_inconnus.length > 0 && (
+          <>
+            <h3>Domaines tiers non identifiés</h3>
+            <p class="texte-secondaire petit">
+              Ressources chargées depuis des domaines absents du référentiel (non notées).
+            </p>
+            <ul>
+              {infos.domaines_tiers_inconnus.map((domaine) => <li><code>{domaine}</code></li>)}
+            </ul>
+          </>
+        )
+      }
+    </section>
+
+    {
+      org.rapport_ia && (
+        <section class="section" aria-labelledby="titre-rapport">
+          <h2 id="titre-rapport">Synthèse et plan d'action</h2>
+          <MentionIA />
+          <div class="carte prose">
+            <p>{org.rapport_ia.contenu.resume_decideur}</p>
+            {org.rapport_ia.contenu.points_forts.length > 0 && (
+              <>
+                <h3>Points forts</h3>
+                <ul>{org.rapport_ia.contenu.points_forts.map((point) => <li>{point}</li>)}</ul>
+              </>
+            )}
+            {org.rapport_ia.contenu.risques.length > 0 && (
+              <>
+                <h3>Risques</h3>
+                <ul>
+                  {org.rapport_ia.contenu.risques.map((risque) => (
+                    <li>
+                      <strong>{risque.titre}</strong>{" "}
+                      <span class={`gravite gravite--${risque.gravite}`}>
+                        gravité {risque.gravite === "elevee" ? "élevée" : risque.gravite}
+                      </span>
+                      <br />
+                      {risque.explication}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {org.rapport_ia.contenu.plan_migration.length > 0 && (
+              <>
+                <h3>Plan de migration proposé</h3>
+                <ol>
+                  {[...org.rapport_ia.contenu.plan_migration]
+                    .sort((a, b) => a.ordre - b.ordre)
+                    .map((etape) => (
+                      <li>
+                        {etape.action}{" "}
+                        <span class="texte-secondaire petit">(effort {etape.effort === "eleve" ? "élevé" : etape.effort})</span>
+                        {etape.alternative_id && alternativesParId.has(etape.alternative_id) && (
+                          <>
+                            {" "}— piste : <a href={`#alt-${etape.alternative_id}`}>{alternativesParId.get(etape.alternative_id)!.nom}</a>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                </ol>
+              </>
+            )}
+            <p class="texte-secondaire petit">
+              Modèle : {org.rapport_ia.modele} · consignes v{org.rapport_ia.version_invite} · généré le {date(org.rapport_ia.genere_le)}
+            </p>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      org.alternatives.length > 0 && (
+        <section class="section" aria-labelledby="titre-alternatives">
+          <h2 id="titre-alternatives">Pistes : alternatives françaises et européennes</h2>
+          <p class="texte-secondaire">
+            Suggestions issues de notre <a href="/alternatives/">référentiel public</a>, sans
+            rémunération des fournisseurs cités.
+          </p>
+          <ul class="grille">
+            {org.alternatives.map((alternative) => (
+              <li class="carte" id={`alt-${alternative.id}`}>
+                <h3 style="margin-top: 0">
+                  <a href={alternative.url} rel="noopener">{alternative.nom}</a>
+                </h3>
+                <p class="texte-secondaire petit">
+                  {pays(alternative.pays)} · {LIBELLES_CATEGORIES[alternative.categorie]}
+                </p>
+                <p>{alternative.description_courte}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class="section carte" aria-labelledby="titre-correction">
+      <h2 id="titre-correction" style="margin-top: 0">Une erreur ? Un droit de réponse ?</h2>
+      <p>
+        L'analyse est automatique et peut se tromper. Toute organisation peut demander une
+        correction, exercer un droit de réponse ou demander son retrait de l'observatoire.
+      </p>
+      <p>
+        <a class="bouton" href={`mailto:${SITE.contact}?subject=${sujetCorrection}`}>
+          Signaler une erreur / demander une correction
+        </a>
+        <a class="bouton bouton--secondaire" href="/retrait/">Retrait et droit de réponse</a>
+      </p>
+    </section>
+  </div>
+</Base>

@@ -1,0 +1,66 @@
+---
+import BadgeNote from "../composants/BadgeNote.astro";
+import CarteFrance from "../composants/CarteFrance.astro";
+import Base from "../mises-en-page/Base.astro";
+import { departements } from "../lib/donnees";
+import { nombre } from "../lib/format";
+
+const liste = departements();
+const avecDonnees = liste.filter((d) => d.nombre_organisations > 0);
+---
+<Base
+  titre="Carte des départements"
+  description="Note moyenne de dépendance numérique des organisations publiques par département, avec tableau accessible."
+>
+  <div class="conteneur">
+    <h1>Carte des départements</h1>
+    <p class="texte-secondaire">
+      Chaque département est coloré selon la note moyenne des organisations analysées.
+      Sélectionnez un département pour afficher ses organisations. Les mêmes données sont
+      présentées dans le tableau ci-dessous.
+    </p>
+    <CarteFrance departements={liste} titre="Note moyenne par département (carte interactive)" />
+
+    <section class="section" aria-labelledby="titre-tableau">
+      <h2 id="titre-tableau">Tableau des départements</h2>
+      <div class="tableau-defilant">
+        <table>
+          <caption class="visuellement-cache">
+            Score moyen, note moyenne et nombre d'organisations analysées par département
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Code</th>
+              <th scope="col">Département</th>
+              <th scope="col" class="nombre">Organisations</th>
+              <th scope="col" class="nombre">Score moyen</th>
+              <th scope="col">Note moyenne</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              avecDonnees.map((d) => (
+                <tr>
+                  <td>{d.code}</td>
+                  <td>
+                    <a href={`/classements/?departement=${encodeURIComponent(d.code)}`}>{d.nom}</a>
+                  </td>
+                  <td class="nombre">{d.nombre_organisations}</td>
+                  <td class="nombre">{d.score_moyen != null ? `${nombre(d.score_moyen, 1)}/100` : "—"}</td>
+                  <td>{d.note_moyenne && <BadgeNote note={d.note_moyenne} />}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      {
+        liste.length > avecDonnees.length && (
+          <p class="texte-secondaire petit">
+            {liste.length - avecDonnees.length} département(s) sans organisation analysée pour le moment.
+          </p>
+        )
+      }
+    </section>
+  </div>
+</Base>

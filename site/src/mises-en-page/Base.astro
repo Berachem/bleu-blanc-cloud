@@ -1,0 +1,105 @@
+---
+import "../styles/theme.css";
+import Logo from "../composants/Logo.astro";
+import { NAVIGATION, SITE } from "../config";
+import { meta } from "../lib/donnees";
+
+interface Props {
+  titre: string;
+  description?: string;
+}
+const { titre, description = SITE.description } = Astro.props;
+const titreComplet = titre === SITE.nom ? `${SITE.nom} — souveraineté numérique des services publics` : `${titre} — ${SITE.nom}`;
+const canonique = new URL(Astro.url.pathname, SITE.url).href;
+const cheminCourant = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const demonstration = meta().donnees_demonstration;
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titreComplet}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonique} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/polices/Luciole-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <meta name="theme-color" content="#002395" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="no-referrer" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content={SITE.nom} />
+    <meta property="og:title" content={titreComplet} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonique} />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <a class="evitement" href="#contenu">Aller au contenu</a>
+    <div class="bandeau-tricolore" aria-hidden="true"></div>
+    {
+      demonstration && (
+        <p class="bandeau-demo">
+          Données de démonstration fictives : aucune organisation réelle n'est présentée.
+        </p>
+      )
+    }
+    <header class="entete">
+      <div class="conteneur">
+        <a class="logo" href="/" aria-label={`${SITE.nom} — accueil`}>
+          <Logo />
+        </a>
+        <nav class="navigation" aria-label="Navigation principale">
+          <ul>
+            {
+              NAVIGATION.map((entree) => (
+                <li>
+                  <a
+                    href={entree.href}
+                    aria-current={cheminCourant === entree.href ? "page" : undefined}
+                  >
+                    {entree.libelle}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="contenu" tabindex="-1">
+      <slot />
+    </main>
+    <footer class="pied">
+      <div class="conteneur">
+        <div>
+          <p>
+            <strong>{SITE.nom}</strong> est un projet personnel, indépendant et open source.
+            Il n'a <strong>aucun lien avec l'État ni avec l'Union européenne</strong>.
+          </p>
+          <p class="texte-secondaire">
+            Le score ne reflète que l'empreinte externe et visible publiquement des organisations,
+            pas leurs outils internes. Il est indicatif.
+          </p>
+        </div>
+        <div>
+          <h2 class="petit">Comprendre</h2>
+          <ul>
+            <li><a href="/methodologie/">Méthodologie</a></li>
+            <li><a href="/alternatives/">Alternatives européennes</a></li>
+            <li><a href="/a-propos/">À propos</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="petit">Le projet</h2>
+          <ul>
+            <li><a href="/retrait/">Retrait et droit de réponse</a></li>
+            <li><a href="/mentions-legales/">Mentions légales</a></li>
+            <li><a href={SITE.depot}>Code source ({SITE.licenceCode})</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

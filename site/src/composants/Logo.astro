@@ -1,0 +1,34 @@
+---
+// Logo maison : nuage stylisé aux trois bandes verticales (bleu, blanc, rouge).
+interface Props {
+  taille?: number;
+  avecTexte?: boolean;
+}
+const { taille = 40, avecTexte = true } = Astro.props;
+const id = `nuage-${Math.random().toString(36).slice(2, 8)}`;
+---
+<svg
+  width={taille}
+  height={Math.round(taille * 0.7)}
+  viewBox="0 0 64 45"
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <clipPath id={id}>
+      <path d="M16 44a15 15 0 0 1-2.2-29.8A19 19 0 0 1 50.5 12 16 16 0 0 1 48 44Z" />
+    </clipPath>
+  </defs>
+  <g clip-path={`url(#${id})`}>
+    <rect x="0" y="0" width="22" height="45" fill="#002395"></rect>
+    <rect x="22" y="0" width="20" height="45" fill="#ffffff"></rect>
+    <rect x="42" y="0" width="22" height="45" fill="#ED2939"></rect>
+  </g>
+  <path
+    d="M16 44a15 15 0 0 1-2.2-29.8A19 19 0 0 1 50.5 12 16 16 0 0 1 48 44Z"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linejoin="round"></path>
+</svg>
+{avecTexte && <span>Bleu Blanc Cloud</span>}

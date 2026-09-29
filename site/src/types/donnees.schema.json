@@ -166,7 +166,10 @@
         "sonde",
         "categorie",
         "cle",
-        "valeur"
+        "valeur",
+        "fournisseur_id",
+        "niveau",
+        "preuve"
       ],
       "title": "Constat",
       "type": "object"
@@ -239,6 +242,7 @@
       "required": [
         "code",
         "nom",
+        "region",
         "nombre_organisations",
         "score_moyen",
         "note_moyenne",
@@ -346,6 +350,9 @@
         "nom",
         "type",
         "departement",
+        "departement_nom",
+        "region",
+        "population",
         "domaine",
         "score",
         "note",
@@ -391,6 +398,7 @@
       "required": [
         "ordre",
         "action",
+        "alternative_id",
         "effort"
       ],
       "title": "EtapeMigration",
@@ -477,6 +485,7 @@
         "maison_mere",
         "pays_maison_mere",
         "soumis_cloud_act",
+        "autre_loi_extraterritoriale",
         "propose_offre_secnumcloud",
         "niveau",
         "a_verifier"
@@ -528,6 +537,12 @@
           "type": "array"
         }
       },
+      "required": [
+        "bureau_enregistrement",
+        "autorite_certification",
+        "fournisseurs_secnumcloud",
+        "domaines_tiers_inconnus"
+      ],
       "title": "InformationsComplementaires",
       "type": "object"
     },
@@ -589,7 +604,8 @@
         "date_campagne",
         "date_export",
         "version_methodo",
-        "nombre_organisations"
+        "nombre_organisations",
+        "donnees_demonstration"
       ],
       "title": "MetaExport",
       "type": "object"
@@ -744,13 +760,20 @@
         "nom",
         "type",
         "departement",
+        "departement_nom",
+        "region",
+        "region_nom",
+        "population",
+        "site_web",
         "domaine",
         "date_scan",
         "statut_scan",
         "score",
         "constats",
         "informations",
-        "fournisseurs"
+        "fournisseurs",
+        "rapport_ia",
+        "alternatives"
       ],
       "title": "OrganisationExport",
       "type": "object"
@@ -904,7 +927,8 @@
         "score_global",
         "note",
         "version_methodo",
-        "detail"
+        "detail",
+        "categories_non_evaluables"
       ],
       "title": "Score",
       "type": "object"
@@ -980,7 +1004,9 @@
         "poids_effectif",
         "score",
         "evaluable",
-        "explication"
+        "points_perdus_global",
+        "explication",
+        "justifications"
       ],
       "title": "ScoreCategorie",
       "type": "object"

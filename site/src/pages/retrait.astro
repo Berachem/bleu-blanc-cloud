@@ -1,0 +1,52 @@
+---
+import Base from "../mises-en-page/Base.astro";
+import { SITE } from "../config";
+const sujetRetrait = encodeURIComponent("Bleu Blanc Cloud — demande de retrait");
+const sujetReponse = encodeURIComponent("Bleu Blanc Cloud — droit de réponse ou correction");
+---
+<Base
+  titre="Retrait et droit de réponse"
+  description="Demander la correction d'une analyse, exercer un droit de réponse ou demander le retrait d'une organisation de l'observatoire."
+>
+  <div class="conteneur prose">
+    <h1>Retrait et droit de réponse</h1>
+    <p>
+      L'analyse est automatique : elle peut se tromper ou devenir obsolète. Toute organisation
+      concernée peut demander une <strong>correction</strong>, exercer un <strong>droit de
+      réponse</strong> ou demander son <strong>retrait</strong>. Chaque demande reçoit une réponse
+      <strong>sous 30 jours</strong>.
+    </p>
+
+    <h2>Corriger une erreur ou répondre</h2>
+    <p>Indiquez dans votre message :</p>
+    <ul>
+      <li>le nom de l'organisation et son domaine ;</li>
+      <li>le constat contesté (catégorie, valeur affichée) ;</li>
+      <li>l'information correcte et, si possible, un élément vérifiable (documentation, contrat public…).</li>
+    </ul>
+    <p>
+      Une réponse de l'organisation peut être publiée sur sa fiche, à côté de l'analyse.
+    </p>
+    <p>
+      <a class="bouton" href={`mailto:${SITE.contact}?subject=${sujetReponse}`}>Écrire pour une correction</a>
+    </p>
+
+    <h2>Demander un retrait</h2>
+    <p>
+      Sur demande d'une personne habilitée de l'organisation, son domaine est ajouté à la liste
+      d'exclusion du projet : il n'est <strong>plus jamais analysé</strong> (aucune requête n'est
+      envoyée) et sa fiche est supprimée lors de la publication suivante.
+    </p>
+    <p>
+      <a class="bouton bouton--secondaire" href={`mailto:${SITE.contact}?subject=${sujetRetrait}`}>Demander un retrait</a>
+    </p>
+
+    <h2>Données personnelles</h2>
+    <p>
+      L'observatoire ne collecte ni ne publie aucune donnée personnelle : pas de nom d'agent,
+      pas d'adresse e-mail, pas de numéro de téléphone, et seuls les noms techniques des cookies
+      sont relevés. Les messages reçus ne servent qu'à traiter la demande.
+    </p>
+    <p class="texte-secondaire petit">Adresse de contact : {SITE.contact}</p>
+  </div>
+</Base>

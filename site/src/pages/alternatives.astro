@@ -1,0 +1,61 @@
+---
+import Base from "../mises-en-page/Base.astro";
+import { alternatives } from "../lib/donnees";
+import { LIBELLES_CATEGORIES, LIBELLES_TYPES_SERVICE, pays } from "../lib/format";
+
+const ORDRE = ["hebergement", "messagerie", "dns", "suites_saas", "services_tiers", "mesure_audience"] as const;
+const liste = alternatives();
+const groupes = ORDRE.map((categorie) => ({
+  categorie,
+  alternatives: liste.filter((a) => a.categorie === categorie),
+})).filter((g) => g.alternatives.length > 0);
+---
+<Base
+  titre="Alternatives françaises et européennes"
+  description="Référentiel public d'alternatives françaises et européennes aux services numériques extra-européens, par catégorie."
+>
+  <div class="conteneur">
+    <h1>Alternatives françaises et européennes</h1>
+    <p class="texte-secondaire">
+      Ce référentiel public est la seule source d'alternatives utilisée dans les rapports. Il est
+      indicatif : aucun fournisseur ne rémunère le projet, et chaque fiche est sourcée. Le choix
+      d'une solution dépend des besoins, des marchés publics et des compétences disponibles.
+    </p>
+    <nav aria-label="Catégories">
+      <ul>
+        {groupes.map((g) => <li><a href={`#${g.categorie}`}>{LIBELLES_CATEGORIES[g.categorie]}</a></li>)}
+      </ul>
+    </nav>
+    {
+      groupes.map((groupe) => (
+        <section class="section" id={groupe.categorie} aria-labelledby={`titre-${groupe.categorie}`}>
+          <h2 id={`titre-${groupe.categorie}`}>{LIBELLES_CATEGORIES[groupe.categorie]}</h2>
+          <ul class="grille">
+            {groupe.alternatives.map((alternative) => (
+              <li class="carte" id={alternative.id}>
+                <h3 style="margin-top: 0">
+                  <a href={alternative.url} rel="noopener">{alternative.nom}</a>
+                </h3>
+                <p class="texte-secondaire petit">
+                  {pays(alternative.pays)}
+                  {alternative.types_service.length > 0 &&
+                    ` · ${alternative.types_service.map((t) => LIBELLES_TYPES_SERVICE[t] ?? t).join(", ")}`}
+                </p>
+                <p>{alternative.description_courte}</p>
+                {alternative.a_verifier && (
+                  <p class="texte-secondaire petit">Informations en cours de vérification.</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+    <div class="alerte">
+      <p>
+        Une alternative manque ou une information est inexacte ? Le référentiel est public :
+        proposez une modification sur le <a href="https://github.com/Berachem/bleu-blanc-cloud">dépôt du projet</a>.
+      </p>
+    </div>
+  </div>
+</Base>

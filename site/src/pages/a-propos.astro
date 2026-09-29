@@ -1,0 +1,76 @@
+---
+import Base from "../mises-en-page/Base.astro";
+import { SITE } from "../config";
+---
+<Base
+  titre="À propos"
+  description="Qui porte Bleu Blanc Cloud, pourquoi, comment : un observatoire indépendant, open source et sans lien avec l'État."
+>
+  <div class="conteneur prose">
+    <h1>À propos</h1>
+
+    <h2>Pourquoi cet observatoire&nbsp;?</h2>
+    <p>
+      Les collectivités et services publics confient une part croissante de leur vie numérique à
+      des fournisseurs : hébergement des sites, messagerie, outils collaboratifs, mesure
+      d'audience… Lorsque ces fournisseurs sont soumis à des lois extraterritoriales comme le
+      <strong>Cloud Act</strong> américain, les données des habitants et des agents peuvent être
+      réclamées par des autorités étrangères, en dehors du droit européen.
+    </p>
+    <p>
+      Bleu Blanc Cloud rend cette dépendance <strong>visible et mesurable</strong>, commune par
+      commune, et propose des <a href="/alternatives/">pistes concrètes</a> vers des solutions
+      françaises et européennes. L'objectif est pédagogique : aider les élus, les directions et
+      les habitants à se poser les bonnes questions.
+    </p>
+
+    <h2>Qui&nbsp;?</h2>
+    <p>
+      Le projet est conçu et maintenu bénévolement par {SITE.auteur}
+      (<a href={SITE.siteAuteur}>berachem.dev</a>). C'est un <strong>projet personnel</strong> :
+      il n'a <strong>aucun lien avec l'État, une administration, ni avec l'Union européenne</strong>,
+      et ne reçoit aucun financement de fournisseurs.
+    </p>
+
+    <h2>Open source et transparent</h2>
+    <p>
+      Le code, la méthodologie et les référentiels sont publics sous licence
+      <a href="https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12">EUPL-1.2</a> :
+      <a href={SITE.depot}>dépôt du projet</a>. Chaque score est reproductible et chaque point
+      retiré est justifié par une preuve.
+    </p>
+
+    <h2>Cohérent avec son sujet</h2>
+    <ul>
+      <li>Site statique hébergé en Allemagne par Codeberg, association à but non lucratif.</li>
+      <li>Aucun cookie, aucun traceur, aucune mesure d'audience, aucune ressource externe.</li>
+      <li>Police <strong>Luciole</strong> (conçue en France pour les personnes malvoyantes), auto-hébergée.</li>
+      <li>Rapports rédigés avec <strong>Mistral</strong>, entreprise française.</li>
+    </ul>
+
+    <h2>Limites</h2>
+    <ul>
+      <li>Seule l'empreinte <strong>externe et visible publiquement</strong> est analysée.</li>
+      <li>Un fournisseur non référencé est classé « inconnu » et exclu du calcul.</li>
+      <li>Les faits des référentiels sont sourcés mais peuvent évoluer (rachats, filiales…).</li>
+      <li>Les textes générés par l'IA peuvent contenir des erreurs ; ils sont signalés comme tels.</li>
+    </ul>
+
+    <h2>Crédits</h2>
+    <ul>
+      <li>
+        Police Luciole © Laurent Bourcellier &amp; Jonathan Perez, Centre Technique Régional pour
+        la Déficience Visuelle et typographies.fr —
+        <a href="https://creativecommons.org/licenses/by/4.0/deed.fr">CC-BY 4.0</a>.
+      </li>
+      <li>
+        Contours des départements : IGN Admin Express COG, Licence Ouverte (Etalab 2.0),
+        via <a href="https://github.com/gregoiredavid/france-geojson">france-geojson</a>.
+      </li>
+      <li>
+        Données des organisations : API Annuaire de l'administration (Service-Public) et
+        API Découpage administratif (geo.api.gouv.fr), Licence Ouverte.
+      </li>
+    </ul>
+  </div>
+</Base>

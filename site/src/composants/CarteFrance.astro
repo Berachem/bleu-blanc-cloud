@@ -1,0 +1,136 @@
+---
+// Carte des départements en SVG, calculée au moment de la construction (d3-geo) :
+// aucune tuile, aucune bibliothèque cartographique chargée par le navigateur.
+// Contours : IGN Admin Express COG (Licence Ouverte Etalab 2.0), via france-geojson.
+import { geoConicConformal, geoMercator, geoPath } from "d3-geo";
+import type { Feature, FeatureCollection, Geometry } from "geojson";
+import { feature } from "topojson-client";
+import type { GeometryCollection, Topology } from "topojson-specification";
+import topologie from "../donnees-carte/departements.topo.json";
+import { nombre } from "../lib/format";
+import type { DepartementExport } from "../lib/types";
+
+interface Props {
+  departements: DepartementExport[];
+  titre?: string;
+  avecLiens?: boolean;
+}
+const { departements, titre = "Carte des départements", avecLiens = true } = Astro.props;
+
+type Proprietes = { code: string; nom: string };
+const topo = topologie as unknown as Topology<{ departements: GeometryCollection<Proprietes> }>;
+const collection = feature(topo, topo.objects.departements) as FeatureCollection<
+  Geometry,
+  Proprietes
+>;
+
+const LARGEUR = 600;
+const HAUTEUR = 650;
+const OUTRE_MER = ["971", "972", "973", "974", "976"];
+const metropole = collection.features.filter((f) => !OUTRE_MER.includes(f.properties.code));
+const projection = geoConicConformal()
+  .parallels([44, 49])
+  .rotate([-3, 0])
+  .fitExtent(
+    [
+      [8, 8],
+      [LARGEUR - 8, 548],
+    ],
+    { type: "FeatureCollection", features: metropole },
+  );
+const chemin = geoPath(projection).digits(1);
+
+// Encadrés des départements et régions d'outre-mer
+const LARGEUR_CADRE = (LARGEUR - 16 - 4 * 8) / 5;
+const cadres = OUTRE_MER.map((code, rang) => {
+  const entite = collection.features.find((f) => f.properties.code === code);
+  const x = 8 + rang * (LARGEUR_CADRE + 8);
+  const y = 562;
+  if (!entite) return null;
+  const proj = geoMercator().fitExtent(
+    [
+      [x + 6, y + 4],
+      [x + LARGEUR_CADRE - 6, y + 62],
+    ],
+    entite,
+  );
+  return { code, x, y, entite, d: geoPath(proj).digits(1)(entite) ?? "" };
+}).filter((c) => c !== null);
+
+const parCode = new Map(departements.map((d) => [d.code, d]));
+
+function description(entite: Feature<Geometry, Proprietes>): string {
+  const donnees = parCode.get(entite.properties.code);
+  const nom = `${entite.properties.nom} (${entite.properties.code})`;
+  if (!donnees || donnees.score_moyen == null || donnees.nombre_organisations === 0) {
+    return `${nom} : aucune organisation analysée`;
+  }
+  return `${nom} : score moyen ${nombre(donnees.score_moyen)}/100 (note ${donnees.note_moyenne}), ${donnees.nombre_organisations} organisation${donnees.nombre_organisations > 1 ? "s" : ""}`;
+}
+function classe(entite: Feature<Geometry, Proprietes>): string {
+  const note = parCode.get(entite.properties.code)?.note_moyenne;
+  return note ? `remplissage-${note}` : "vide";
+}
+function lien(entite: Feature<Geometry, Proprietes>): string | null {
+  const donnees = parCode.get(entite.properties.code);
+  return avecLiens && donnees && donnees.nombre_organisations > 0
+    ? `/classements/?departement=${encodeURIComponent(entite.properties.code)}`
+    : null;
+}
+const departementsMetropole = metropole.map((entite) => ({
+  entite,
+  d: chemin(entite) ?? "",
+}));
+const tous = [...departementsMetropole, ...cadres];
+const identifiantTitre = `titre-carte-${Math.random().toString(36).slice(2, 8)}`;
+---
+<figure class="carte-figure">
+  <svg
+    class="carte-france"
+    viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`}
+    role="group"
+    aria-labelledby={identifiantTitre}
+  >
+    <title id={identifiantTitre}>{titre}</title>
+    {
+      tous.map(({ entite, d }) => {
+        const url = lien(entite);
+        const texte = description(entite);
+        return url ? (
+          <a href={url} aria-label={texte}>
+            <path d={d} class={classe(entite)}>
+              <title>{texte}</title>
+            </path>
+          </a>
+        ) : (
+          <path d={d} class={classe(entite)}>
+            <title>{texte}</title>
+          </path>
+        );
+      })
+    }
+    {
+      cadres.map((cadre) => (
+        <g aria-hidden="true">
+          <rect class="cadre-om" x={cadre.x} y={cadre.y} width={LARGEUR_CADRE} height="80" rx="4" />
+          <text x={cadre.x + LARGEUR_CADRE / 2} y={cadre.y + 76} text-anchor="middle">
+            {cadre.entite.properties.nom}
+          </text>
+        </g>
+      ))
+    }
+  </svg>
+  <figcaption>
+    <ul class="legende" aria-label="Légende : note moyenne du département">
+      {
+        ["A", "B", "C", "D", "E"].map((note) => (
+          <li>
+            <span class={`pastille note-${note}`} aria-hidden="true" />
+            Note moyenne {note}
+          </li>
+        ))
+      }
+      <li><span class="pastille" style="background: var(--carte-vide)" aria-hidden="true"></span>Aucune donnée</li>
+    </ul>
+  </figcaption>
+</figure>

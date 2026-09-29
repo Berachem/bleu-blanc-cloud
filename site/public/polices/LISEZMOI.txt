@@ -1,0 +1,7 @@
+Police Luciole — © Laurent Bourcellier & Jonathan Perez (2019)
+Conçue par le Centre Technique Régional pour la Déficience Visuelle et le studio typographies.fr.
+Licence : Creative Commons Attribution 4.0 International (CC-BY 4.0)
+https://creativecommons.org/licenses/by/4.0/legalcode.fr
+
+Fichiers : sous-ensembles WOFF2 (latin et ponctuation française) générés par site/scripts/polices.py
+à partir des fichiers TTF d'origine (version 1.001). Aucune modification des dessins.

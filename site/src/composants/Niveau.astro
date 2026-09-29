@@ -1,0 +1,9 @@
+---
+import { DESCRIPTIONS_NIVEAUX } from "../lib/format";
+interface Props {
+  niveau: string;
+}
+const { niveau } = Astro.props;
+const libelle = niveau === "inconnu" ? "Niveau inconnu" : `Niveau ${niveau}`;
+---
+<span class={`niveau niveau-${niveau}`} title={DESCRIPTIONS_NIVEAUX[niveau]}>{libelle}</span>

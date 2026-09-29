@@ -50,3 +50,5 @@ jobs:
         run: npm run verifier
       - name: Construction
         run: npm run build
+      - name: Aucune requête externe, aucun cookie
+        run: npm run verifier:externe

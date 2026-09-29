@@ -1,0 +1,12 @@
+---
+import { descriptionNote } from "../lib/format";
+interface Props {
+  note: string;
+  taille?: "petit" | "moyen" | "grand";
+}
+const { note, taille = "petit" } = Astro.props;
+const classes = ["badge", `note-${note}`, taille !== "petit" && `badge--${taille}`];
+---
+<span class:list={classes} role="img" aria-label={descriptionNote(note)} title={descriptionNote(note)}>
+  {note}
+</span>

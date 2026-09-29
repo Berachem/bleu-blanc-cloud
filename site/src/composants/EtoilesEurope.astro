@@ -1,0 +1,18 @@
+---
+// Motif décoratif : 12 étoiles jaunes disposées en cercle, clin d'œil à l'Europe.
+// Volontairement sans fond bleu : ce n'est pas le drapeau européen et il n'implique
+// aucune approbation officielle.
+const etoiles = Array.from({ length: 12 }, (_, i) => {
+  const angle = (i * Math.PI) / 6 - Math.PI / 2;
+  return { x: 100 + 70 * Math.cos(angle), y: 100 + 70 * Math.sin(angle) };
+});
+const branche = (cx: number, cy: number, r: number) =>
+  Array.from({ length: 10 }, (_, k) => {
+    const rayon = k % 2 === 0 ? r : r * 0.4;
+    const a = (k * Math.PI) / 5 - Math.PI / 2;
+    return `${(cx + rayon * Math.cos(a)).toFixed(1)},${(cy + rayon * Math.sin(a)).toFixed(1)}`;
+  }).join(" ");
+---
+<svg class="etoiles" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+  {etoiles.map((e) => <polygon points={branche(e.x, e.y, 11)} fill="#FFCC00" />)}
+</svg>

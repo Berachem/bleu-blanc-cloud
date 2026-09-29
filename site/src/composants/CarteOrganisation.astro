@@ -1,0 +1,19 @@
+---
+import BadgeNote from "./BadgeNote.astro";
+import { LIBELLES_TYPES } from "../lib/format";
+import type { EntreeIndex } from "../lib/types";
+interface Props {
+  entree: EntreeIndex;
+}
+const { entree } = Astro.props;
+---
+<a class="carte carte-organisation" href={`/organisation/${entree.slug}/`}>
+  <BadgeNote note={entree.note} taille="moyen" />
+  <span>
+    <span class="carte-organisation__nom">{entree.nom}</span>
+    <span class="texte-secondaire petit">
+      {LIBELLES_TYPES[entree.type]}
+      {entree.departement_nom && ` · ${entree.departement_nom}`} · {entree.score}/100
+    </span>
+  </span>
+</a>

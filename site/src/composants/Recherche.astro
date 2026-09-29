@@ -1,0 +1,81 @@
+---
+// Recherche instantanée : l'index léger (/recherche.json) n'est chargé qu'à la première saisie.
+interface Props {
+  identifiant?: string;
+}
+const { identifiant = "recherche" } = Astro.props;
+---
+<div class="recherche" data-recherche>
+  <div class="champ">
+    <label for={identifiant}>Rechercher une organisation</label>
+    <input
+      id={identifiant}
+      type="search"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="Commune, département, domaine…"
+      aria-describedby={`${identifiant}-aide`}
+      aria-controls={`${identifiant}-resultats`}
+    />
+    <span id={`${identifiant}-aide`} class="texte-secondaire petit">
+      Ou consultez <a href="/classements/">la liste complète</a>.
+    </span>
+  </div>
+  <ul id={`${identifiant}-resultats`} class="recherche__resultats" aria-live="polite"></ul>
+</div>
+
+<script>
+  type Ligne = [slug: string, nom: string, departement: string, note: string, score: number, domaine: string];
+  const normaliser = (texte: string) =>
+    texte.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+  for (const bloc of document.querySelectorAll<HTMLElement>("[data-recherche]")) {
+    const champ = bloc.querySelector("input");
+    const liste = bloc.querySelector("ul");
+    if (!champ || !liste) continue;
+    let donnees: Promise<Ligne[]> | null = null;
+    const charger = () =>
+      (donnees ??= fetch("/recherche.json").then((reponse) => reponse.json() as Promise<Ligne[]>));
+
+    champ.addEventListener("focus", () => void charger(), { once: true });
+    champ.addEventListener("input", async () => {
+      const requete = normaliser(champ.value.trim());
+      liste.replaceChildren();
+      if (requete.length < 2) return;
+      const lignes = await charger();
+      const trouvees = lignes
+        .filter(([, nom, departement, , , domaine]) =>
+          normaliser(`${nom} ${departement} ${domaine}`).includes(requete),
+        )
+        .slice(0, 8);
+      if (trouvees.length === 0) {
+        const vide = document.createElement("li");
+        vide.className = "texte-secondaire petit";
+        vide.style.padding = "0.5rem";
+        vide.textContent = "Aucune organisation trouvée.";
+        liste.append(vide);
+        return;
+      }
+      for (const [slug, nom, departement, note, score] of trouvees) {
+        const element = document.createElement("li");
+        const lien = document.createElement("a");
+        lien.href = `/organisation/${slug}/`;
+        const badge = document.createElement("span");
+        badge.className = `badge note-${note}`;
+        badge.textContent = note;
+        badge.setAttribute("aria-hidden", "true");
+        const texte = document.createElement("span");
+        texte.textContent = `${nom}${departement ? ` · ${departement}` : ""} — ${score}/100 (note ${note})`;
+        lien.append(badge, texte);
+        element.append(lien);
+        liste.append(element);
+      }
+    });
+    champ.addEventListener("keydown", (evenement) => {
+      if (evenement.key === "Escape") {
+        champ.value = "";
+        liste.replaceChildren();
+      }
+    });
+  }
+</script>

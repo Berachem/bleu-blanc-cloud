@@ -1,0 +1,16 @@
+---
+// Contenu publié directement depuis docs/methodologie.md (source unique, versionnée).
+import Base from "../mises-en-page/Base.astro";
+import { Content, frontmatter } from "../../../docs/methodologie.md";
+---
+<Base
+  titre="Méthodologie"
+  description="Comment Bleu Blanc Cloud calcule le score de dépendance numérique : sondes passives, niveaux de juridiction, pondération, limites."
+>
+  <div class="conteneur prose">
+    <p class="texte-secondaire petit" style="margin-top: 1.5rem">
+      Version {frontmatter.version} du {frontmatter.date}
+    </p>
+    <Content />
+  </div>
+</Base>
