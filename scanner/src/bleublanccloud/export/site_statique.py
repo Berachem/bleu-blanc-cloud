@@ -12,6 +12,7 @@ Aucune donnée personnelle n'est exportée (ni e-mail, ni téléphone, ni nom de
 from __future__ import annotations
 
 import json
+import shutil
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -37,12 +38,18 @@ from bleublanccloud.modeles import (
     MetaExport,
     Organisation,
     OrganisationExport,
+    PhotoExport,
     RapportIAExport,
     Score,
 )
 from bleublanccloud.referentiels import Referentiels
 from bleublanccloud.scan import normaliser_cible
-from bleublanccloud.stockage.base import Base, RapportEnregistre, ScanEnregistre
+from bleublanccloud.stockage.base import (
+    Base,
+    PhotoEnregistree,
+    RapportEnregistre,
+    ScanEnregistre,
+)
 
 
 @dataclass
@@ -100,6 +107,35 @@ def score_a_jour(scan: ScanEnregistre) -> Score:
         return scan.score
 
 
+def publier_photo(
+    photo: PhotoEnregistree | None,
+    dossier_photos: Path,
+    dossier_sortie: Path,
+    slug: str,
+    prefixe_url: str,
+) -> PhotoExport | None:
+    """Copie la photo (si elle existe et a une licence libre vérifiée) à côté des données du
+    site ; le visiteur la reçoit du site lui-même, jamais de Wikimedia."""
+    if photo is None or photo.statut != "ok" or not photo.chemin:
+        return None
+    source = dossier_photos / photo.chemin
+    if not source.is_file() or not photo.auteur or not photo.licence or not photo.url_source:
+        return None
+    destination = dossier_sortie / f"{slug}{source.suffix}"
+    dossier_sortie.mkdir(parents=True, exist_ok=True)
+    if not destination.exists() or destination.stat().st_size != source.stat().st_size:
+        shutil.copyfile(source, destination)
+    return PhotoExport(
+        url=f"{prefixe_url.rstrip('/')}/photos/{destination.name}",
+        largeur=photo.largeur or 0,
+        hauteur=photo.hauteur or 0,
+        auteur=photo.auteur,
+        licence=photo.licence,
+        url_licence=photo.url_licence,
+        url_source=photo.url_source,
+    )
+
+
 def construire_organisation(
     organisation: Organisation,
     scan: ScanEnregistre,
@@ -107,6 +143,7 @@ def construire_organisation(
     rapport: RapportEnregistre | None,
     noms_departements: dict[str, str],
     noms_regions: dict[str, str],
+    photo: PhotoExport | None = None,
 ) -> OrganisationExport:
     score = score_a_jour(scan)
     resultat = scan.resultat
@@ -141,6 +178,7 @@ def construire_organisation(
             else None
         ),
         alternatives=[exporter_alternative(a) for a in alternatives],
+        photo=photo,
     )
 
 
@@ -248,8 +286,14 @@ def ecrire_export(
     return rapport
 
 
-def exporter(base: Base, referentiels: Referentiels, dossier: Path) -> RapportExport:
-    """Exporte le dernier scan noté de chaque organisation."""
+def exporter(
+    base: Base,
+    referentiels: Referentiels,
+    dossier: Path,
+    dossier_photos: Path | None = None,
+    prefixe_url: str = "/donnees",
+) -> RapportExport:
+    """Exporte le dernier scan noté de chaque organisation (et sa photo, si disponible)."""
     departements = base.territoires("departement")
     regions = base.territoires("region")
     noms_departements = {code: nom for code, (nom, _) in departements.items()}
@@ -265,6 +309,15 @@ def exporter(base: Base, referentiels: Referentiels, dossier: Path) -> RapportEx
             ignorees.append(f"{enregistree.organisation.slug} (retrait demandé)")
             continue
         rapport = base.rapport_du_scan(scan.id)
+        photo = None
+        if dossier_photos is not None:
+            photo = publier_photo(
+                base.photo(enregistree.id),
+                dossier_photos,
+                dossier / "photos",
+                enregistree.organisation.slug,
+                prefixe_url,
+            )
         organisations.append(
             construire_organisation(
                 enregistree.organisation,
@@ -273,8 +326,15 @@ def exporter(base: Base, referentiels: Referentiels, dossier: Path) -> RapportEx
                 rapport,
                 noms_departements,
                 noms_regions,
+                photo,
             )
         )
+    # Photos des organisations qui ne sont plus exportées (retrait, suppression)
+    publiees = {Path(o.photo.url).name for o in organisations if o.photo is not None}
+    if (dossier / "photos").is_dir():
+        for fichier in (dossier / "photos").iterdir():
+            if fichier.name not in publiees:
+                fichier.unlink()
     rapport_export = ecrire_export(dossier, organisations, departements, referentiels)
     rapport_export.ignorees = ignorees
     return rapport_export

@@ -65,6 +65,7 @@ npm run dev                   # http://localhost:4321
 | `bbcloud exporter --vers ../site/public/donnees` | fichiers JSON du site |
 | `bbcloud schemas` | schéma JSON du contrat de données (types TypeScript : `npm run types`) |
 | `bbcloud demo` | données de démonstration fictives |
+| `bbcloud photos maj [--forcer] [--limite N]` | photos des communes (Wikidata → Wikimedia Commons, licences libres), auto-hébergées |
 | `bbcloud publier` | export + build + publication sur Codeberg Pages |
 | `bbcloud demandes traiter` · `bbcloud demandes lister` | analyses sur demande (tickets « Analyser mon site » sur Codeberg) |
 

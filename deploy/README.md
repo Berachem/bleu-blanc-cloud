@@ -251,12 +251,16 @@ cd /opt/bleu-blanc-cloud/scanner
    uv run bbcloud rapports generer --max 3 --dry-run      # nombre d'appels et coût estimés
    uv run bbcloud rapports generer --max 3
    ```
-6. **Aperçu local du site** (depuis ton réseau, sur `http://<IP-du-conteneur>:4321`) :
+6. **Photos des communes** (Wikidata → Wikimedia Commons, licences libres uniquement ; téléchargées dans `donnees/photos/` puis publiées avec le site, auteur et licence affichés) :
+   ```bash
+   uv run bbcloud photos maj --limite 10
+   ```
+7. **Aperçu local du site** (depuis ton réseau, sur `http://<IP-du-conteneur>:4321`) :
    ```bash
    uv run bbcloud exporter
    cd ../site && npm run build && npx astro preview --host 0.0.0.0
    ```
-7. **Publication**, puis **dogfooding** (le site doit obtenir A) :
+8. **Publication**, puis **dogfooding** (le site doit obtenir A) :
    ```bash
    cd ../scanner
    uv run bbcloud publier
@@ -276,7 +280,7 @@ systemctl list-timers 'bbcloud*'
 
 - Lancer la chaîne complète tout de suite : `systemctl start bbcloud-campagne.service`
 - Suivre les journaux : `journalctl -u bbcloud-campagne -f`
-- La chaîne hebdomadaire (`deploy/campagne-hebdomadaire.sh`) : `uv sync` → `referentiels maj` → `cibles importer` → `campagne lancer --oui` → `rapports generer --oui` (seulement si la clé Mistral est présente ; le cache évite tout appel si rien n'a changé) → `publier`.
+- La chaîne hebdomadaire (`deploy/campagne-hebdomadaire.sh`) : `uv sync` → `referentiels maj` → `cibles importer` → `campagne lancer --oui` → `photos maj` → `rapports generer --oui` (seulement si la clé Mistral est présente ; le cache évite tout appel si rien n'a changé) → `publier`.
 - Durée indicative d'une campagne complète (~1 000 organisations, 1 requête/s/domaine, 10 scans en parallèle) : **30 à 60 minutes**.
 
 ### Mise à jour automatique du code (toutes les heures)
@@ -424,6 +428,8 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur
 | Message mentionnant l'**« old pages server »** | la requête arrive sur l'ancien serveur Pages v2, fermé aux nouveaux comptes. Causes possibles : CNAME encore à l'ancienne forme (`bleublanccloud-pages.<ton-pseudo>.codeberg.page.`) au lieu de `codeberg.page.` ; TXT `_git-pages-repository.bleublanccloud` absent ou différent de l'URL HTTPS exacte du dépôt (avec `.git`) ; aucun déploiement git-pages encore effectué (webhook absent, filtré sur une autre branche que `pages`, ou jamais déclenché). Corriger le DNS (`dig`, étape 4.2), vérifier le webhook, puis redéclencher un déploiement (étape 4.4). |
 | **`tls: internal error`** (ou `tlsv1 alert internal error` avec curl, `SSL_ERROR_INTERNAL_ERROR_ALERT` dans Firefox) | le certificat HTTPS n'est pas (encore) émis. Il n'est demandé qu'après un **déploiement réussi par le webhook** : vérifier dans *Livraisons récentes* qu'une livraison a abouti (code 2xx) avec une URL cible en **`http://`** ; sinon corriger l'URL et relancer la livraison. Vérifier aussi : CNAME en « DNS only » chez Cloudflare, TXT présent, enregistrements CAA autorisant `letsencrypt.org`. Puis patienter quelques minutes. Outil officiel de diagnostic : `curl -fsSL https://troubleshoot.codeberg.page/verify.sh -o verify.sh`, relire le script, puis `bash verify.sh bleublanccloud.berachem.dev`. |
 | Le site affiche encore une ancienne version | contrôler la branche `pages` du dépôt Codeberg et la dernière livraison du webhook (une URL cible restée en `http://` après l'émission du certificat peut faire échouer les livraisons : la passer en `https://`). |
+| `photos maj` : « Wikimedia injoignable » | réseau sortant filtré vers `query.wikidata.org`, `commons.wikimedia.org` ou `upload.wikimedia.org` : autoriser ces domaines. Les fiches gardent leurs photos précédentes (ou l'illustration de repli). |
+| Une commune n'a pas de photo | pas d'image principale (P18) sur Wikidata, ou licence non libre (refusée) : `bbcloud photos maj` affiche la raison. Ajouter une photo libre sur Wikidata la fera apparaître lors de la revérification (30 jours, ou `--forcer`). |
 | `npm run build` échoue par manque de mémoire | passer le conteneur à 3–4 Go de RAM. |
 | Beaucoup de « robots.txt injoignable » | réseau sortant filtré ou sites en panne : le robot n'analyse alors aucune page, par respect de la RFC 9309. |
 | `bbcloud-demandes` : « CODEBERG_JETON absent du fichier .env » | normal tant que la fonctionnalité n'est pas configurée (étape 6 bis). |

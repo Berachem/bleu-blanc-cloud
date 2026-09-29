@@ -18,6 +18,7 @@ from bleublanccloud.modeles import (
     InformationsComplementaires,
     Organisation,
     OrganisationExport,
+    PhotoExport,
     RapportIA,
     ResultatScan,
     RisqueIA,
@@ -27,6 +28,18 @@ from bleublanccloud.referentiels import Referentiels
 from bleublanccloud.stockage.base import RapportEnregistre, ScanEnregistre
 
 DATE_DEMO = datetime(2026, 9, 27, 3, 0, tzinfo=UTC)
+
+# Illustration FICTIVE (SVG maison, site/public/demo) pour prévisualiser une fiche avec photo ;
+# en production, les photos viennent de Wikimedia Commons (bbcloud photos maj).
+PHOTO_DEMO = PhotoExport(
+    url="/demo/exempleville.svg",
+    largeur=1280,
+    hauteur=960,
+    auteur="Illustration fictive de démonstration",
+    licence="CC0",
+    url_licence="https://creativecommons.org/publicdomain/zero/1.0/deed.fr",
+    url_source="https://bleublanccloud.berachem.dev/a-propos/",
+)
 
 # Noms officiels des départements utilisés par la démonstration (placement sur la carte).
 DEPARTEMENTS_DEMO: dict[str, tuple[str, str]] = {
@@ -413,7 +426,13 @@ def generer_demonstration(referentiels: Referentiels) -> list[OrganisationExport
         )
         organisations.append(
             construire_organisation(
-                organisation, scan, referentiels, rapport, noms_departements, {}
+                organisation,
+                scan,
+                referentiels,
+                rapport,
+                noms_departements,
+                {},
+                photo=PHOTO_DEMO if profil.domaine == "exempleville.example" else None,
             )
         )
     return organisations

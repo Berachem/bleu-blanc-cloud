@@ -30,6 +30,9 @@ uv run bbcloud cibles importer --population-min "${POPULATION_MIN:-10000}" || ec
 echo "▶ Campagne de scan"
 uv run bbcloud campagne lancer --oui
 
+echo "▶ Photos des organisations (Wikimedia Commons, licences libres, auto-hébergées)"
+uv run bbcloud photos maj || echo "⚠ photos non mises à jour : les fiches gardent les précédentes"
+
 echo "▶ Rapports IA (seuls les constats modifiés entraînent un appel)"
 if grep -qE '^MISTRAL_API_KEY=.+' "$RACINE/.env" 2>/dev/null; then
   uv run bbcloud rapports generer --oui --max "${RAPPORTS_MAX:-2000}"

@@ -80,6 +80,28 @@ class DemandeEnregistree:
     cloturee_le: datetime | None = None
 
 
+StatutPhoto = Literal["ok", "absente", "refusee", "erreur"]
+
+
+@dataclass
+class PhotoEnregistree:
+    """Photo d'une organisation (Wikimedia Commons) et sa provenance."""
+
+    organisation_id: int
+    statut: StatutPhoto
+    maj_le: datetime
+    wikidata: str | None = None
+    fichier: str | None = None
+    auteur: str | None = None
+    licence: str | None = None
+    url_licence: str | None = None
+    url_source: str | None = None
+    largeur: int | None = None
+    hauteur: int | None = None
+    chemin: str | None = None
+    motif: str | None = None
+
+
 def _date_ou_rien(valeur: str | None) -> datetime | None:
     return datetime.fromisoformat(valeur) if valeur else None
 
@@ -460,6 +482,34 @@ class Base:
             (depuis.astimezone(UTC).isoformat(),),
         )
         return [self._demande(ligne) for ligne in lignes]
+
+    # ------------------------------------------------------------------ #
+    # Photos (Wikimedia Commons)
+    # ------------------------------------------------------------------ #
+
+    def photo(self, organisation_id: int) -> PhotoEnregistree | None:
+        ligne = self.connexion.execute(
+            "SELECT * FROM photos WHERE organisation_id = ?", (organisation_id,)
+        ).fetchone()
+        if ligne is None:
+            return None
+        champs = {k: ligne[k] for k in ligne.keys()}  # noqa: SIM118
+        champs["maj_le"] = datetime.fromisoformat(champs["maj_le"])
+        return PhotoEnregistree(**champs)
+
+    def enregistrer_photo(self, photo: PhotoEnregistree) -> None:
+        colonnes = [
+            "organisation_id", "statut", "wikidata", "fichier", "auteur", "licence",
+            "url_licence", "url_source", "largeur", "hauteur", "chemin", "motif", "maj_le",
+        ]  # fmt: skip
+        valeurs = {c: getattr(photo, c) for c in colonnes}
+        valeurs["maj_le"] = photo.maj_le.astimezone(UTC).isoformat()
+        with self.transaction() as c:
+            c.execute(
+                f"INSERT OR REPLACE INTO photos ({', '.join(colonnes)}) "
+                f"VALUES ({', '.join(':' + c for c in colonnes)})",
+                valeurs,
+            )
 
     # ------------------------------------------------------------------ #
     # Rapports IA

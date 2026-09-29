@@ -45,6 +45,8 @@ class Parametres(BaseSettings):
     chemin_base_asn: Path = Path("scanner/src/bleublanccloud/referentiels/telechargements/asn.mmdb")
     ipinfo_token: SecretStr | None = None
     chemin_base_sqlite: Path = Path("donnees/bleublanccloud.db")
+    # Photos Wikimedia Commons téléchargées par le serveur (cache, publiées avec le site)
+    chemin_photos: Path = Path("donnees/photos")
 
     concurrence_max: int = Field(default=20, ge=1, le=200)
     delai_expiration_s: float = Field(default=10.0, gt=0, le=60)
@@ -78,6 +80,10 @@ class Parametres(BaseSettings):
     @property
     def base_sqlite(self) -> Path:
         return self.chemin_absolu(self.chemin_base_sqlite)
+
+    @property
+    def photos(self) -> Path:
+        return self.chemin_absolu(self.chemin_photos)
 
     @property
     def verrou(self) -> Path:

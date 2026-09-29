@@ -36,6 +36,8 @@ app_campagne = typer.Typer(help="Campagnes de scan.")
 app.add_typer(app_campagne, name="campagne")
 app_rapports = typer.Typer(help="Rapports rédigés par l'IA (Mistral).")
 app.add_typer(app_rapports, name="rapports")
+app_photos = typer.Typer(help="Photos des organisations (Wikimedia Commons, auto-hébergées).")
+app.add_typer(app_photos, name="photos")
 app_demandes = typer.Typer(
     help="Analyses sur demande (tickets « Analyser mon site » sur Codeberg)."
 )
@@ -495,7 +497,9 @@ def exporter(
 
     parametres = obtenir_parametres()
     with Base(parametres.base_sqlite) as base:
-        rapport = exporter_site(base, referentiels_par_defaut(), vers)
+        rapport = exporter_site(
+            base, referentiels_par_defaut(), vers, dossier_photos=parametres.photos
+        )
     console.print(
         f"[green]✓[/] {rapport.nombre_organisations} organisation(s) exportée(s) vers {vers}"
     )
@@ -503,6 +507,50 @@ def exporter(
         console.print(f"{rapport.fichiers_supprimes} ancien(s) fichier(s) supprimé(s).")
     for ignoree in rapport.ignorees:
         console.print(f"[yellow]Ignorée :[/] {ignoree}")
+
+
+@app_photos.command("maj")
+def photos_maj(
+    forcer: Annotated[
+        bool, typer.Option("--forcer", help="Revérifie aussi les photos récentes.")
+    ] = False,
+    limite: Annotated[
+        int | None, typer.Option("--limite", help="Nombre maximal d'organisations.")
+    ] = None,
+) -> None:
+    """Cherche la photo de chaque organisation (Wikidata → Commons, licence libre) et la
+    télécharge pour la publier avec le site. Les photos de plus de 30 jours sont revérifiées."""
+    from datetime import UTC, datetime
+
+    from rich.markup import escape
+
+    from bleublanccloud.photos import mettre_a_jour_photos
+
+    parametres = obtenir_parametres()
+
+    async def executer() -> Any:
+        async with httpx.AsyncClient(
+            headers={"User-Agent": parametres.user_agent},
+            timeout=parametres.delai_expiration_s * 3,
+            follow_redirects=False,
+        ) as client:
+            return await mettre_a_jour_photos(
+                base, parametres.photos, client, datetime.now(UTC), forcer=forcer, limite=limite
+            )
+
+    with Base(parametres.base_sqlite) as base:
+        try:
+            bilan = asyncio.run(executer())
+        except httpx.HTTPError as erreur:
+            console_erreur.print(f"[red]Wikimedia injoignable : {escape(str(erreur))}[/]")
+            raise typer.Exit(code=1) from None
+    console.print(
+        f"[green]✓[/] {bilan.trouvees} photo(s) téléchargée(s) · {bilan.absentes} sans photo · "
+        f"{len(bilan.refusees)} refusée(s) (licence) · {len(bilan.erreurs)} en erreur · "
+        f"{bilan.inchangees} déjà à jour"
+    )
+    for ligne in (bilan.refusees + bilan.erreurs)[:20]:
+        console.print(f"[yellow]•[/] {escape(ligne)}")
 
 
 @app_demandes.command("traiter")
