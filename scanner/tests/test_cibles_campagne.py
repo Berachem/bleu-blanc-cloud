@@ -65,7 +65,7 @@ def simuler_apis() -> dict[str, respx.Route]:
         ),
     }
     for pivot, fichier in (("mairie", "mairies"), ("cg", "cg"), ("cr", "cr")):
-        routes[pivot] = respx.get(URL_EXPORT, params={"where": f'pivot="{pivot}"'}).mock(
+        routes[pivot] = respx.get(URL_EXPORT, params={"where": f'pivot like "{pivot}"'}).mock(
             return_value=httpx.Response(200, text=lire(f"annuaire_{fichier}.json"))
         )
     return routes
@@ -84,7 +84,7 @@ def simuler_apis() -> dict[str, respx.Route]:
         ("https://c.fr", ["https://c.fr"]),
         ({"valeur": "https://d.fr"}, ["https://d.fr"]),
         (None, []),
-        ("[pas du json", ["https://[pas du json"]),
+        ("[pas du json", []),
         ([{"valeur": ""}], []),
     ],
 )

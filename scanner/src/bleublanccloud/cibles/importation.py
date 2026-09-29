@@ -48,6 +48,50 @@ class DonneesImport:
 
 
 @dataclass
+class BilanMairies:
+    """Rapprochement des mairies de l'annuaire avec les communes de geo.api.gouv.fr."""
+
+    trouvees: int = 0
+    """Mairies trouvées dans l'annuaire (type « mairie » confirmé)."""
+    sans_code_insee: int = 0
+    """Mairies sans code INSEE exploitable (impossibles à rapprocher)."""
+    communes_retenues: int = 0
+    """Communes au-dessus du seuil de population."""
+    rapprochees: int = 0
+    """Communes retenues pour lesquelles une mairie a été trouvée (même code INSEE)."""
+    avec_site_web: int = 0
+    """Communes retenues dont la mairie a un site web valide."""
+
+
+def rapprocher_mairies(
+    communes: list[CommuneGeo], mairies: list[ServiceAnnuaire]
+) -> dict[str, ServiceAnnuaire]:
+    """Mairie principale de chaque commune, rapprochée par code INSEE."""
+    par_code: dict[str, list[ServiceAnnuaire]] = {}
+    for mairie in mairies:
+        if mairie.code_insee_commune:
+            par_code.setdefault(mairie.code_insee_commune, []).append(mairie)
+    resultat: dict[str, ServiceAnnuaire] = {}
+    for commune in communes:
+        service = choisir_service_principal(par_code.get(commune.code, []))
+        if service is not None:
+            resultat[commune.code] = service
+    return resultat
+
+
+def bilan_mairies(donnees: DonneesImport, population_min: int) -> BilanMairies:
+    retenues = filtrer_par_population(donnees.communes, population_min)
+    rapprochement = rapprocher_mairies(retenues, donnees.mairies)
+    return BilanMairies(
+        trouvees=len(donnees.mairies),
+        sans_code_insee=sum(1 for m in donnees.mairies if not m.code_insee_commune),
+        communes_retenues=len(retenues),
+        rapprochees=len(rapprochement),
+        avec_site_web=sum(1 for s in rapprochement.values() if s.site_principal),
+    )
+
+
+@dataclass
 class RapportImport:
     organisations: int = 0
     avec_site: int = 0
@@ -82,12 +126,10 @@ def construire_organisations(
     organisations: list[Organisation] = []
 
     if "commune" in types:
-        mairies: dict[str, list[ServiceAnnuaire]] = {}
-        for mairie in donnees.mairies:
-            if mairie.code_insee_commune:
-                mairies.setdefault(mairie.code_insee_commune, []).append(mairie)
-        for commune in filtrer_par_population(donnees.communes, population_min):
-            service = choisir_service_principal(mairies.get(commune.code, []))
+        retenues = filtrer_par_population(donnees.communes, population_min)
+        mairies = rapprocher_mairies(retenues, donnees.mairies)
+        for commune in retenues:
+            service = mairies.get(commune.code)
             organisations.append(
                 Organisation(
                     slug=f"{slugifier(commune.nom)}-{commune.code.lower()}",

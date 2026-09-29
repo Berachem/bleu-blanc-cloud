@@ -210,6 +210,7 @@ def cibles_importer(
 ) -> None:
     """Importe communes, départements et régions (API Annuaire + geo.api.gouv.fr)."""
     from bleublanccloud.cibles.importation import (
+        bilan_mairies,
         construire_organisations,
         enregistrer_import,
         telecharger_donnees,
@@ -230,6 +231,21 @@ def cibles_importer(
         console_erreur.print(f"[red]Téléchargement impossible : {erreur}[/]")
         raise typer.Exit(code=1) from erreur
     organisations = construire_organisations(donnees, population_min, liste_types)
+    if "commune" in liste_types:
+        bilan = bilan_mairies(donnees, population_min)
+        console.print(f"Mairies trouvées dans l'annuaire : [bold]{bilan.trouvees}[/]")
+        if bilan.sans_code_insee:
+            console.print(f"  [yellow]dont {bilan.sans_code_insee} sans code INSEE exploitable[/]")
+        console.print(
+            f"Mairies rapprochées d'une commune ≥ {population_min} hab. : "
+            f"[bold]{bilan.rapprochees}[/] / {bilan.communes_retenues} commune(s)"
+        )
+        console.print(f"Mairies avec site web : [bold]{bilan.avec_site_web}[/]")
+        if bilan.trouvees == 0:
+            console.print(
+                "[yellow]⚠ Aucune mairie reçue de l'annuaire : vérifiez l'URL de l'API "
+                "et le filtre « pivot like » (bbcloud -v cibles importer).[/]"
+            )
     with Base(parametres.base_sqlite) as base:
         rapport = enregistrer_import(base, donnees, organisations)
     console.print(
