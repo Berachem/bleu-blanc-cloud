@@ -1960,6 +1960,23 @@ select:focus {
   padding: 0.6rem 0.9rem;
   color: var(--texte-secondaire);
 }
+/* Logo Mistral AI dans la phrase, sur une pastille claire pour rester net en mode sombre */
+.mention-ia__logo {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 28px;
+  margin: 0 0.2em;
+  vertical-align: -8px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--bordure-forte);
+}
+/* 21 px = 7 cases de 3 px : chaque « pixel » du M tombe sur des pixels entiers */
+.mention-ia__logo svg {
+  width: 21px;
+  height: 21px;
+}
 .gravite {
   font-size: 0.8rem;
   font-weight: 700;

@@ -1,4 +1,23 @@
+---
+// Mention de transparence (AI Act) des textes rédigés par l'IA. Le fournisseur est indiqué
+// par son logo, dessiné en SVG dans la page (aucune ressource externe) ; son nom reste lu
+// par les lecteurs d'écran (« Mistral AI »).
+// Logo : « M » pixelisé de Mistral AI, tracé issu de Simple Icons (CC0), couleur de la
+// marque #FA520F. Marque de Mistral AI, utilisée pour désigner le fournisseur du modèle.
+const TRACE_MISTRAL =
+  "M17.143 3.429v3.428h-3.429v3.429h-3.428V6.857H6.857V3.43H3.43v13.714H0v3.428h10.286v-3.428H6.857v-3.429h3.429v3.429h3.429v-3.429h3.428v3.429h-3.428v3.428H24v-3.428h-3.43V3.429z";
+---
 <p class="mention-ia">
-  <strong>Rédigé par une IA (Mistral) à partir des constats techniques — peut contenir des erreurs.</strong>
+  <strong>
+    Rédigé par une IA
+    <span class="mention-ia__logo" role="img" aria-label="Mistral AI" title="Mistral AI"><svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        aria-hidden="true"
+        focusable="false"
+        shape-rendering="crispEdges"><path fill="#FA520F" d={TRACE_MISTRAL}></path></svg></span>
+    à partir des constats techniques — peut contenir des erreurs.
+  </strong>
   L'IA ne calcule pas le score et ne propose que des alternatives issues de notre référentiel public.
 </p>
