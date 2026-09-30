@@ -6,7 +6,7 @@ import Logo from "../composants/Logo.astro";
 import { NAVIGATION, SITE } from "../config";
 import { meta } from "../lib/donnees";
 import { date } from "../lib/format";
-import { DATE_BUILD, VERSION_SITE } from "../lib/version";
+import { DATE_BUILD, IMAGE_PARTAGE, VERSION_SITE } from "../lib/version";
 
 interface Props {
   titre: string;
@@ -17,6 +17,7 @@ const titreComplet = titre === SITE.nom ? `${SITE.nom} — souveraineté numéri
 const canonique = new URL(Astro.url.pathname, SITE.url).href;
 const cheminCourant = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : `${Astro.url.pathname}/`;
 const demonstration = meta().donnees_demonstration;
+const imagePartage = new URL(`${IMAGE_PARTAGE.chemin}?v=${IMAGE_PARTAGE.empreinte}`, SITE.url).href;
 ---
 <!doctype html>
 <html lang="fr" data-theme="dark">
@@ -38,6 +39,18 @@ const demonstration = meta().donnees_demonstration;
     <meta property="og:title" content={titreComplet} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonique} />
+    <!-- Aperçu lors d'un partage (réseaux sociaux, messageries) : image 1200 × 630 servie par
+         le site lui-même (scripts/generer-image-partage.mjs) -->
+    <meta property="og:image" content={imagePartage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(IMAGE_PARTAGE.largeur)} />
+    <meta property="og:image:height" content={String(IMAGE_PARTAGE.hauteur)} />
+    <meta property="og:image:alt" content={IMAGE_PARTAGE.texte} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={titreComplet} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imagePartage} />
+    <meta name="twitter:image:alt" content={IMAGE_PARTAGE.texte} />
     <meta name="generator" content={Astro.generator} />
     <!-- Thème mémorisé et animations appliqués avant l'affichage (aucun flash), y compris
          après chaque transition de page. Sombre par défaut. -->
