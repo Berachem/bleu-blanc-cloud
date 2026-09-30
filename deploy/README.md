@@ -311,7 +311,7 @@ systemctl disable --now bbcloud-maj-auto.timer   # suspendre les mises à jour a
 
 ## 6 bis. Analyses sur demande (« Analyser mon site »)
 
-Le bouton « Analyser mon site » du site ouvre un **ticket** sur le dépôt Codeberg `bleublanccloud-pages`. Toutes les heures (à la demie), `bbcloud-demandes.timer` lance `bbcloud demandes traiter`, qui lit les tickets via l'API Codeberg, valide le domaine, lance l'analyse passive, publie la fiche et répond dans le ticket. **Aucun port entrant** : c'est le serveur qui va chercher les tickets.
+Le bouton « Analyser mon site » ouvre une fenêtre qui propose d'abord un **ticket** sur le dépôt Codeberg `bleublanccloud-pages` (automatique), puis un **e-mail** à l'adresse `SITE.contact` de `site/src/config.ts` (traitement manuel, voir plus bas). Toutes les heures (à la demie), `bbcloud-demandes.timer` lance `bbcloud demandes traiter`, qui lit les tickets via l'API Codeberg, valide le domaine, lance l'analyse passive, publie la fiche et répond dans le ticket. **Aucun port entrant** : c'est le serveur qui va chercher les tickets.
 
 ### Étiquettes
 
@@ -414,6 +414,7 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur
 | Changer la **méthodologie** | nouvelle version dans `analyse/score.py` + entrée dans `docs/methodologie.md` |
 | Changer les **consignes IA** | incrémenter `VERSION_INVITE` dans `ia/invites.py` (les rapports seront régénérés) |
 | Mettre à jour le code tout de suite | `systemctl start bbcloud-maj-auto.service` (tests puis republication) |
+| Traiter une **demande reçue par e-mail** | vérifier que la demande concerne le site du demandeur ou d'un organisme public, puis `su - bbcloud -c 'cd /opt/bleu-blanc-cloud/scanner && uv run bbcloud demandes analyser mairie-exemple.fr'` : mêmes contrôles qu'un ticket (domaine, retraits, adresses publiques), fiche « sur demande » (ou fiche existante de l'observatoire), publication du site, puis réponse type à copier dans l'e-mail |
 | Voir les **demandes d'analyse** en attente | `su - bbcloud -c 'cd /opt/bleu-blanc-cloud/scanner && uv run bbcloud demandes lister'` |
 | Suspendre les **demandes d'analyse** | `systemctl disable --now bbcloud-demandes.timer` (ou vider `CODEBERG_JETON`) |
 | Relancer une demande **refusée ou en échec** | demander au visiteur d'ouvrir un nouveau ticket : un ticket fermé puis rouvert n'est plus traité par le robot |

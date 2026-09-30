@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import "../styles/theme.css";
+import FenetreAnalyse from "../composants/FenetreAnalyse.astro";
 import Logo from "../composants/Logo.astro";
 import { NAVIGATION, SITE } from "../config";
 import { meta } from "../lib/donnees";
@@ -111,6 +112,7 @@ const demonstration = meta().donnees_demonstration;
     <main id="contenu" tabindex="-1">
       <slot />
     </main>
+    <FenetreAnalyse />
     <footer class="pied">
       <div class="conteneur">
         <div>

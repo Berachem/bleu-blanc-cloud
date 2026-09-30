@@ -49,11 +49,16 @@ const { identifiant = "recherche" } = Astro.props;
       (donnees ??= fetch("/recherche.json").then((reponse) => reponse.json() as Promise<Ligne[]>));
 
     champ.addEventListener("focus", () => void charger(), { once: true });
+    // Numéro de la dernière saisie : une recherche terminée après une saisie plus récente
+    // (ex. champ vidé pendant le chargement de l'index) est ignorée.
+    let derniere = 0;
     champ.addEventListener("input", async () => {
+      const numero = ++derniere;
       const requete = normaliser(champ.value.trim());
       liste.replaceChildren();
       if (requete.length < 2) return;
       const lignes = await charger();
+      if (numero !== derniere) return;
       const trouvees = lignes
         .filter(([, nom, departement, , , domaine]) =>
           normaliser(`${nom} ${departement} ${domaine}`).includes(requete),
@@ -66,7 +71,9 @@ const { identifiant = "recherche" } = Astro.props;
         vide.textContent = "Aucune organisation trouvée. ";
         const demande = document.createElement("a");
         demande.href = bloc.dataset.urlDemande ?? "/methodologie/";
-        demande.textContent = "Analyser mon site";
+        demande.dataset.ouvrirAnalyse = "";
+        demande.setAttribute("aria-haspopup", "dialog");
+        demande.textContent = "Faire analyser un site";
         vide.append(demande);
         liste.append(vide);
         return;

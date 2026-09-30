@@ -70,6 +70,7 @@ npm run dev                   # http://localhost:4321
 | `bbcloud demo` | données de démonstration fictives |
 | `bbcloud publier` | export + build + publication sur Codeberg Pages |
 | `bbcloud demandes traiter` · `bbcloud demandes lister` | analyses sur demande (tickets « Analyser mon site » sur Codeberg) |
+| `bbcloud demandes analyser <domaine> [--sans-publier]` | analyse sur demande reçue par e-mail : mêmes contrôles et même fiche qu'un ticket, puis publication et réponse type à renvoyer |
 
 ## Qualité
 

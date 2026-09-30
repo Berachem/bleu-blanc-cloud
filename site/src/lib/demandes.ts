@@ -1,5 +1,5 @@
 // Liens « Analyser mon site » vers un nouveau ticket Codeberg.
-import { DEMANDES } from "../config";
+import { DEMANDES, SITE } from "../config";
 
 const NOUVEAU_TICKET = `${DEMANDES.forge}/${DEMANDES.depot}/issues/new`;
 
@@ -19,3 +19,18 @@ const CORPS_SIMPLE = [
 ].join("\n");
 
 export const URL_DEMANDE_SIMPLE = `${NOUVEAU_TICKET}?title=${encodeURIComponent("[Analyse] ")}&body=${encodeURIComponent(CORPS_SIMPLE)}`;
+
+// Demande par e-mail (sans compte Codeberg) : traitée à la main avec
+// « bbcloud demandes analyser <domaine> », qui applique les mêmes contrôles qu'un ticket.
+const CORPS_EMAIL = [
+  "Bonjour,",
+  "",
+  "Je souhaite faire analyser ce site :",
+  "Domaine : ",
+  "",
+  "Je confirme qu'il s'agit de mon site ou du site d'un organisme public.",
+  "",
+  "Merci !",
+].join("\n");
+
+export const URL_DEMANDE_EMAIL = `mailto:${SITE.contact}?subject=${encodeURIComponent("Bleu Blanc Cloud — demande d'analyse")}&body=${encodeURIComponent(CORPS_EMAIL)}`;

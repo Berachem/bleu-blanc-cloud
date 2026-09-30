@@ -1,0 +1,45 @@
+---
+// Fenêtre « Analyser mon site » (<dialog> natif : focus, touche Échap et arrière-plan
+// inerte gérés par le navigateur). Ticket Codeberg en premier (automatique), e-mail ensuite.
+import { SITE, DEMANDES } from "../config";
+import { URL_DEMANDE_EMAIL, URL_DEMANDE_FORMULAIRE, URL_DEMANDE_SIMPLE } from "../lib/demandes";
+---
+<dialog class="fenetre" id="fenetre-analyse" aria-labelledby="titre-fenetre-analyse">
+  <div class="fenetre__contenu">
+    <form method="dialog">
+      <button class="fenetre__fermer" type="submit" aria-label="Fermer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+      </button>
+    </form>
+    <h2 id="titre-fenetre-analyse">Faire analyser un site</h2>
+    <ol class="choix-analyse">
+      <li class="choix-analyse__option choix-analyse__option--principale">
+        <div class="choix-analyse__entete">
+          <h3>Par un ticket Codeberg</h3>
+          <span class="choix-analyse__badge">Recommandé</span>
+        </div>
+        <p>Automatique, réponse en moins d'une heure (compte gratuit).</p>
+        <a class="bouton" href={URL_DEMANDE_FORMULAIRE} target="_blank" rel="noopener">
+          Ouvrir un ticket Codeberg
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M9 7h8v8"></path></svg>
+        </a>
+        <p class="petit texte-secondaire">
+          Formulaire absent&nbsp;?
+          <a href={URL_DEMANDE_SIMPLE} target="_blank" rel="noopener">Version simplifiée</a>
+        </p>
+      </li>
+      <li class="choix-analyse__option">
+        <h3>Par e-mail</h3>
+        <p>
+          Sans compte, traité à la main sous quelques jours&nbsp;:
+          <span class="fenetre__adresse">{SITE.contact}</span>
+        </p>
+        <a class="bouton bouton--secondaire" href={URL_DEMANDE_EMAIL}>Envoyer un e-mail</a>
+      </li>
+    </ol>
+    <p class="fenetre__note petit texte-secondaire">
+      Analyse passive, résultat publié sur une fiche publique. Réservé à votre propre site ou à
+      celui d'un organisme public ({DEMANDES.limiteJour} analyses par jour au maximum).
+    </p>
+  </div>
+</dialog>

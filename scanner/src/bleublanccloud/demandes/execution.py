@@ -8,7 +8,14 @@ import subprocess
 
 from bleublanccloud.configuration import RACINE_PROJET, Parametres
 from bleublanccloud.demandes.forge import ClientForge
-from bleublanccloud.demandes.traitement import BilanDemandes, GenererRapport, TraiteurDemandes
+from bleublanccloud.demandes.tickets import Ticket
+from bleublanccloud.demandes.traitement import (
+    SOURCE_EMAIL,
+    AnalyseDirecte,
+    BilanDemandes,
+    GenererRapport,
+    TraiteurDemandes,
+)
 from bleublanccloud.modeles import ResultatScan
 from bleublanccloud.referentiels import Referentiels
 from bleublanccloud.scan import ContexteScan, contexte_reseau, scanner_domaine
@@ -99,3 +106,51 @@ async def traiter_demandes(
             limite_compte=parametres.demandes_limite_compte,
         )
         return await traiteur.traiter()
+
+
+class _SansForge:
+    """Demande reçue par e-mail : aucun ticket à lire ni à commenter."""
+
+    depot = "e-mail"
+
+    async def tickets_ouverts(self) -> list[Ticket]:
+        return []
+
+    async def commenter(self, numero: int, texte: str) -> None:
+        raise RuntimeError("aucune forge pour une demande reçue par e-mail")
+
+    async def ajouter_etiquette(self, numero: int, nom: str) -> bool:
+        raise RuntimeError("aucune forge pour une demande reçue par e-mail")
+
+    async def retirer_etiquette(self, numero: int, nom: str) -> None:
+        raise RuntimeError("aucune forge pour une demande reçue par e-mail")
+
+    async def fermer(self, numero: int) -> None:
+        raise RuntimeError("aucune forge pour une demande reçue par e-mail")
+
+
+async def analyser_demande_directe(
+    parametres: Parametres, referentiels: Referentiels, base: Base, saisie: str
+) -> AnalyseDirecte:
+    """Analyse d'un domaine demandée par e-mail (commande « bbcloud demandes analyser »)."""
+    async with contexte_reseau(parametres, referentiels) as contexte:
+        contexte_scan: ContexteScan = contexte
+
+        async def analyser(hote: str) -> ResultatScan:
+            return await scanner_domaine(hote, contexte_scan)
+
+        async def resoudre(hote: str) -> list[str]:
+            return await adresses_du_site(hote, contexte_scan.resolveur_dns)
+
+        traiteur = TraiteurDemandes(
+            base=base,
+            referentiels=referentiels,
+            forge=_SansForge(),
+            analyser=analyser,
+            resoudre=resoudre,
+            publier=publier_site,
+            url_site=parametres.url_site,
+            generer_rapport=_generateur_rapports(parametres, referentiels, base),
+            source=SOURCE_EMAIL,
+        )
+        return await traiteur.analyser_directement(saisie)

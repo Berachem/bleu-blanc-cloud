@@ -92,6 +92,41 @@ function brancherMenu(): void {
   document.addEventListener("astro:before-swap", () => arret.abort(), { once: true });
 }
 
+// Fenêtre « Analyser mon site » : tout élément [data-ouvrir-analyse] (boutons, lien de la
+// recherche) l'ouvre. Un clic sur le fond la ferme. Sans <dialog> ni JavaScript, le lien
+// mène directement au formulaire Codeberg.
+function brancherFenetreAnalyse(): void {
+  const fenetre = document.getElementById("fenetre-analyse");
+  if (!(fenetre instanceof HTMLDialogElement) || typeof fenetre.showModal !== "function") return;
+  const arret = new AbortController();
+  const { signal } = arret;
+  document.addEventListener(
+    "click",
+    (evenement) => {
+      const declencheur = (evenement.target as HTMLElement).closest("[data-ouvrir-analyse]");
+      if (!declencheur) return;
+      evenement.preventDefault();
+      fenetre.showModal();
+    },
+    { signal },
+  );
+  fenetre.addEventListener(
+    "click",
+    (evenement) => {
+      if (evenement.target === fenetre) fenetre.close();
+    },
+    { signal },
+  );
+  document.addEventListener(
+    "astro:before-swap",
+    () => {
+      arret.abort();
+      if (fenetre.open) fenetre.close();
+    },
+    { once: true },
+  );
+}
+
 function animerCompteur(element: HTMLElement): void {
   const cible = Number(element.dataset.compteur);
   const decimales = Number(element.dataset.decimales ?? 0);
@@ -164,6 +199,7 @@ function lancerAnimations(): void {
 document.addEventListener("astro:page-load", () => {
   brancherBascule();
   brancherMenu();
+  brancherFenetreAnalyse();
   lancerAnimations();
 });
 

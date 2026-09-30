@@ -131,9 +131,12 @@ Pour chaque organisation, un rapport lisible par un décideur et un plan de migr
 
 ## 8. Analyses sur demande
 
-Tout visiteur peut demander l'analyse d'un domaine avec le bouton « Analyser mon site », qui ouvre un **ticket sur Codeberg**. Le serveur du projet n'est joignable depuis Internet par aucun port : il relit les tickets toutes les heures via l'API de Codeberg, puis répond dans le ticket.
+Tout visiteur peut demander l'analyse d'un domaine avec le bouton « Analyser mon site », qui propose deux voies :
 
-- **Engagement** : la demande doit concerner votre propre site ou le site d'un organisme public (case obligatoire).
+1. **un ticket sur Codeberg** (recommandé, automatique) : le serveur du projet n'est joignable depuis Internet par aucun port ; il relit les tickets toutes les heures via l'API de Codeberg, puis répond dans le ticket ;
+2. **un e-mail**, sans compte : la demande est traitée à la main, avec **les mêmes contrôles** qu'un ticket (validation du domaine, retraits, adresses publiques uniquement) et la même fiche ; l'adresse de l'expéditeur ne sert qu'à lui répondre et n'est jamais publiée.
+
+- **Engagement** : la demande doit concerner votre propre site ou le site d'un organisme public (case obligatoire dans le ticket, à confirmer dans l'e-mail).
 - **Validation stricte** : seul un nom de domaine est accepté (ni chemin, ni port, ni adresse IP, ni nom local comme `localhost` ou `.local`) ; un domaine qui pointe vers une adresse locale ou privée est refusé. Le contenu du ticket n'est jamais exécuté : seul le domaine validé est utilisé.
 - **Retraits** : un domaine qui a demandé son retrait n'est jamais analysé.
 - **Limites** : 10 analyses acceptées par jour au total, une par jour et par compte Codeberg. Si le domaine a été analysé il y a moins de 7 jours, la fiche existante est réutilisée.

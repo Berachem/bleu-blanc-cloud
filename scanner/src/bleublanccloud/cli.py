@@ -730,6 +730,63 @@ def demandes_traiter() -> None:
         raise typer.Exit(code=1)
 
 
+@app_demandes.command("analyser")
+def demandes_analyser(
+    domaine: Annotated[str, typer.Argument(help="Domaine demandé, ex. mairie-exemple.fr")],
+    publier: Annotated[
+        bool, typer.Option("--publier/--sans-publier", help="Publie le site ensuite.")
+    ] = True,
+) -> None:
+    """Analyse sur demande reçue par e-mail : mêmes contrôles de sécurité, même fiche et même
+    réutilisation (moins de 7 jours) qu'un ticket Codeberg. À vous de vérifier que la demande
+    concerne le site du demandeur ou celui d'un organisme public."""
+    from rich.markup import escape
+
+    from bleublanccloud.demandes.execution import analyser_demande_directe, publier_site
+    from bleublanccloud.demandes.reponses import MESSAGES_REFUS
+    from bleublanccloud.demandes.traitement import ErreurTechnique, Refus
+    from bleublanccloud.verrou import verrou_exclusif
+
+    parametres = obtenir_parametres()
+    with verrou_exclusif(parametres.verrou) as obtenu:
+        if not obtenu:
+            console.print("Une autre tâche Bleu Blanc Cloud est en cours : réessayez plus tard.")
+            raise typer.Exit(code=1)
+        with Base(parametres.base_sqlite) as base:
+            try:
+                analyse = asyncio.run(
+                    analyser_demande_directe(parametres, referentiels_par_defaut(), base, domaine)
+                )
+            except Refus as refus:
+                raison = MESSAGES_REFUS.get(refus.code, refus.code)
+                console.print(f"[yellow]✗ Demande refusée ({refus.code}) :[/] {escape(raison)}")
+                raise typer.Exit(code=2) from None
+            except ErreurTechnique as erreur:
+                console_erreur.print(f"[red]Analyse impossible : {escape(str(erreur))}[/]")
+                raise typer.Exit(code=1) from None
+        publiee = asyncio.run(publier_site()) if publier else None
+    provisoire = " (provisoire)" if analyse.provisoire else ""
+    origine = "analyse de moins de 7 jours réutilisée" if analyse.reutilisee else "nouvelle analyse"
+    console.print(
+        f"[green]✓[/] {escape(analyse.hote)} : note {analyse.note}{provisoire}, "
+        f"{analyse.score}/100 ({origine})"
+    )
+    console.print(f"Fiche : {analyse.url_fiche}")
+    if publiee is False:
+        console_erreur.print("[red]Publication du site impossible : voir les journaux.[/]")
+        raise typer.Exit(code=1)
+    if publiee is None:
+        console.print("Site non publié (--sans-publier) : lancez « bbcloud publier ».")
+    console.print(
+        "\nRéponse à envoyer :\n"
+        f"Bonjour,\n\nL'analyse de {analyse.hote} est en ligne : {analyse.url_fiche}\n"
+        f"Note {analyse.note}{provisoire} ({analyse.score}/100). Le score ne reflète que "
+        "l'empreinte externe et visible publiquement du site (DNS et pages publiques) ; il est "
+        "indicatif. Une question ou une correction ? Il suffit de répondre à ce message.",
+        highlight=False,
+    )
+
+
 @app_demandes.command("lister")
 def demandes_lister() -> None:
     """Liste les demandes ouvertes et le verdict de validation (lecture seule, aucun scan)."""

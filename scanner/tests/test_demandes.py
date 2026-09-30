@@ -704,3 +704,75 @@ def test_ipv4_essayee_en_premier() -> None:
         "51.91.10.20",
         "2a0a:4580:103f:c0de::2",
     ]
+
+
+# --------------------------------------------------------------------------- #
+# Demandes reçues par e-mail (bbcloud demandes analyser)
+# --------------------------------------------------------------------------- #
+
+
+async def test_demande_par_email_meme_fiche_qu_un_ticket(banc: Banc) -> None:
+    from bleublanccloud.demandes.traitement import SOURCE_EMAIL
+
+    traiteur = banc.traiteur(source=SOURCE_EMAIL)
+    analyse = await traiteur.analyser_directement("https://Exempleville.fr/")
+    assert analyse.hote == "exempleville.fr" and not analyse.reutilisee
+    assert analyse.slug == "sur-demande-exempleville-fr"
+    assert analyse.url_fiche == f"{URL_SITE}/organisation/sur-demande-exempleville-fr/"
+    enregistree = banc.base.organisation_par_slug(analyse.slug)
+    assert enregistree is not None
+    assert (enregistree.organisation.type, enregistree.organisation.source) == (
+        "sur_demande",
+        SOURCE_EMAIL,
+    )
+    scan = banc.base.dernier_scan(enregistree.id)
+    assert scan is not None and scan.score is not None
+    assert (analyse.note, analyse.score) == (scan.score.note, scan.score.score_global)
+    assert banc.analyses == ["exempleville.fr"] and len(banc.rapports) == 1
+    assert banc.publications == 0  # la commande publie ensuite, une seule fois
+
+    # Même domaine quelques minutes plus tard : l'analyse récente est réutilisée
+    encore = await traiteur.analyser_directement("exempleville.fr")
+    assert encore.reutilisee and encore.slug == analyse.slug
+    assert banc.analyses == ["exempleville.fr"]
+
+
+@pytest.mark.parametrize(
+    ("saisie", "code"),
+    [
+        ("localhost", "domaine_reserve"),
+        ("192.168.1.10", "domaine_ip"),
+        ("exemple.fr; rm -rf /", "domaine_invalide"),
+        ("inexistant-exemple.fr", "sans_adresse"),
+    ],
+)
+async def test_demande_par_email_memes_refus_qu_un_ticket(
+    banc: Banc, saisie: str, code: str
+) -> None:
+    from bleublanccloud.demandes.traitement import Refus
+
+    with pytest.raises(Refus) as refus:
+        await banc.traiteur().analyser_directement(saisie)
+    assert refus.value.code == code
+    assert banc.analyses == []
+
+
+async def test_demande_par_email_reseau_prive_et_retrait(
+    base: Base, referentiels: Referentiels, parametres: Parametres, resolveur_asn: ResolveurAsn
+) -> None:
+    import dataclasses
+
+    from bleublanccloud.demandes.traitement import Refus
+
+    scenario = {"resolutions": {"piege-exemple.fr": {"ipv4": ["51.91.10.20", "10.0.0.8"]}}}
+    banc = Banc(base, referentiels, parametres, resolveur_asn, scenario)
+    with pytest.raises(Refus, match="reseau_prive"):
+        await banc.traiteur().analyser_directement("piege-exemple.fr")
+    avec_retrait = dataclasses.replace(
+        referentiels,
+        retraits={"exempleville.fr": Retrait(domaine="exempleville.fr", date_demande="2026-01-01")},
+    )
+    with pytest.raises(Refus, match="retrait"):
+        await banc.traiteur(referentiels=avec_retrait).analyser_directement("www.exempleville.fr")
+    # Le retrait est vérifié avant toute requête DNS (seule « piege » a été résolue)
+    assert banc.analyses == [] and banc.resolveur.appels == ["piege-exemple.fr|A"]

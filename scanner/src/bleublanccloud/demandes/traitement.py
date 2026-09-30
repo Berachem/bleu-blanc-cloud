@@ -51,6 +51,7 @@ LIMITE_COMPTE: Final = 1
 DELAI_REUTILISATION: Final = timedelta(days=7)
 TENTATIVES_MAX: Final = 3
 SOURCE: Final = "demande-codeberg"
+SOURCE_EMAIL: Final = "demande-email"
 
 Analyser = Callable[[str], Awaitable[ResultatScan]]
 Resoudre = Callable[[str], Awaitable[list[str]]]
@@ -80,6 +81,19 @@ class BilanDemandes:
     reponses_en_attente: list[int] = field(default_factory=list)
 
 
+@dataclass(frozen=True)
+class AnalyseDirecte:
+    """Résultat d'une demande reçue hors ticket (e-mail), à communiquer au demandeur."""
+
+    hote: str
+    slug: str
+    url_fiche: str
+    note: str
+    score: int
+    provisoire: bool
+    reutilisee: bool
+
+
 @dataclass
 class TraiteurDemandes:
     """Orchestration d'un passage ; toutes les dépendances externes sont injectées."""
@@ -96,6 +110,8 @@ class TraiteurDemandes:
     limite_compte: int = LIMITE_COMPTE
     delai_reutilisation: timedelta = DELAI_REUTILISATION
     tentatives_max: int = TENTATIVES_MAX
+    source: str = SOURCE
+    """Origine enregistrée sur les fiches créées (ticket Codeberg ou e-mail)."""
     maintenant: Callable[[], datetime] = field(default=lambda: datetime.now(UTC))
 
     @property
@@ -187,11 +203,23 @@ class TraiteurDemandes:
         """Contrôles d'une nouvelle demande, dans l'ordre ; retourne le nom d'hôte validé."""
         if not case_cochee(ticket):
             raise Refus("case_non_cochee")
+        hote = self._valider(extraire_domaine(ticket))
+        suivi.domaine = hote
+        await self._verifier_hote(hote)
+        self._verifier_limites(ticket.auteur)
+        suivi.acceptee_le = self.maintenant()
+        self.base.enregistrer_demande(suivi)
+        return hote
+
+    @staticmethod
+    def _valider(saisie: str | None) -> str:
         try:
-            hote = valider_domaine(extraire_domaine(ticket))
+            return valider_domaine(saisie)
         except DomaineRefuse as refus:
             raise Refus(refus.code) from None
-        suivi.domaine = hote
+
+    async def _verifier_hote(self, hote: str) -> None:
+        """Retrait demandé, nom sans adresse ou adresse non publique : refus."""
         if self.referentiels.est_retire(hote) or self.referentiels.est_retire(
             normaliser_cible(hote).domaine
         ):
@@ -201,10 +229,37 @@ class TraiteurDemandes:
             raise Refus("sans_adresse")
         if not all(est_adresse_publique(adresse) for adresse in adresses):
             raise Refus("reseau_prive")
-        self._verifier_limites(ticket.auteur)
-        suivi.acceptee_le = self.maintenant()
-        self.base.enregistrer_demande(suivi)
-        return hote
+
+    async def analyser_directement(self, saisie: str) -> AnalyseDirecte:
+        """Demande reçue hors ticket (par e-mail) : mêmes contrôles de sécurité qu'un ticket,
+        même réutilisation d'une analyse récente et même fiche « sur demande ». La case
+        d'engagement et les limites quotidiennes relèvent de la personne qui lance la
+        commande. Lève Refus ; ne publie pas le site."""
+        hote = self._valider(saisie)
+        await self._verifier_hote(hote)
+        domaine = normaliser_cible(hote).domaine
+        recent = self.base.dernier_scan_note_du_domaine(
+            domaine, self.maintenant() - self.delai_reutilisation
+        )
+        if recent is not None and recent.organisation_id is not None:
+            organisation_id, reutilisee = recent.organisation_id, True
+        else:
+            organisation_id, reutilisee = await self._analyser(hote, domaine), False
+        enregistree = self.base.organisation_par_id(organisation_id)
+        scan = self.base.dernier_scan(organisation_id)
+        if enregistree is None or scan is None or scan.score is None:
+            raise ErreurTechnique("fiche introuvable après l'analyse")
+        score = score_a_jour(scan)
+        slug = enregistree.organisation.slug
+        return AnalyseDirecte(
+            hote=hote,
+            slug=slug,
+            url_fiche=f"{self.url_site.rstrip('/')}/organisation/{slug}/",
+            note=score.note,
+            score=score.score_global,
+            provisoire=score.provisoire,
+            reutilisee=reutilisee,
+        )
 
     def _verifier_limites(self, auteur: str) -> None:
         """1 demande acceptée par jour et par compte, 10 au total (jour calendaire, Paris)."""
@@ -252,7 +307,7 @@ class TraiteurDemandes:
                 nom=nom_lisible(domaine),
                 type="sur_demande",
                 site_web=f"https://{hote}/",
-                source=SOURCE,
+                source=self.source,
             )
         )
 
