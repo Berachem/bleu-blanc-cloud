@@ -26,7 +26,7 @@ L'analyse part du **nom de domaine** du site officiel de l'organisation. Elle es
 
 ### Règles de politesse
 
-- Robot identifié : `BleuBlancCloudBot/1.0 (+https://bleublanccloud.berachem.dev/methodologie)`.
+- Robot identifié : `BleuBlancCloudBot/1.0 (+https://bleublanccloud.fr/methodologie)`.
 - 5 pages au maximum par site, 1 requête par seconde et par domaine, délai d'attente de 10 secondes, 2 nouvelles tentatives au maximum.
 - Respect du fichier `robots.txt` (RFC 9309) : une page interdite n'est jamais demandée ; si `robots.txt` est injoignable, aucune page n'est analysée.
 - Aucune soumission de formulaire, aucune tentative d'authentification, aucun test de vulnérabilité.

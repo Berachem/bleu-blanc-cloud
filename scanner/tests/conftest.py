@@ -116,7 +116,13 @@ class LecteurMmdbFactice:
         "104.16.1.1": {"asn": "AS13335", "as_name": "Cloudflare, Inc.", "country_code": "US"},
         "185.10.20.30": {"asn": "AS64500", "as_name": "PETIT HEBERGEUR", "country_code": "FR"},
         "185.10.20.31": {"asn": "AS64500", "as_name": "PETIT HEBERGEUR", "country_code": "FR"},
-        "217.197.84.141": {"asn": "AS64501", "as_name": "HEBERGEUR BERLIN", "country_code": "DE"},
+        # Codeberg Pages (réseau de l'association IN-Berlin)
+        "217.197.84.141": {"asn": "AS29670", "as_name": "IN-BERLIN-AS", "country_code": "DE"},
+        "2a0a:4580:103f:c0de::2": {
+            "asn": "AS29670",
+            "as_name": "IN-BERLIN-AS",
+            "country_code": "DE",
+        },
         "185.20.30.40": {
             "asn": "AS64510",
             "as_name": "COMMUNE DE METROPOLE-EXEMPLE",

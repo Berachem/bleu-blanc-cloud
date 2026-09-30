@@ -14,10 +14,10 @@ body:
         **Bleu Blanc Cloud** mesure la dépendance numérique d'un site vis-à-vis de fournisseurs extra-européens (hébergement, messagerie, DNS, services tiers).
 
         - 🔍 **Analyse passive uniquement** : enregistrements DNS et quelques pages publiques, comme le ferait n'importe quel visiteur. Aucun test d'intrusion, aucun formulaire soumis.
-        - 🌐 **Résultat public** : la fiche est publiée sur https://bleublanccloud.berachem.dev et la réponse (note, score, lien) est donnée dans ce ticket.
+        - 🌐 **Résultat public** : la fiche est publiée sur https://bleublanccloud.fr et la réponse (note, score, lien) est donnée dans ce ticket.
         - ⏱️ **Délai habituel : moins d'une heure.** 10 analyses par jour au total, une par jour et par compte ; une analyse de moins de 7 jours est réutilisée.
 
-        N'indiquez aucune donnée personnelle dans ce ticket. Votre nom de compte Codeberg n'est conservé que 30 jours par le robot (limite d'une demande par jour) : voir https://bleublanccloud.berachem.dev/mentions-legales/#donnees-personnelles
+        N'indiquez aucune donnée personnelle dans ce ticket. Votre nom de compte Codeberg n'est conservé que 30 jours par le robot (limite d'une demande par jour) : voir https://bleublanccloud.fr/mentions-legales/#donnees-personnelles
   - type: input
     id: domaine
     attributes:

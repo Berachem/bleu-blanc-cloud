@@ -2,12 +2,17 @@
 // Contenu publié directement depuis docs/methodologie.md (source unique, versionnée).
 import BoutonAnalyse from "../composants/BoutonAnalyse.astro";
 import Base from "../mises-en-page/Base.astro";
+import { SITE } from "../config";
 import { date } from "../lib/format";
 import { annoterTableaux } from "../lib/libelles-tableaux";
 import { compiledContent, frontmatter } from "../../../docs/methodologie.md";
 
-// Tableaux lisibles sur mobile : libellé de colonne recopié sur chaque cellule
-const contenu = annoterTableaux(await compiledContent());
+// Tableaux lisibles sur mobile : libellé de colonne recopié sur chaque cellule. Adresses du
+// site (User-Agent du robot) : domaine réellement publié (DOMAINE_SITE).
+const contenu = annoterTableaux(await compiledContent()).replaceAll(
+  "https://bleublanccloud.fr/",
+  `${SITE.url}/`,
+);
 ---
 <Base
   titre="Méthodologie"

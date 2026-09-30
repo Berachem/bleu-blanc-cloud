@@ -264,6 +264,19 @@
     - "https://codeberg.org/"
   a_verifier: true
 
+- id: in-berlin
+  nom: Individual Network Berlin (IN-Berlin) e.V.
+  pays_siege: DE
+  soumis_cloud_act: false
+  asn: [29670]
+  motifs_domaines: ["in-berlin.de"]
+  categories: [hebergement]
+  sources:
+    - "https://www.in-berlin.de/"
+    - "https://bgp.tools/as/29670"
+  remarque: "Association berlinoise ; son réseau (AS29670) héberge les serveurs de Codeberg, dont Codeberg Pages (217.197.84.141, 2a0a:4580:103f:c0de::2) : un domaine pointé par A/AAAA vers Codeberg Pages est attribué à ce réseau."
+  a_verifier: true
+
 - id: bunny
   nom: Bunny.net (BunnyWay)
   pays_siege: SI

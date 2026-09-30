@@ -1,7 +1,7 @@
 # CLAUDE.md — Bleu Blanc Cloud 🇫🇷🇪🇺
 
 > Observatoire indépendant et open source de la souveraineté numérique des organisations françaises.
-> Auteur : Berachem Markria (berachem.dev) · URL cible : `bleublanccloud.berachem.dev`
+> Auteur : Berachem Markria (berachem.dev) · URL : `bleublanccloud.fr` (ancienne adresse `bleublanccloud.berachem.dev`, redirigée)
 
 ---
 
@@ -89,7 +89,7 @@ Serveur Proxmox (domicile) — conteneur LXC Debian 12
 └── deploy/
     ├── timer systemd hebdomadaire → campagne → export → build → publication
     └── publication : git push vers le dépôt Pages (Codeberg Pages)
-                      → bleublanccloud.berachem.dev
+                      → bleublanccloud.fr
 ```
 
 **Principe clé (v1)** : le site est 100 % statique. Aucun serveur exposé depuis le domicile. Les traitements tournent sur le Proxmox, seuls les fichiers générés sont publiés. Le scan à la demande est une phase optionnelle (phase 8).
@@ -228,7 +228,7 @@ bleu-blanc-cloud/
 | `rdap` | Bureau d'enregistrement | Informatif |
 
 ### Règles de politesse (obligatoires)
-- User-Agent explicite : `BleuBlancCloudBot/1.0 (+https://bleublanccloud.berachem.dev/methodologie)`.
+- User-Agent explicite : `BleuBlancCloudBot/1.0 (+https://bleublanccloud.fr/methodologie)` (construit à partir de `DOMAINE_SITE`).
 - 5 pages maximum par site, 1 requête par seconde par domaine, concurrence globale plafonnée (20 par défaut, configurable).
 - Délais d'expiration : 10 s. Relances limitées (2 maximum).
 - Respect de `robots.txt` pour les pages HTML.
@@ -464,7 +464,7 @@ CHEMIN_BASE_ASN=scanner/src/bleublanccloud/referentiels/telechargements/asn.mmdb
 CHEMIN_BASE_SQLITE=donnees/bleublanccloud.db
 CONCURRENCE_MAX=20
 DELAI_EXPIRATION_S=10
-USER_AGENT="BleuBlancCloudBot/1.0 (+https://bleublanccloud.berachem.dev/methodologie)"
+DOMAINE_SITE=bleublanccloud.fr   # URL du site, User-Agent (+https://<DOMAINE_SITE>/methodologie)
 DEPOT_PAGES=
 ```
 
@@ -475,7 +475,7 @@ DEPOT_PAGES=
 - **Serveur** : conteneur LXC Debian 12 sur Proxmox (2 vCPU, 2 Go RAM suffisent), avec `uv` et Node.js LTS.
 - **Planification** : `bbcloud-campagne.timer` (systemd), chaque dimanche à 3 h : mise à jour des référentiels → campagne → rapports IA → export → build → publication.
 - **Publication** : `deploy/publier.sh` copie `site/dist/` dans le dépôt Pages, commit, push.
-- **Hébergement du site** : Codeberg Pages (Allemagne) avec domaine personnalisé `bleublanccloud.berachem.dev` (fichier `.domains` + enregistrement DNS à configurer selon la documentation Codeberg Pages). Alternative : alwaysdata (France).
+- **Hébergement du site** : Codeberg Pages (git-pages, Allemagne) avec le domaine `bleublanccloud.fr` (zone DNS chez OVHcloud, DNSSEC) : apex en A/AAAA, `www` et l'ancienne adresse `bleublanccloud.berachem.dev` redirigés en 301 par un dépôt dédié (ADR-0004, `deploy/README.md` étape 4). Alternative : alwaysdata (France).
 - **Code source** : GitHub (visibilité) avec miroir sur Codeberg.
 - **Journaux** : journald. **Sauvegarde** : `sqlite3 .backup` quotidien vers le stockage Proxmox.
 
@@ -512,7 +512,7 @@ DEPOT_PAGES=
 - ✅ `--dry-run` estime le coût. Aucun `alternative_id` inventé ne passe la validation (testé).
 
 ### Phase 7 — Déploiement et dogfooding
-- Fichiers systemd, `publier.sh`, documentation d'installation sur Proxmox, publication sur `bleublanccloud.berachem.dev`.
+- Fichiers systemd, `publier.sh`, documentation d'installation sur Proxmox, publication sur `bleublanccloud.fr`.
 - ✅ Le site obtient **A** sur son propre scan. Première campagne complète publiée après mon accord.
 
 ### Phase 8 — Évolutions optionnelles

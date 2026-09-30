@@ -4,7 +4,8 @@
 # Variables (lues dans .env) :
 #   DEPOT_PAGES    URL git (SSH) du dépôt Pages, ex. git@codeberg.org:berachem/bleublanccloud-pages.git
 #   BRANCHE_PAGES  branche publiée (défaut : pages)
-#   DOMAINE_SITE   domaine personnalisé (défaut : bleublanccloud.berachem.dev)
+#   DOMAINE_SITE   domaine du site (défaut : bleublanccloud.fr) : transmis au build Astro
+#                  (URL canoniques, plan du site, robots.txt) et écrit dans .domains
 #
 # Variables d'exécution :
 #   NPM_CI=0          ne pas relancer « npm ci » (déjà fait par maj-auto.sh si nécessaire)
@@ -18,7 +19,8 @@ DEPOT_PAGES="${DEPOT_PAGES:-$(lire_env DEPOT_PAGES)}"
 BRANCHE_PAGES="${BRANCHE_PAGES:-$(lire_env BRANCHE_PAGES)}"
 BRANCHE_PAGES="${BRANCHE_PAGES:-pages}"
 DOMAINE_SITE="${DOMAINE_SITE:-$(lire_env DOMAINE_SITE)}"
-DOMAINE_SITE="${DOMAINE_SITE:-bleublanccloud.berachem.dev}"
+DOMAINE_SITE="${DOMAINE_SITE:-bleublanccloud.fr}"
+export DOMAINE_SITE
 CLONE_PAGES="${CLONE_PAGES:-$RACINE/donnees/depot-pages}"
 
 echo "▶ Export des données"
@@ -37,7 +39,7 @@ if [ "${EXIGER_DONNEES:-0}" = "1" ]; then
   fi
 fi
 
-echo "▶ Construction du site"
+echo "▶ Construction du site (https://$DOMAINE_SITE)"
 cd "$RACINE/site"
 if [ "${NPM_CI:-1}" = "1" ] || [ ! -d node_modules ]; then
   npm ci --no-audit --no-fund --silent
@@ -70,6 +72,10 @@ cp -a "$RACINE/site/dist/." .
 # Fichiers propres au dépôt Codeberg (modèle de ticket « Analyser mon site », README) :
 # recopiés à chaque publication pour survivre au remplacement complet du contenu.
 cp -a "$RACINE/deploy/codeberg/." .
+# Liens vers le site : domaine réellement publié (utile tant que DOMAINE_SITE vaut l'ancien)
+if [ "$DOMAINE_SITE" != "bleublanccloud.fr" ]; then
+  sed -i "s#https://bleublanccloud\.fr#https://$DOMAINE_SITE#g" README.md .forgejo/issue_template/analyse.yaml
+fi
 # .domains : ignoré par git-pages (domaine autorisé par l'enregistrement TXT
 # _git-pages-repository), conservé pour les comptes encore sur l'ancien serveur Pages v2.
 printf '%s\n' "$DOMAINE_SITE" > .domains

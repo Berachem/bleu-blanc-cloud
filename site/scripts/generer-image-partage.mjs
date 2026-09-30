@@ -8,6 +8,8 @@ import { chromium } from "playwright-core";
 
 const RACINE = new URL("../", import.meta.url);
 const SORTIE = new URL("public/partage.png", RACINE);
+// Domaine affiché sur l'image (même variable que le build du site)
+const DOMAINE = (process.env.DOMAINE_SITE || "bleublanccloud.fr").trim().toLowerCase();
 const LARGEUR = 1200;
 const HAUTEUR = 630;
 const CANDIDATS_CHROMIUM = [
@@ -99,7 +101,7 @@ h1 { margin: 16px 0 0; max-width: 820px; font-size: 70px; line-height: 1.02;
     <h1>Nos services publics dépendent-ils du <span class="degrade">cloud américain</span>&nbsp;?</h1>
     <div class="bas">
       <div class="notes">${NOTES.map(([n, fond, texte]) => `<span class="note" style="background:${fond};color:${texte}">${n}</span>`).join("")}</div>
-      <div class="url">bleublanccloud.berachem.dev</div>
+      <div class="url">${DOMAINE}</div>
     </div>
   </main>
 </body></html>`;

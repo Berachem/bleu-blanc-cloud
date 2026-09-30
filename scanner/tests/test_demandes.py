@@ -36,7 +36,7 @@ from tests.conftest import ResolveurFactice, fabriquer_contexte
 API = "https://codeberg.test/api/v1"
 DEPOT = "berachem/bleublanccloud-pages"
 JETON = "jeton-secret-de-test-123"
-URL_SITE = "https://bleublanccloud.berachem.dev"
+URL_SITE = "https://bleublanccloud.fr"
 ETIQUETTES = {"analyse": 1, "traitée": 2, "refusée": 3, "erreur": 4}
 
 

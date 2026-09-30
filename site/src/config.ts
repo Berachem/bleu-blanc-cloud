@@ -1,8 +1,24 @@
 // Configuration éditoriale du site.
 
+// Domaine du site publié, lu au build dans DOMAINE_SITE (transmis par deploy/publier.sh
+// depuis le .env du serveur) : URL canoniques, plan du site, robots.txt, partage.
+const DOMAINE_PAR_DEFAUT = "bleublanccloud.fr";
+const RE_NOM_HOTE = /^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
+
+function lireDomaine(): string {
+  const brut = typeof process !== "undefined" ? process.env.DOMAINE_SITE : undefined;
+  const domaine = (brut ?? "").trim().toLowerCase().replace(/\.$/, "") || DOMAINE_PAR_DEFAUT;
+  if (!RE_NOM_HOTE.test(domaine)) {
+    throw new Error(`DOMAINE_SITE invalide : « ${brut} » (nom de domaine seul attendu)`);
+  }
+  return domaine;
+}
+
+export const DOMAINE_SITE = lireDomaine();
+
 export const SITE = {
   nom: "Bleu Blanc Cloud",
-  url: "https://bleublanccloud.berachem.dev",
+  url: `https://${DOMAINE_SITE}`,
   description:
     "Observatoire indépendant et open source de la souveraineté numérique des organisations publiques françaises.",
   depot: "https://github.com/Berachem/bleu-blanc-cloud",

@@ -1,6 +1,8 @@
 # Mise en production sur Proxmox — guide pas à pas 🇫🇷
 
-Ce guide installe Bleu Blanc Cloud dans un **conteneur LXC Debian 12** sur ton Proxmox, puis publie le site sur **Codeberg Pages** à l'adresse `https://bleublanccloud.berachem.dev`.
+Ce guide installe Bleu Blanc Cloud dans un **conteneur LXC Debian 12** sur ton Proxmox, puis publie le site sur **Codeberg Pages** à l'adresse `https://bleublanccloud.fr`.
+
+> 🔀 **Le site était auparavant publié sur `bleublanccloud.berachem.dev`** : pour basculer un serveur existant vers `bleublanccloud.fr`, suis la [section 4.6 « Migration depuis bleublanccloud.berachem.dev »](#46-migration-depuis-bleublanccloudberachemdev).
 
 ⏱️ Compter environ **1 heure** la première fois. Tout est déjà prêt dans le dépôt : il reste à créer le conteneur, lancer le script d'installation et renseigner quelques clés.
 
@@ -9,8 +11,8 @@ Proxmox (chez toi)                                    Internet
 ┌──────────────────────────────────────────┐
 │ LXC Debian 12 « bbcloud »                 │   git push   ┌────────────────────────┐
 │  timer systemd (dimanche 3 h)             │ ───────────▶ │ Codeberg Pages (DE)    │
-│   référentiels → campagne → rapports IA   │              │ bleublanccloud.        │
-│   → export JSON → build Astro → publier   │              │ berachem.dev           │
+│   référentiels → campagne → rapports IA   │              │ bleublanccloud.fr      │
+│   → export JSON → build Astro → publier   │              │                        │
 │  sauvegarde SQLite quotidienne (2 h)      │              └────────────────────────┘
 └──────────────────────────────────────────┘
       aucun port entrant, uniquement des connexions sortantes
@@ -24,7 +26,7 @@ Proxmox (chez toi)                                    Internet
 |---|---|---|
 | Proxmox VE 8 avec un accès administrateur | — | oui |
 | Un compte **Codeberg** | <https://codeberg.org/user/sign_up> | oui |
-| L'accès à la zone DNS de `berachem.dev` | ton fournisseur DNS actuel (Cloudflare) | oui |
+| Le domaine `bleublanccloud.fr` et l'accès à sa zone DNS | OVHcloud (*Web Cloud → Noms de domaine*) | oui |
 | Une clé API **Mistral** | <https://console.mistral.ai> → *API Keys* | pour les rapports IA |
 | Un jeton **IPinfo** gratuit (base IP → ASN) | <https://ipinfo.io/signup> | recommandé (sinon repli sur RIPEstat, plus lent) |
 
@@ -162,34 +164,67 @@ Fais ces étapes **dans l'ordre, avant la première publication** (étape 5) : l
    (ou `cat /home/bbcloud/.ssh/id_ed25519_codeberg.pub`) et coche **Activer l'accès en écriture** : c'est elle que `publier.sh` utilise pour pousser.
 3. Après la première publication, vérifie que **`pages` est la branche par défaut** du dépôt (*Paramètres → Branches*) : c'est le cas automatiquement si le dépôt était vide. Forgejo y lit le modèle de ticket « Analyser mon site » (étape 6 bis).
 
-### 4.2 Enregistrements DNS
+### 4.2 Enregistrements DNS (zone OVHcloud de `bleublanccloud.fr`)
 
-Dans la zone DNS de `berachem.dev`, ajoute :
+Console OVHcloud : *Web Cloud → Noms de domaine → `bleublanccloud.fr` → Zone DNS*. Ne touche ni aux enregistrements **NS** (`dnsXX.ovh.net` / `nsXX.ovh.net`) ni à **DNSSEC** : OVHcloud re-signe la zone automatiquement à chaque modification.
 
-| Type | Nom | Valeur |
+**1. Supprimer les enregistrements de parking** créés par OVHcloud à l'achat (repère-les dans la zone, leurs valeurs varient) :
+
+| Type | Sous-domaine | Pourquoi |
 |---|---|---|
-| `CNAME` | `bleublanccloud` | `codeberg.page.` |
-| `TXT` | `_git-pages-repository.bleublanccloud` | `https://codeberg.org/<ton-pseudo>/bleublanccloud-pages.git` |
+| `A` (et `AAAA` s'il existe) | *(vide)*, c'est-à-dire l'apex `bleublanccloud.fr` | adresse de la page de parking OVHcloud, remplacée par Codeberg Pages |
+| `A`, `AAAA` ou `CNAME` | `www` | remplacé par le `CNAME` ci-dessous |
+| `TXT` de valeur `"1\|www.bleublanccloud.fr"` | *(vide)* | marqueur de la redirection web OVHcloud, s'il existe |
 
-- Le **CNAME pointe vers `codeberg.page.`** tout court, et non plus vers `bleublanccloud-pages.<ton-pseudo>.codeberg.page.` (forme de l'ancien serveur).
-- Le **TXT** se place sur le sous-domaine `_git-pages-repository.<sous-domaine>`, soit ici `_git-pages-repository.bleublanccloud.berachem.dev`. Il contient l'**URL HTTPS de clonage** du dépôt (avec `.git`) : c'est lui qui autorise ce dépôt à publier sur ce domaine.
-- ⚠️ **Chez Cloudflare, mets le CNAME en « DNS only » (nuage gris)**. Proxifié (nuage orange), le site serait servi par Cloudflare : Codeberg ne pourrait pas émettre le certificat, et le site perdrait sa note A sur son propre scan (hébergement masqué par un CDN américain → niveau C).
-- Si la zone contient des enregistrements **CAA**, ils doivent autoriser Let's Encrypt (`0 issue "letsencrypt.org"`).
+> ⚠️ Si l'onglet **Redirection** du domaine contient une redirection, supprime-la d'abord : sinon OVHcloud recrée ses propres `A`/`TXT`.
+
+**2. Créer** (dans le formulaire OVHcloud, le champ *Sous-domaine* vide désigne l'apex) :
+
+| Type | Sous-domaine | Cible / valeur | Rôle |
+|---|---|---|---|
+| `A` | *(vide)* | `217.197.84.141` | apex → Codeberg Pages |
+| `AAAA` | *(vide)* | `2a0a:4580:103f:c0de::2` | apex → Codeberg Pages (IPv6) |
+| `TXT` | `_git-pages-repository` | `https://codeberg.org/berachem/bleublanccloud-pages.git` | autorise le dépôt du site à publier sur l'apex |
+| `CNAME` | `www` | `codeberg.page.` | `www` → Codeberg Pages |
+| `TXT` | `_git-pages-repository.www` | `https://codeberg.org/berachem/bleublanccloud-redirection.git` | autorise le dépôt de redirection (étape 4.5) sur `www` |
+
+- Un apex ne peut pas porter de `CNAME` : on y met les adresses de `codeberg.page` indiquées par la documentation de Codeberg (vérifiées le 30 septembre 2026 avec `dig +short A codeberg.page` et `AAAA`). Si Codeberg en change un jour, il faudra les mettre à jour ; le `CNAME` de `www` suit tout seul. (`www` peut aussi recevoir les mêmes `A`/`AAAA` que l'apex, mais le `CNAME` est préférable.)
+- Le **TXT** contient l'**URL HTTPS de clonage** du dépôt (avec `.git`) ; OVHcloud ajoute lui-même les guillemets.
+- Aucun `CAA` n'existe par défaut. Si tu en ajoutes un, il doit autoriser Let's Encrypt : `0 issue "letsencrypt.org"`.
+
+**3. Messagerie** (au choix) :
+
+- **Aucune adresse sur `bleublanccloud.fr`** (recommandé tant que le contact reste `contact@berachem.dev`) : supprime les `MX` OVHcloud (`mx1`, `mx2`, `mx3.mail.ovh.net`), le `TXT` SPF `v=spf1 include:mx.ovh.com ~all` et les enregistrements `autoconfig` / `autodiscover` / `_autodiscover._tcp`, puis protège le domaine contre l'usurpation :
+
+  | Type | Sous-domaine | Valeur |
+  |---|---|---|
+  | `MX` | *(vide)* | priorité `0`, cible `.` (« MX nul », RFC 7505 ; si l'interface refuse `.`, ne mets simplement aucun `MX`) |
+  | `TXT` | *(vide)* | `v=spf1 -all` |
+  | `TXT` | `_dmarc` | `v=DMARC1; p=reject;` |
+
+- **Une adresse `contact@bleublanccloud.fr` chez OVHcloud** (messagerie française, qui remplacerait l'actuelle adresse relayée par un service américain) : garde les `MX` et le SPF OVHcloud. Le site reste à 100/100 sur son propre scan.
 
 Vérifie la propagation (depuis n'importe quelle machine ; dans le conteneur : `apt-get install -y dnsutils`) :
 
 ```bash
-dig +short CNAME bleublanccloud.berachem.dev                    # → codeberg.page.
-dig +short TXT _git-pages-repository.bleublanccloud.berachem.dev # → "https://codeberg.org/<ton-pseudo>/bleublanccloud-pages.git"
+dig +short NS bleublanccloud.fr                              # → serveurs OVHcloud (sinon : domaine pas encore actif)
+dig +short A bleublanccloud.fr                               # → 217.197.84.141
+dig +short AAAA bleublanccloud.fr                            # → 2a0a:4580:103f:c0de::2
+dig +short TXT _git-pages-repository.bleublanccloud.fr       # → "https://codeberg.org/berachem/bleublanccloud-pages.git"
+dig +short CNAME www.bleublanccloud.fr                       # → codeberg.page.
+dig +short TXT _git-pages-repository.www.bleublanccloud.fr   # → "https://codeberg.org/berachem/bleublanccloud-redirection.git"
+dig +dnssec A bleublanccloud.fr | grep RRSIG                 # une signature : DNSSEC actif
 ```
 
 ### 4.3 Webhook de déploiement
+
+Avec git-pages, **chaque domaine est un site distinct** : un déploiement ne concerne que le domaine de l'URL du webhook, et seulement si le `TXT` `_git-pages-repository` de ce domaine autorise le dépôt. Le dépôt du site n'a donc qu'**un seul webhook**, vers `bleublanccloud.fr`.
 
 Dans le dépôt `bleublanccloud-pages` : *Paramètres → Webhooks → Ajouter un webhook → **Forgejo***.
 
 | Champ | Valeur |
 |---|---|
-| URL cible | `http://bleublanccloud.berachem.dev/` (**http://** pour le tout premier déploiement, voir ci-dessous) |
+| URL cible | `http://bleublanccloud.fr/` (**http://** pour le tout premier déploiement, voir ci-dessous) |
 | Méthode HTTP | `POST` |
 | Type de contenu | `application/json` |
 | Déclencheur | *Évènements de push* uniquement |
@@ -204,17 +239,56 @@ Dans le dépôt `bleublanccloud-pages` : *Paramètres → Webhooks → Ajouter u
 
 1. Lance la première publication (étape 5, point 7 : `uv run bbcloud publier`). Le push sur `pages` déclenche le webhook : git-pages récupère le site, le publie et demande le certificat Let's Encrypt.
 2. Contrôle la livraison dans *Paramètres → Webhooks → (ton webhook) → Livraisons récentes* : un code **2xx** est attendu.
-3. Après quelques minutes, `https://bleublanccloud.berachem.dev` doit répondre avec un certificat valide (`curl -sI https://bleublanccloud.berachem.dev`).
-4. **Modifie alors l'URL cible du webhook en `https://bleublanccloud.berachem.dev/`** : une fois le certificat émis, le serveur peut rediriger le HTTP vers le HTTPS, ce qui ferait échouer les livraisons suivantes.
+3. Après quelques minutes, `https://bleublanccloud.fr` doit répondre avec un certificat valide (`curl -sI https://bleublanccloud.fr`).
+4. **Modifie alors l'URL cible du webhook en `https://bleublanccloud.fr/`** : une fois le certificat émis, le serveur peut rediriger le HTTP vers le HTTPS, ce qui ferait échouer les livraisons suivantes.
 
 > 💡 **Publication faite avant le webhook ?** Le site n'est alors pas déployé et une nouvelle publication sans changement ne pousse rien. Relance la dernière livraison depuis *Livraisons récentes* (bouton de renvoi), ou pousse un commit vide sur `pages` :
 > ```bash
 > su - bbcloud -c 'cd /opt/bleu-blanc-cloud/donnees/depot-pages && git commit --allow-empty -qm "redéploiement" && git push -q origin pages'
 > ```
 
-> ℹ️ `publier.sh` écrit toujours un fichier `.domains` : git-pages l'ignore (l'autorisation passe par le TXT), il ne sert qu'aux comptes encore sur l'ancien serveur. git-pages ne redirige plus `/page` vers `/page.html`, ce qui ne gêne pas le site : Astro génère des dossiers (`/methodologie/index.html`) et les liens internes se terminent par `/`.
+> ℹ️ `publier.sh` écrit toujours un fichier `.domains` (valeur de `DOMAINE_SITE`) : git-pages l'ignore (l'autorisation passe par le TXT), il ne sert qu'aux comptes encore sur l'ancien serveur. git-pages ne redirige plus `/page` vers `/page.html`, ce qui ne gêne pas le site : Astro génère des dossiers (`/methodologie/index.html`) et les liens internes se terminent par `/`.
 
-> 💡 Pour un **100/100** au lieu de 87/100 (A) : héberger la zone DNS de `berachem.dev` chez un fournisseur européen (deSEC, Gandi, OVHcloud…) plutôt que chez Cloudflare. Ce n'est pas obligatoire pour obtenir la note A.
+> 💡 Avec Codeberg Pages (Allemagne, réseau de l'association IN-Berlin) et la zone DNS chez OVHcloud (France), le site obtient **100/100** sur son propre scan.
+
+### 4.5 Redirection de `www` (dépôt de redirection)
+
+Comme chaque domaine est un site distinct, `www` ne peut pas être redirigé par le dépôt du site (le même contenu y serait servi en double). Un petit dépôt dédié, dont le fichier `_redirects` renvoie **toutes** les adresses vers l'apex par une redirection permanente (`/* https://bleublanccloud.fr/:splat 301!`, chemin et paramètres conservés), s'en charge. Son contenu est prêt dans [`deploy/redirection/`](redirection/). Le même dépôt sert à l'ancien domaine (étape 4.6).
+
+1. Sur Codeberg, crée un dépôt **public et vide** nommé `bleublanccloud-redirection`.
+2. *Paramètres → Webhooks → Ajouter un webhook → Forgejo*, mêmes réglages qu'à l'étape 4.3 (POST, `application/json`, push uniquement, filtre de branche `pages`), avec l'URL cible **`http://www.bleublanccloud.fr/`**.
+3. Vérifie que le `TXT` `_git-pages-repository.www.bleublanccloud.fr` est en place (étape 4.2), puis **pousse le contenu sur la branche `pages`** : ce push déclenche le déploiement.
+   - Depuis ton ordinateur (clé SSH enregistrée dans ton compte Codeberg) :
+     ```bash
+     cp -r bleu-blanc-cloud/deploy/redirection /tmp/redirection && cd /tmp/redirection
+     git init -q -b pages && git add . && git commit -qm "Redirection vers bleublanccloud.fr"
+     git push git@codeberg.org:berachem/bleublanccloud-redirection.git pages
+     ```
+   - Ou dans l'interface web : téléverse `_redirects`, `index.html` et `README.md`, crée une branche `pages` à partir de ce commit, puis modifie une ligne de `README.md` **sur la branche `pages`** pour déclencher un push sur cette branche.
+4. Après quelques minutes, repasse l'URL du webhook en **`https://www.bleublanccloud.fr/`**.
+5. Contrôle : `curl -sI https://www.bleublanccloud.fr/methodologie/` doit répondre `301` avec `location: https://bleublanccloud.fr/methodologie/`.
+
+### 4.6 Migration depuis bleublanccloud.berachem.dev
+
+Pour un serveur déjà en service sur l'ancienne adresse. **L'ordre compte** : le site reste en ligne à chaque étape.
+
+1. **Domaine actif** : `dig +short NS bleublanccloud.fr` doit renvoyer les serveurs OVHcloud (un domaine tout juste acheté peut mettre un peu de temps à apparaître dans la zone `.fr`).
+2. **DNS OVHcloud** : étape 4.2, puis attends que les `dig` répondent.
+3. **Code du serveur** : la mise à jour automatique (étape 6) installe le nouveau code. Tant que le `.env` du serveur contient `DOMAINE_SITE=bleublanccloud.berachem.dev`, le site continue d'être construit pour l'ancienne adresse : rien ne change encore.
+4. **Webhook du dépôt `bleublanccloud-pages`** : remplace son URL cible par **`http://bleublanccloud.fr/`** (étape 4.3). L'ancien domaine ne reçoit plus de mises à jour mais reste en ligne tel quel.
+5. **`.env` du serveur** (`nano /opt/bleu-blanc-cloud/.env`) :
+   - `DOMAINE_SITE=bleublanccloud.fr` ;
+   - **supprime la ligne `USER_AGENT=`** : le User-Agent est désormais construit à partir de `DOMAINE_SITE` (`BleuBlancCloudBot/1.0 (+https://bleublanccloud.fr/methodologie)`).
+6. **Republication** : `su - bbcloud -c 'cd /opt/bleu-blanc-cloud/scanner && uv run bbcloud publier'`. Les URL canoniques, le plan du site, `robots.txt`, les liens du modèle de ticket et les réponses aux tickets passent à `bleublanccloud.fr` ; le push déclenche le premier déploiement sur le nouveau domaine. Puis étape 4.4 (livraison 2xx, certificat, webhook en `https://`).
+7. **Redirection de l'ancien domaine** :
+   1. dépôt `bleublanccloud-redirection` et redirection de `www` : étape 4.5 ;
+   2. ajoute dans ce dépôt un second webhook (mêmes réglages) vers **`https://bleublanccloud.berachem.dev/`** : son certificat existe déjà, `https://` fonctionne tout de suite ;
+   3. dans la zone de `berachem.dev` (Cloudflare), **remplace la valeur du `TXT` `_git-pages-repository.bleublanccloud`** par `https://codeberg.org/berachem/bleublanccloud-redirection.git`. **Garde le `CNAME` `bleublanccloud` → `codeberg.page.`** (toujours en « DNS only ») ;
+   4. déclenche un déploiement du dépôt de redirection (nouveau push sur `pages`, par exemple une ligne modifiée dans `README.md`) ;
+   5. contrôle : `curl -sI https://bleublanccloud.berachem.dev/carte/` → `301`, `location: https://bleublanccloud.fr/carte/`.
+8. **Finitions** : adresse du site dans la description des dépôts GitHub et Codeberg ; `uv run bbcloud scanner bleublanccloud.fr` (A attendu) ; garde les enregistrements de `berachem.dev` **au moins un an** pour que les anciens liens continuent de rediriger.
+
+> ℹ️ Inutile de relancer `installer.sh` : il ne gère pas le domaine (il ne crée le `.env` que s'il n'existe pas) et les services systemd sont inchangés.
 
 ---
 
@@ -266,7 +340,7 @@ cd /opt/bleu-blanc-cloud/scanner
    ```bash
    cd ../scanner
    uv run bbcloud publier
-   uv run bbcloud scanner bleublanccloud.berachem.dev
+   uv run bbcloud scanner bleublanccloud.fr
    ```
    Au premier push, vérifie la livraison du webhook puis repasse son URL en `https://` (étape 4.4).
 
@@ -396,7 +470,8 @@ Tant que le dépôt GitHub est privé, renseigne dans le formulaire de migration
 - [ ] **Première campagne complète** lancée puis publiée.
 - [ ] **Webhook Codeberg** repassé en `https://` après l'émission du certificat (étape 4.4).
 - [ ] **Analyses sur demande** : étiquettes créées, jeton renseigné, ticket de test traité (étape 6 bis).
-- [ ] **Dogfooding** : `bbcloud scanner bleublanccloud.berachem.dev` donne A.
+- [ ] **Dogfooding** : `bbcloud scanner bleublanccloud.fr` donne A (100/100 attendu : Codeberg Pages via le réseau IN-Berlin, DNS chez OVHcloud).
+- [ ] **Redirections** : `www.bleublanccloud.fr` et `bleublanccloud.berachem.dev` renvoient une 301 vers `https://bleublanccloud.fr/` (étapes 4.5 et 4.6).
 - [ ] **Dépôt GitHub passé en public** : le site renvoie vers le code source, la méthodologie et les référentiels.
 
 Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur récupère la nouvelle version dans l'heure (`bbcloud-maj-auto`), après passage des tests, et republie le site.
@@ -433,7 +508,7 @@ Toute modification de ces fichiers se fait dans le dépôt GitHub : le conteneur
 | L'installateur choisit le mauvais mode (public/privé) | relancer avec `DEPOT_PRIVE=1 bash installer.sh` ou `DEPOT_PRIVE=0 bash installer.sh`. |
 | `Permission denied (publickey)` à la publication | la clé de déploiement Codeberg n'a pas l'accès en écriture, ou `DEPOT_PAGES` n'est pas en SSH. Test : `su - bbcloud -c 'ssh -T git@codeberg.org'`. |
 | Message mentionnant l'**« old pages server »** | la requête arrive sur l'ancien serveur Pages v2, fermé aux nouveaux comptes. Causes possibles : CNAME encore à l'ancienne forme (`bleublanccloud-pages.<ton-pseudo>.codeberg.page.`) au lieu de `codeberg.page.` ; TXT `_git-pages-repository.bleublanccloud` absent ou différent de l'URL HTTPS exacte du dépôt (avec `.git`) ; aucun déploiement git-pages encore effectué (webhook absent, filtré sur une autre branche que `pages`, ou jamais déclenché). Corriger le DNS (`dig`, étape 4.2), vérifier le webhook, puis redéclencher un déploiement (étape 4.4). |
-| **`tls: internal error`** (ou `tlsv1 alert internal error` avec curl, `SSL_ERROR_INTERNAL_ERROR_ALERT` dans Firefox) | le certificat HTTPS n'est pas (encore) émis. Il n'est demandé qu'après un **déploiement réussi par le webhook** : vérifier dans *Livraisons récentes* qu'une livraison a abouti (code 2xx) avec une URL cible en **`http://`** ; sinon corriger l'URL et relancer la livraison. Vérifier aussi : CNAME en « DNS only » chez Cloudflare, TXT présent, enregistrements CAA autorisant `letsencrypt.org`. Puis patienter quelques minutes. Outil officiel de diagnostic : `curl -fsSL https://troubleshoot.codeberg.page/verify.sh -o verify.sh`, relire le script, puis `bash verify.sh bleublanccloud.berachem.dev`. |
+| **`tls: internal error`** (ou `tlsv1 alert internal error` avec curl, `SSL_ERROR_INTERNAL_ERROR_ALERT` dans Firefox) | le certificat HTTPS n'est pas (encore) émis. Il n'est demandé qu'après un **déploiement réussi par le webhook** : vérifier dans *Livraisons récentes* qu'une livraison a abouti (code 2xx) avec une URL cible en **`http://`** ; sinon corriger l'URL et relancer la livraison. Vérifier aussi : `A`/`AAAA` de l'apex exactement égaux à ceux de `codeberg.page` (et `CNAME` de `www` vers `codeberg.page.`), TXT présent, enregistrements CAA autorisant `letsencrypt.org`. Puis patienter quelques minutes. Outil officiel de diagnostic : `curl -fsSL https://troubleshoot.codeberg.page/verify.sh -o verify.sh`, relire le script, puis `bash verify.sh bleublanccloud.fr`. |
 | Le site en ligne a un **ancien design** ou pas la dernière fonctionnalité | comparer la « Version du site » en pied de page avec le dernier commit du dépôt. Puis, sur le serveur : `systemctl status bbcloud-maj-auto.timer` (« Unit not found » : relancer `bash deploy/installer.sh` après un `git pull`) et `journalctl -u bbcloud-maj-auto -n 80 --no-pager`. « Tests en échec » ou « déjà rejeté » : corriger puis pousser un nouveau commit (jusqu'au commit qui isole les tests du `.env`, les tests échouaient sur le serveur à cause des vraies clés du `.env`) ; « Fusion en avance rapide impossible » : `git -C /opt/bleu-blanc-cloud status` et annuler les modifications locales. Forcer une vérification : `systemctl start bbcloud-maj-auto.service`. |
 | Le site affiche encore une ancienne version | contrôler la branche `pages` du dépôt Codeberg et la dernière livraison du webhook (une URL cible restée en `http://` après l'émission du certificat peut faire échouer les livraisons : la passer en `https://`). |
 | Une fiche de commune affiche l'illustration au lieu de la carte | contour pas encore téléchargé (serveur installé avant la carte de situation, ou `geo.api.gouv.fr` injoignable lors de l'import) : `uv run bbcloud cibles contours`, puis `uv run bbcloud publier`. Si le réseau sortant est filtré, autoriser `geo.api.gouv.fr`. |

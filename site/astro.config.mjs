@@ -1,8 +1,10 @@
 // Configuration Astro : site 100 % statique, aucune ressource externe.
 import { defineConfig } from "astro/config";
+import { SITE } from "./src/config.ts";
 
 export default defineConfig({
-  site: "https://bleublanccloud.berachem.dev",
+  // Domaine lu dans DOMAINE_SITE (défaut : bleublanccloud.fr), voir src/config.ts
+  site: SITE.url,
   output: "static",
   trailingSlash: "ignore",
   // La compression supprime certains espaces entre texte et liens : on la désactive.

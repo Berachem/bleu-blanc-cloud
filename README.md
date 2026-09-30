@@ -1,7 +1,7 @@
 # Bleu Blanc Cloud 🇫🇷🇪🇺
 
 > Observatoire indépendant et open source de la souveraineté numérique des organisations françaises.
-> <https://bleublanccloud.berachem.dev>
+> <https://bleublanccloud.fr>
 
 **Bleu Blanc Cloud** mesure la dépendance numérique des organisations publiques françaises (communes, départements, régions…) vis-à-vis des fournisseurs extra-européens, en particulier ceux soumis au **Cloud Act** américain.
 
@@ -29,7 +29,7 @@ deploy/   systemd (campagne hebdomadaire, sauvegarde), publication Codeberg Page
 docs/     méthodologie publique, décisions d'architecture (ADR)
 ```
 
-Voir [ADR-0001](docs/adr/0001-architecture.md) et [ADR-0002](docs/adr/0002-site-statique.md).
+Voir [ADR-0001](docs/adr/0001-architecture.md), [ADR-0002](docs/adr/0002-site-statique.md) et [ADR-0004](docs/adr/0004-domaine-bleublanccloud-fr.md) (domaine et redirections).
 
 ## Démarrage rapide (développement)
 

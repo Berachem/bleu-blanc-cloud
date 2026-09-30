@@ -1,8 +1,9 @@
 """Dogfooding : le site Bleu Blanc Cloud doit obtenir la note A sur son propre scan.
 
 Le scénario reproduit la configuration de production décrite dans deploy/README.md :
-CNAME vers codeberg.page (git-pages, non proxifié), aucun service tiers, aucun cookie, aucun MX.
-La page analysée est la vraie page d'accueil construite par Astro.
+apex bleublanccloud.fr en A/AAAA vers Codeberg Pages (git-pages), zone DNS chez OVHcloud,
+MX nul, aucun service tiers, aucun cookie. La page analysée est la vraie page d'accueil
+construite par Astro.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from bleublanccloud.sondes.ip import ResolveurAsn
 from tests.conftest import DOSSIER_FIXTURES, ResolveurFactice
 from tests.test_http import HorlogeFactice, fabriquer_client
 
-DOMAINE = "bleublanccloud.berachem.dev"
+DOMAINE = "bleublanccloud.fr"
 HTML_SITE = (DOSSIER_FIXTURES / "http" / "site_bleublanccloud.html").read_text()
 
 
@@ -64,24 +65,48 @@ async def test_le_site_obtient_la_note_a(
     ]
     assert resultat.informations.domaines_tiers_inconnus == []
     hebergement = next(c for c in resultat.constats if c.categorie == "hebergement")
-    assert (hebergement.fournisseur_id, hebergement.niveau) == ("codeberg", "A")
+    # Sans CNAME à l'apex, Codeberg Pages est reconnu par son réseau (IN-Berlin, AS29670)
+    assert (hebergement.fournisseur_id, hebergement.niveau) == ("in-berlin", "A")
+    dns = next(c for c in resultat.constats if c.categorie == "dns")
+    assert (dns.fournisseur_id, dns.niveau) == ("ovhcloud", "A")
     score = calculer_score(resultat.constats, resultat.sondes_reussies)
     assert score.note == "A", score
-    assert score.score_global >= 85
+    assert score.score_global == 100
+    assert not score.provisoire
 
 
 @respx.mock
-async def test_sans_cloudflare_en_dns_le_score_est_parfait(
+async def test_avec_la_messagerie_ovh_le_score_reste_parfait(
     parametres: Parametres, referentiels: Referentiels, resolveur_asn: ResolveurAsn
 ) -> None:
     simuler_site()
     resolveur = ResolveurFactice.depuis_fixture(DOMAINE)
-    resolveur.enregistrements["berachem.dev|NS"] = ["ns1.desec.io", "ns2.desec.org"]
+    resolveur.enregistrements[f"{DOMAINE}|MX"] = [
+        "1 mx1.mail.ovh.net",
+        "5 mx2.mail.ovh.net",
+        "100 mx3.mail.ovh.net",
+    ]
     resultat = await scanner_site(parametres, referentiels, resolveur, resolveur_asn)
+    messagerie = [c for c in resultat.constats if c.categorie == "messagerie"]
+    assert messagerie and {(c.fournisseur_id, c.niveau) for c in messagerie} == {("ovhcloud", "A")}
     score = calculer_score(resultat.constats, resultat.sondes_reussies)
-    # DNS hébergé par deSEC (association allemande, niveau A) : toutes les catégories à 100
     assert score.score_global == 100
-    assert "dns" not in score.categories_non_evaluables
+
+
+@respx.mock
+async def test_l_ancien_domaine_via_cname_reste_attribue_a_codeberg(
+    parametres: Parametres, referentiels: Referentiels, resolveur_asn: ResolveurAsn
+) -> None:
+    simuler_site()
+    resolveur = ResolveurFactice.depuis_fixture(DOMAINE)
+    resolveur.resolutions[DOMAINE] = {
+        "cnames": ["codeberg.page"],
+        "ipv4": ["217.197.84.141"],
+        "ipv6": [],
+    }
+    resultat = await scanner_site(parametres, referentiels, resolveur, resolveur_asn)
+    hebergement = next(c for c in resultat.constats if c.categorie == "hebergement")
+    assert (hebergement.fournisseur_id, hebergement.niveau) == ("codeberg", "A")
 
 
 @respx.mock

@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://bleublanccloud.berachem.dev/sitemap.xml

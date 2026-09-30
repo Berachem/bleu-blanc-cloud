@@ -1,0 +1,16 @@
+{
+  "_commentaire": "Configuration cible du site publié (git-pages) : apex en A/AAAA vers Codeberg Pages (réseau IN-Berlin, AS29670), zone DNS chez OVHcloud (noms de serveurs d'exemple), MX nul (domaine sans messagerie). Voir deploy/README.md, étape 4.",
+  "zones": {"bleublanccloud.fr": "bleublanccloud.fr"},
+  "resolutions": {
+    "bleublanccloud.fr": {
+      "cnames": [],
+      "ipv4": ["217.197.84.141"],
+      "ipv6": ["2a0a:4580:103f:c0de::2"]
+    }
+  },
+  "enregistrements": {
+    "bleublanccloud.fr|NS": ["dns200.ovh.net", "ns200.ovh.net"],
+    "bleublanccloud.fr|MX": ["0 ."],
+    "bleublanccloud.fr|TXT": ["v=spf1 -all"]
+  }
+}
