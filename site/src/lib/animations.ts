@@ -41,26 +41,55 @@ function brancherBascule(): void {
   }
 }
 
-// Menu mobile : bouton « Menu » qui déplie la navigation (fermée par Échap ou au clic sur
-// un lien ; sur grand écran, le bouton est masqué et la navigation toujours visible).
+// Menu mobile (hamburger) : le bouton déplie la navigation en panneau par-dessus la page.
+// Fermeture : lien choisi, clic à l'extérieur, touche Échap ou passage en grand écran. Les
+// écouteurs sont retirés à chaque changement de page (View Transitions).
 function brancherMenu(): void {
   const bouton = document.querySelector<HTMLButtonElement>("[data-bouton-menu]");
   const navigation = document.getElementById("navigation-principale");
   if (!bouton || !navigation) return;
-  const basculer = (ouvert: boolean) => {
-    bouton.setAttribute("aria-expanded", String(ouvert));
-    navigation.classList.toggle("navigation--ouverte", ouvert);
+  const ouvert = () => bouton.getAttribute("aria-expanded") === "true";
+  const basculer = (etat: boolean) => {
+    bouton.setAttribute("aria-expanded", String(etat));
+    bouton.setAttribute("aria-label", etat ? "Fermer le menu" : "Ouvrir le menu");
+    navigation.classList.toggle("navigation--ouverte", etat);
   };
-  bouton.addEventListener("click", () => basculer(bouton.getAttribute("aria-expanded") !== "true"));
-  navigation.addEventListener("click", (evenement) => {
-    if ((evenement.target as HTMLElement).closest("a")) basculer(false);
-  });
-  document.addEventListener("keydown", (evenement) => {
-    if (evenement.key === "Escape" && bouton.getAttribute("aria-expanded") === "true") {
-      basculer(false);
-      bouton.focus();
-    }
-  });
+  const arret = new AbortController();
+  const { signal } = arret;
+  bouton.addEventListener("click", () => basculer(!ouvert()), { signal });
+  navigation.addEventListener(
+    "click",
+    (evenement) => {
+      if ((evenement.target as HTMLElement).closest("a")) basculer(false);
+    },
+    { signal },
+  );
+  document.addEventListener(
+    "click",
+    (evenement) => {
+      const cible = evenement.target as Node;
+      if (ouvert() && !navigation.contains(cible) && !bouton.contains(cible)) basculer(false);
+    },
+    { signal },
+  );
+  document.addEventListener(
+    "keydown",
+    (evenement) => {
+      if (evenement.key === "Escape" && ouvert()) {
+        basculer(false);
+        bouton.focus();
+      }
+    },
+    { signal },
+  );
+  matchMedia("(min-width: 1080px)").addEventListener(
+    "change",
+    (evenement) => {
+      if (evenement.matches) basculer(false);
+    },
+    { signal },
+  );
+  document.addEventListener("astro:before-swap", () => arret.abort(), { once: true });
 }
 
 function animerCompteur(element: HTMLElement): void {

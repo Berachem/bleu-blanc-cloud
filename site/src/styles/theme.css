@@ -432,17 +432,15 @@ th {
 
 .bouton-menu {
   display: none;
-  align-items: center;
-  gap: 0.45rem;
+  place-items: center;
+  width: 2.75rem;
   height: 2.75rem;
-  padding: 0 1rem 0 0.85rem;
+  flex: none;
+  padding: 0;
   border-radius: 999px;
   border: 1px solid var(--bordure-forte);
   background: var(--surface);
   color: var(--texte);
-  font: inherit;
-  font-weight: 700;
-  font-size: 0.95rem;
   cursor: pointer;
   box-shadow: var(--ombre);
 }
@@ -460,26 +458,10 @@ th {
   transform: translateY(-5px) rotate(-45deg);
 }
 
-@media (max-width: 960px) {
-  .navigation {
-    order: 3;
-    width: 100%;
-    margin-left: 0;
-  }
-  .navigation ul {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .navigation ul::-webkit-scrollbar {
-    display: none;
-  }
-  .bascule-theme {
-    margin-left: auto;
-  }
-}
-
-/* Téléphone : bouton « Menu » et navigation en grille (dépliée sans JavaScript) */
-@media (max-width: 720px) {
+/* Téléphones et tablettes : [logo] ………… [thème] [☰], navigation masquée derrière le
+   hamburger. Sans JavaScript, elle reste affichée en grille (aucun lien inaccessible).
+   Seuil : largeur nécessaire au menu complet sur une ligne (≈ 1 044 px). */
+@media (max-width: 1079px) {
   .entete .conteneur {
     min-height: 68px;
     gap: 0.5rem;
@@ -492,18 +474,18 @@ th {
     width: 36px;
     height: auto;
   }
-  /* [logo] ………… [thème] [Menu] */
   .bascule-theme {
     order: 1;
     margin-left: auto;
-    width: 2.5rem;
-    height: 2.5rem;
   }
   .js .bouton-menu {
-    display: inline-flex;
+    display: inline-grid;
     order: 2;
-    height: 2.5rem;
-    padding: 0 0.8rem 0 0.7rem;
+  }
+  .navigation {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
   }
   .navigation ul {
     display: grid;
@@ -511,7 +493,6 @@ th {
     gap: 0.4rem;
     padding: 0.5rem;
     border-radius: var(--rayon-moyen);
-    overflow: visible;
   }
   .navigation a {
     padding: 0.8rem 1rem;
@@ -520,28 +501,40 @@ th {
     color: var(--texte);
     text-align: center;
   }
+  /* Avec JavaScript : panneau déroulant sous l'en-tête, par-dessus la page */
   .js .navigation {
     display: none;
+    position: absolute;
+    top: calc(100% - 0.25rem);
+    left: 50%;
+    width: min(var(--largeur-max), 100% - 2.5rem);
+    transform: translateX(-50%);
+    z-index: 30;
   }
   .js .navigation.navigation--ouverte {
     display: block;
-    animation: menu-apparition 0.25s var(--adouci);
+    animation: menu-apparition 0.22s var(--adouci);
   }
-}
-/* Petits téléphones : icône seule (le mot « Menu » reste lu par les lecteurs d'écran) */
-@media (max-width: 389px) {
-  .js .bouton-menu {
-    width: 2.5rem;
-    padding: 0;
-    justify-content: center;
+  .js .navigation ul {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid var(--bordure-forte);
+    background: var(--surface);
+    box-shadow: var(--ombre-forte);
   }
-  .bouton-menu span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+  .js .navigation a {
+    padding: 0.9rem 1.1rem;
+    background: transparent;
+    text-align: left;
+    font-size: 1.05rem;
+  }
+  .js .navigation a:hover {
+    background: var(--surface-2);
+  }
+  .js .navigation a[aria-current="page"] {
+    background: var(--bleu-france);
+    color: #fff;
   }
 }
 @media (max-width: 339px) {
@@ -555,7 +548,7 @@ th {
 @keyframes menu-apparition {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translate(-50%, -6px);
   }
 }
 
