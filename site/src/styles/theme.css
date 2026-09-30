@@ -2529,6 +2529,10 @@ select:focus {
   }
 }
 
+.pied__miroir {
+  margin: 0.8rem 0 0;
+  font-size: 0.85rem;
+}
 .pied .pied__signature,
 .pied .pied__version {
   display: block;

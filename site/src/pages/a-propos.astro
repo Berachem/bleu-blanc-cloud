@@ -39,10 +39,19 @@ import Base from "../mises-en-page/Base.astro";
     <h2>Open source et transparent</h2>
     <p>
       Le code, la méthodologie et les référentiels sont publics sous licence
-      <a href="https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12">EUPL-1.2</a> :
-      <a href={SITE.depot}>dépôt du projet</a>. Les données publiées sont réutilisables sous
+      <a href="https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12">EUPL-1.2</a>. Les
+      données publiées sont réutilisables sous
       <a href={MENTIONS_LEGALES.licenceDonnees.url}>{MENTIONS_LEGALES.licenceDonnees.nom}</a>.
       Chaque score est reproductible et chaque point retiré est justifié par une preuve.
+    </p>
+    <p>
+      <a class="bouton bouton--secondaire" href={SITE.depot}>Code source sur GitHub</a>
+    </p>
+    <p>
+      Le dépôt est publié sur GitHub pour sa visibilité auprès des développeurs ; un
+      <a href={SITE.miroir}>miroir</a> est tenu à jour sur Codeberg, forge associative hébergée
+      en Allemagne. Les contributions suivent le
+      <a href={`${SITE.depot}/blob/main/CONTRIBUTING.md`}>guide de contribution</a>.
     </p>
 
     <h2>Analyses sur demande</h2>
