@@ -29,7 +29,7 @@ const avecDonnees = liste.filter((d) => d.nombre_organisations > 0);
     <section class="section" aria-labelledby="titre-tableau">
       <h2 id="titre-tableau">Tableau des départements</h2>
       <div class="tableau-defilant">
-        <table>
+        <table class="tableau-cartes">
           <caption class="visuellement-cache">
             Score moyen, note moyenne et nombre d'organisations analysées par département
           </caption>
@@ -46,13 +46,19 @@ const avecDonnees = liste.filter((d) => d.nombre_organisations > 0);
             {
               avecDonnees.map((d) => (
                 <tr>
-                  <td>{d.code}</td>
-                  <td>
+                  <td><span class="suffixe-mobile">Dép. </span>{d.code}</td>
+                  <td class="cellule-titre">
                     <a href={`/classements/?departement=${encodeURIComponent(d.code)}`}>{d.nom}</a>
                   </td>
-                  <td class="nombre">{d.nombre_organisations}</td>
-                  <td class="nombre">{d.score_moyen != null ? `${nombre(d.score_moyen, 1)}/100` : "—"}</td>
-                  <td>{d.note_moyenne && <BadgeNote note={d.note_moyenne} />}</td>
+                  <td class="nombre">
+                    {d.nombre_organisations}
+                    <span class="suffixe-mobile">{d.nombre_organisations > 1 ? "organisations" : "organisation"}</span>
+                  </td>
+                  <td class="nombre">
+                    <span class="suffixe-mobile">moyenne </span>
+                    {d.score_moyen != null ? `${nombre(d.score_moyen, 1)}/100` : "—"}
+                  </td>
+                  <td class="cellule-note">{d.note_moyenne && <BadgeNote note={d.note_moyenne} />}</td>
                 </tr>
               ))
             }

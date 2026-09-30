@@ -127,6 +127,24 @@ function brancherFenetreAnalyse(): void {
   );
 }
 
+// Badge « Rapport IA disponible » (en-tête de fiche) : défile jusqu'à la synthèse, y place
+// le focus et la met brièvement en évidence. Sans JavaScript, l'ancre suffit.
+function brancherLienRapport(): void {
+  const lien = document.querySelector<HTMLAnchorElement>("[data-lien-rapport]");
+  const section = document.getElementById("rapport-ia");
+  if (!lien || !section) return;
+  lien.addEventListener("click", (evenement) => {
+    evenement.preventDefault();
+    section.classList.add("apparition--visible");
+    section.scrollIntoView({ behavior: mouvementReduit() ? "auto" : "smooth", block: "start" });
+    history.replaceState(history.state, "", "#rapport-ia");
+    section.querySelector<HTMLElement>("h2")?.focus({ preventScroll: true });
+    section.classList.remove("rapport-signale");
+    void section.offsetWidth; // relance l'animation à chaque clic
+    section.classList.add("rapport-signale");
+  });
+}
+
 function animerCompteur(element: HTMLElement): void {
   const cible = Number(element.dataset.compteur);
   const decimales = Number(element.dataset.decimales ?? 0);
@@ -200,6 +218,7 @@ document.addEventListener("astro:page-load", () => {
   brancherBascule();
   brancherMenu();
   brancherFenetreAnalyse();
+  brancherLienRapport();
   lancerAnimations();
 });
 

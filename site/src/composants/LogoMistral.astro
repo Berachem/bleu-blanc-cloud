@@ -1,0 +1,26 @@
+---
+// Logo de Mistral AI, dessiné en SVG dans la page (aucune ressource externe), sur une
+// pastille claire pour rester net en mode sombre.
+// Tracé : « M » pixelisé de Mistral AI, issu de Simple Icons (CC0), couleur de la marque
+// #FA520F. Marque de Mistral AI, utilisée pour désigner le fournisseur du modèle.
+interface Props {
+  /** Logo décoratif (nom du fournisseur déjà présent dans le texte voisin). */
+  decoratif?: boolean;
+}
+const { decoratif = false } = Astro.props;
+const TRACE_MISTRAL =
+  "M17.143 3.429v3.428h-3.429v3.429h-3.428V6.857H6.857V3.43H3.43v13.714H0v3.428h10.286v-3.428H6.857v-3.429h3.429v3.429h3.429v-3.429h3.428v3.429h-3.428v3.428H24v-3.428h-3.43V3.429z";
+const nom = decoratif ? undefined : "Mistral AI";
+---
+<span
+  class="logo-mistral"
+  role={decoratif ? undefined : "img"}
+  aria-hidden={decoratif ? "true" : undefined}
+  aria-label={nom}
+  title={nom}><svg
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    aria-hidden="true"
+    focusable="false"
+    shape-rendering="crispEdges"><path fill="#FA520F" d={TRACE_MISTRAL}></path></svg></span>

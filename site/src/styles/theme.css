@@ -199,6 +199,8 @@ code {
   background: var(--surface-2);
   border-radius: 6px;
   padding: 0.08em 0.35em;
+  /* Longues valeurs techniques (User-Agent, URL) : retour à la ligne sur mobile */
+  overflow-wrap: anywhere;
 }
 pre {
   background: var(--surface-2);
@@ -1673,6 +1675,153 @@ select:focus {
   opacity: 1;
 }
 
+/* Tableaux de données en cartes sur petit écran : une carte par ligne, sans défilement
+   horizontal. La cellule .cellule-titre passe en tête, .cellule-note se place à droite et
+   les autres cellules se suivent sur une ligne, séparées par « · » (.masque-mobile : cellule
+   vide omise). Les compléments .suffixe-mobile (« hab. », « organisations »…) remplacent
+   alors les en-têtes. */
+.suffixe-mobile {
+  display: none;
+}
+@media (max-width: 40rem) {
+  .tableau-defilant {
+    overflow: visible;
+  }
+  .tableau-defilant table {
+    min-width: 0;
+  }
+  .tableau-cartes thead {
+    display: none;
+  }
+  .tableau-cartes tbody {
+    display: block;
+  }
+  .tableau-cartes tr {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.4rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--bordure);
+  }
+  .tableau-cartes tr:has(.cellule-note) {
+    padding-right: 4rem;
+  }
+  .tableau-cartes tr:has(.badge--provisoire) {
+    padding-right: 6rem;
+  }
+  .tableau-cartes tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .tableau-cartes td {
+    display: block;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+  }
+  /* Séparateur en fin d'élément, pour qu'un retour à la ligne ne commence pas par « · » */
+  .tableau-cartes
+    td:not(.cellule-titre, .cellule-note, .masque-mobile):has(~ td:not(.cellule-titre, .cellule-note, .masque-mobile))::after {
+    content: " ·";
+    content: " ·" / "";
+  }
+  .tableau-cartes .masque-mobile {
+    display: none;
+  }
+  .tableau-cartes .cellule-titre {
+    order: -1;
+    flex-basis: 100%;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--texte);
+  }
+  /* Toute la carte mène au lien de la ligne */
+  .tableau-cartes .cellule-titre a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .tableau-cartes .cellule-note {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+  }
+  .tableau-cartes .cellule-note .badge-groupe {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .suffixe-mobile {
+    display: inline;
+  }
+  .seulement-large {
+    display: none;
+  }
+}
+@media (min-width: 40.001rem) {
+  .seulement-mobile {
+    display: none;
+  }
+}
+
+/* Tableaux éditoriaux (méthodologie, mentions légales) sur petit écran : chaque ligne
+   devient un bloc, la première cellule sert de titre et les autres reprennent le libellé de
+   leur colonne (attribut data-libelle, ajouté au build pour le Markdown). */
+.prose tbody th[scope="row"] {
+  font-size: 1rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--texte);
+}
+.prose tbody th[scope="row"],
+.prose tbody td {
+  vertical-align: top;
+}
+@media (max-width: 40rem) {
+  .prose table {
+    overflow: visible;
+  }
+  .prose thead {
+    display: none;
+  }
+  .prose tbody,
+  .prose tbody tr,
+  .prose tbody th,
+  .prose tbody td {
+    display: block;
+  }
+  .prose tbody tr {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--bordure);
+  }
+  .prose tbody tr:last-child {
+    border-bottom: 0;
+  }
+  .prose tbody th,
+  .prose tbody td {
+    padding: 0.4rem 1rem;
+    border: 0;
+    text-align: left;
+  }
+  .prose tbody tr > :first-child {
+    font-weight: 700;
+    color: var(--texte);
+  }
+  .prose tbody td[data-libelle]:not(:first-child)::before {
+    content: attr(data-libelle);
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--texte-secondaire);
+  }
+}
+
 /* ---------------------------------------------------------------- Pages intérieures */
 
 .entete-page {
@@ -1960,8 +2109,9 @@ select:focus {
   padding: 0.6rem 0.9rem;
   color: var(--texte-secondaire);
 }
-/* Logo Mistral AI dans la phrase, sur une pastille claire pour rester net en mode sombre */
-.mention-ia__logo {
+/* Logo Mistral AI (composant LogoMistral), sur une pastille claire pour rester net en mode
+   sombre */
+.logo-mistral {
   display: inline-grid;
   place-items: center;
   width: 34px;
@@ -1973,9 +2123,65 @@ select:focus {
   box-shadow: inset 0 0 0 1px var(--bordure-forte);
 }
 /* 21 px = 7 cases de 3 px : chaque « pixel » du M tombe sur des pixels entiers */
-.mention-ia__logo svg {
+.logo-mistral svg {
   width: 21px;
   height: 21px;
+}
+
+/* Badge « Rapport IA disponible » de l'en-tête de fiche : mène à la synthèse, qui est
+   brièvement mise en évidence à l'arrivée (classe posée par animations.ts) */
+.badge-ia {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1rem;
+  padding: 0.3rem 0.9rem 0.3rem 0.35rem;
+  border: 1px solid var(--bordure-forte);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--ombre);
+  color: var(--texte);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+.badge-ia:hover {
+  border-color: #fa520f;
+  transform: translateY(-1px);
+}
+.badge-ia .logo-mistral {
+  margin: 0;
+  vertical-align: middle;
+}
+.badge-ia__fleche {
+  flex: none;
+  color: var(--texte-secondaire);
+  transition: transform 0.2s ease;
+}
+.badge-ia:hover .badge-ia__fleche {
+  transform: translateY(2px);
+}
+#rapport-ia {
+  scroll-margin-top: 1rem;
+}
+#rapport-ia h2:focus:not(:focus-visible) {
+  outline: none;
+}
+.rapport-signale .carte,
+.rapport-signale .mention-ia {
+  animation: signaler-rapport 1.8s ease-out;
+}
+@keyframes signaler-rapport {
+  0%,
+  35% {
+    box-shadow: 0 0 0 4px rgb(250 82 15 / 45%);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgb(250 82 15 / 0%);
+  }
 }
 .gravite {
   font-size: 0.8rem;

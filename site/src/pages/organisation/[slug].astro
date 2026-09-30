@@ -2,6 +2,7 @@
 import JaugeNote from "../../composants/JaugeNote.astro";
 import CarteSituation from "../../composants/CarteSituation.astro";
 import BarreScore from "../../composants/BarreScore.astro";
+import LogoMistral from "../../composants/LogoMistral.astro";
 import MentionIA from "../../composants/MentionIA.astro";
 import Niveau from "../../composants/Niveau.astro";
 import { SITE } from "../../config";
@@ -95,6 +96,20 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
             </p>
             <p class="texte-secondaire" style="margin: 0; max-width: 28rem">{descriptionNote(score.note)}</p>
             {score.provisoire && <p style="margin: 0.6rem 0 0"><span class="etiquette-provisoire">note provisoire</span></p>}
+            {
+              org.rapport_ia && (
+                <a class="badge-ia" href="#rapport-ia" data-lien-rapport>
+                  <LogoMistral decoratif />
+                  <span>
+                    Rapport IA disponible
+                    <span class="visuellement-cache">(rédigé avec Mistral AI) : aller à la synthèse</span>
+                  </span>
+                  <svg class="badge-ia__fleche" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+                    <path d="M8 3v9m-4-4 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </a>
+              )
+            }
           </div>
         </div>
         <ul class="meta-fiche">
@@ -255,8 +270,8 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
 
     {
       org.rapport_ia && (
-        <section class="section apparition" aria-labelledby="titre-rapport">
-          <h2 id="titre-rapport">Synthèse et plan d'action</h2>
+        <section id="rapport-ia" class="section apparition" aria-labelledby="titre-rapport">
+          <h2 id="titre-rapport" tabindex="-1">Synthèse et plan d'action</h2>
           <MentionIA />
           <div class="carte prose">
             <p>{org.rapport_ia.contenu.resume_decideur}</p>

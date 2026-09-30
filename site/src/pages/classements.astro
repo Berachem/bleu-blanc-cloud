@@ -56,6 +56,16 @@ const parType = types.map((type) => {
             {types.map((type) => <option value={type}>{LIBELLES_TYPES[type]}</option>)}
           </select>
         </div>
+        <div class="champ seulement-mobile">
+          <label for="tri-mobile">Trier par</label>
+          <select id="tri-mobile" data-tri-mobile>
+            <option value="score:desc">Meilleur score d'abord</option>
+            <option value="score:asc">Score le plus faible d'abord</option>
+            <option value="nom:asc">Nom (A → Z)</option>
+            <option value="population:desc">Population décroissante</option>
+            <option value="departement:asc">Département (par numéro)</option>
+          </select>
+        </div>
       </form>
       <p class="texte-secondaire petit" aria-live="polite" data-nombre-resultats>
         {entrees.length} organisation(s)
@@ -68,7 +78,7 @@ const parType = types.map((type) => {
         <BoutonAnalyse />
       </div>
       <div class="tableau-defilant">
-        <table data-tableau>
+        <table class="tableau-cartes" data-tableau>
           <caption class="visuellement-cache">Organisations analysées, triées par score décroissant</caption>
           <thead>
             <tr>
@@ -91,12 +101,15 @@ const parType = types.map((type) => {
                   data-population={e.population ?? 0}
                   data-score={e.score}
                 >
-                  <td><a href={`/organisation/${e.slug}/`}>{e.nom}</a></td>
+                  <td class="cellule-titre"><a href={`/organisation/${e.slug}/`}>{e.nom}</a></td>
                   <td>{e.departement_nom ?? "—"}</td>
                   <td>{LIBELLES_TYPES[e.type]}</td>
-                  <td class="nombre">{e.population != null ? nombre(e.population) : "—"}</td>
+                  <td class:list={["nombre", e.population == null && "masque-mobile"]}>
+                    {e.population != null ? nombre(e.population) : "—"}
+                    {e.population != null && <span class="suffixe-mobile">hab.</span>}
+                  </td>
                   <td class="nombre">{e.score}/100</td>
-                  <td><BadgeNote note={e.note} provisoire={e.note_provisoire} /></td>
+                  <td class="cellule-note"><BadgeNote note={e.note} provisoire={e.note_provisoire} /></td>
                 </tr>
               ))
             }
@@ -108,7 +121,7 @@ const parType = types.map((type) => {
     <section class="section" aria-labelledby="titre-types">
       <h2 id="titre-types">Par type d'organisation</h2>
       <div class="tableau-defilant">
-        <table>
+        <table class="tableau-cartes">
           <thead>
             <tr>
               <th scope="col">Type</th>
@@ -120,9 +133,12 @@ const parType = types.map((type) => {
             {
               parType.map((ligne) => (
                 <tr>
-                  <td>{LIBELLES_TYPES[ligne.type]}</td>
-                  <td class="nombre">{ligne.nombre}</td>
-                  <td class="nombre">{nombre(ligne.moyenne, 1)}/100</td>
+                  <td class="cellule-titre">{LIBELLES_TYPES[ligne.type]}</td>
+                  <td class="nombre">
+                    {ligne.nombre}
+                    <span class="suffixe-mobile">{ligne.nombre > 1 ? "organisations" : "organisation"}</span>
+                  </td>
+                  <td class="nombre"><span class="suffixe-mobile">moyenne </span>{nombre(ligne.moyenne, 1)}/100</td>
                 </tr>
               ))
             }
@@ -169,22 +185,35 @@ const parType = types.map((type) => {
     formulaire.addEventListener("input", filtrer);
     filtrer();
 
+    // Tri commun aux en-têtes (écran large) et à la liste « Trier par » (mobile)
+    const triMobile = document.querySelector<HTMLSelectElement>("[data-tri-mobile]");
+    const trier = (cle: string, descendant: boolean) => {
+      for (const entete of tableau.querySelectorAll<HTMLElement>("th[data-tri]")) {
+        if (entete.dataset.tri === cle) entete.setAttribute("aria-sort", descendant ? "descending" : "ascending");
+        else entete.removeAttribute("aria-sort");
+      }
+      if (triMobile) {
+        const valeur = `${cle}:${descendant ? "desc" : "asc"}`;
+        triMobile.value = [...triMobile.options].some((o) => o.value === valeur) ? valeur : "";
+      }
+      const numerique = cle === "score" || cle === "population";
+      lignes.sort((a, b) => {
+        const va = a.dataset[cle] ?? "";
+        const vb = b.dataset[cle] ?? "";
+        const comparaison = numerique ? Number(va) - Number(vb) : va.localeCompare(vb, "fr", { numeric: true });
+        return descendant ? -comparaison : comparaison;
+      });
+      corps.append(...lignes);
+    };
     for (const entete of tableau.querySelectorAll<HTMLTableCellElement>("th[data-tri]")) {
       entete.querySelector("button")?.addEventListener("click", () => {
-        const cle = entete.dataset.tri as string;
-        const descendant = entete.getAttribute("aria-sort") !== "descending";
-        for (const autre of tableau.querySelectorAll("th[data-tri]")) autre.removeAttribute("aria-sort");
-        entete.setAttribute("aria-sort", descendant ? "descending" : "ascending");
-        const numerique = cle === "score" || cle === "population";
-        lignes.sort((a, b) => {
-          const va = a.dataset[cle] ?? "";
-          const vb = b.dataset[cle] ?? "";
-          const comparaison = numerique ? Number(va) - Number(vb) : va.localeCompare(vb, "fr", { numeric: true });
-          return descendant ? -comparaison : comparaison;
-        });
-        corps.append(...lignes);
+        trier(entete.dataset.tri as string, entete.getAttribute("aria-sort") !== "descending");
       });
     }
+    triMobile?.addEventListener("change", () => {
+      const [cle, sens] = triMobile.value.split(":");
+      if (cle) trier(cle, sens === "desc");
+    });
   }
   });
 </script>

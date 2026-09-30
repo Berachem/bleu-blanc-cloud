@@ -2,7 +2,12 @@
 // Contenu publié directement depuis docs/methodologie.md (source unique, versionnée).
 import BoutonAnalyse from "../composants/BoutonAnalyse.astro";
 import Base from "../mises-en-page/Base.astro";
-import { Content, frontmatter } from "../../../docs/methodologie.md";
+import { date } from "../lib/format";
+import { annoterTableaux } from "../lib/libelles-tableaux";
+import { compiledContent, frontmatter } from "../../../docs/methodologie.md";
+
+// Tableaux lisibles sur mobile : libellé de colonne recopié sur chaque cellule
+const contenu = annoterTableaux(await compiledContent());
 ---
 <Base
   titre="Méthodologie"
@@ -10,9 +15,9 @@ import { Content, frontmatter } from "../../../docs/methodologie.md";
 >
   <div class="conteneur prose">
     <p class="surtitre" style="margin-top: 2rem">
-      Version {frontmatter.version} du {frontmatter.date}
+      Version {frontmatter.version} du {date(new Date(frontmatter.date).toISOString())}
     </p>
-    <Content />
+    <Fragment set:html={contenu} />
     <section class="section" aria-labelledby="titre-demande">
       <h2 id="titre-demande">Faire analyser un site</h2>
       <p>
