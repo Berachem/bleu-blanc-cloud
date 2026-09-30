@@ -173,6 +173,11 @@ const imagePartage = new URL(`${IMAGE_PARTAGE.chemin}?v=${IMAGE_PARTAGE.empreint
           </ul>
         </div>
       </div>
+      <p class="conteneur pied__signature">
+        Fait avec <span role="img" aria-label="amour">❤️</span> par
+        <a href={SITE.siteAuteur}>Berachem.dev</a> (mon propre site a encore des pistes de progrès,
+        promis je m'y mets)
+      </p>
       <p class="conteneur pied__version">
         Version du site <a href={`${SITE.depot}/commit/${VERSION_SITE}`}><code>{VERSION_SITE}</code></a>,
         construite le {date(DATE_BUILD.toISOString())}
