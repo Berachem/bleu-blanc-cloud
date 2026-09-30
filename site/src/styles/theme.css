@@ -666,11 +666,66 @@ th {
 .accroche__texte {
   max-width: 62rem;
 }
+/* Téléphone : la recherche (action principale) remonte juste sous le titre pour être
+   visible entière dès l'arrivée ; l'introduction suit. Seul l'ordre d'affichage change
+   (l'introduction ne contient aucun élément focalisable). */
 @media (max-width: 600px) {
+  .accroche {
+    padding: 1.4rem 0 3rem;
+  }
+  .accroche__texte {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .accroche__texte > .surtitre {
+    order: 1;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    gap: 0.5rem;
+  }
+  .accroche__texte > .surtitre::before {
+    width: 24px;
+  }
   .accroche h1 {
-    font-size: clamp(2.1rem, 1.2rem + 4.6vw, 2.6rem);
-    line-height: 1.02;
+    order: 2;
+    font-size: clamp(1.95rem, 1.1rem + 4.4vw, 2.4rem);
+    line-height: 1.04;
     max-width: none;
+    margin: 0.6rem 0 1.1rem;
+  }
+  .accroche__texte > .recherche {
+    order: 3;
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+  /* 16 px minimum : Safari ne zoome pas au focus ; l'indication tient sur une ligne */
+  .accroche .recherche input[type="search"] {
+    font-size: 1rem;
+    min-height: 3.1rem;
+  }
+  .accroche__intro {
+    order: 4;
+    font-size: 1.05rem;
+    margin-bottom: 1.4rem;
+  }
+  .accroche__texte > .demande-analyse {
+    order: 5;
+  }
+  .accroche__meta {
+    order: 6;
+  }
+}
+@media (max-width: 370px) {
+  .accroche__texte > .surtitre {
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+  }
+  .accroche .recherche .champ {
+    padding: 0.45rem;
+  }
+  .accroche .recherche input[type="search"] {
+    padding-inline: 0.75rem;
   }
 }
 .accroche__intro {
