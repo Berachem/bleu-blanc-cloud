@@ -44,7 +44,7 @@ def isoler_configuration(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
 
 @pytest.fixture(autouse=True)
 def interdire_reseau(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Les tests ne doivent jamais utiliser le réseau (CLAUDE.md, section 2)."""
+    """Les tests ne doivent jamais utiliser le réseau (docs/CLAUDE.md, section 2)."""
     connexion_origine = socket.socket.connect
 
     def connexion_controlee(self: socket.socket, adresse: Any) -> Any:

@@ -78,7 +78,7 @@ warn_redundant_casts = true
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-# Typage strict exigé sur l'analyse et le score (CLAUDE.md, section 4)
+# Typage strict exigé sur l'analyse et le score (docs/CLAUDE.md, section 4)
 module = ["bleublanccloud.analyse.*", "bleublanccloud.modeles"]
 strict = true
 

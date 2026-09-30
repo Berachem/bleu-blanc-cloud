@@ -131,11 +131,15 @@ Serveur Proxmox (domicile) — conteneur LXC Debian 12
 
 ```
 bleu-blanc-cloud/
-├── CLAUDE.md
 ├── README.md
+├── CONTRIBUTING.md
+├── SECURITY.md
 ├── LICENSE                      # EUPL-1.2
 ├── .env.example
-├── .github/workflows/qualite.yml   # lint + tests (scanner et site)
+├── .claude/CLAUDE.md            # importe docs/CLAUDE.md (instructions pour Claude Code)
+├── .github/
+│   ├── workflows/qualite.yml    # lint + tests (scanner et site)
+│   └── ISSUE_TEMPLATE/          # modèle de ticket
 │
 ├── scanner/
 │   ├── pyproject.toml
@@ -190,7 +194,9 @@ bleu-blanc-cloud/
 │       └── donnees-demo/            # organisations fictives pour le dev
 │
 ├── docs/
+│   ├── CLAUDE.md                    # ce fichier
 │   ├── methodologie.md              # publiée sur le site
+│   ├── images/                      # captures du README
 │   └── adr/                         # décisions d'architecture (ADR)
 │
 └── deploy/
@@ -475,7 +481,7 @@ DEPOT_PAGES=
 - **Serveur** : conteneur LXC Debian 12 sur Proxmox (2 vCPU, 2 Go RAM suffisent), avec `uv` et Node.js LTS.
 - **Planification** : `bbcloud-campagne.timer` (systemd), chaque dimanche à 3 h : mise à jour des référentiels → campagne → rapports IA → export → build → publication.
 - **Publication** : `deploy/publier.sh` copie `site/dist/` dans le dépôt Pages, commit, push.
-- **Hébergement du site** : Codeberg Pages (git-pages, Allemagne) avec le domaine `bleublanccloud.fr` (zone DNS chez OVHcloud, DNSSEC) : apex en A/AAAA, `www` et l'ancienne adresse `bleublanccloud.berachem.dev` redirigés en 301 par un dépôt dédié (ADR-0004, `deploy/README.md` étape 4). Alternative : alwaysdata (France).
+- **Hébergement du site** : Codeberg Pages (git-pages, Allemagne) avec le domaine `bleublanccloud.fr` (zone DNS chez OVHcloud, DNSSEC) : apex en A/AAAA, `www` et l'ancienne adresse `bleublanccloud.berachem.dev` redirigés en 301 par un dépôt dédié (ADR-0004, `deploy/README.md` section 5). Alternative : alwaysdata (France).
 - **Code source** : GitHub (visibilité) avec miroir sur Codeberg.
 - **Journaux** : journald. **Sauvegarde** : `sqlite3 .backup` quotidien vers le stockage Proxmox.
 

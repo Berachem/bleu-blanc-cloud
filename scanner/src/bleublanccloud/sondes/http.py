@@ -1,6 +1,6 @@
 """Sonde HTTP : page d'accueil + jusqu'à 4 pages internes, en-têtes, cookies, ressources tierces.
 
-Règles de politesse (obligatoires, CLAUDE.md section 7) :
+Règles de politesse (obligatoires, docs/CLAUDE.md section 7) :
 - User-Agent explicite ;
 - 5 pages HTML maximum par site, 1 requête par seconde par domaine ;
 - concurrence globale plafonnée ;
