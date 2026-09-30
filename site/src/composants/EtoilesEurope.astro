@@ -2,6 +2,13 @@
 // Motif décoratif : 12 étoiles jaunes disposées en cercle, qui tournent lentement.
 // Volontairement sans fond bleu : ce n'est pas le drapeau européen et il n'implique
 // aucune approbation officielle. Rotation désactivée avec prefers-reduced-motion.
+// « anneau » : fin cercle reliant les étoiles ; « rayonEtoile » : taille des étoiles (unités
+// du dessin de 200 × 200, cercle de rayon 70). Utilisés par l'accroche de la page d'accueil.
+interface Props {
+  anneau?: boolean;
+  rayonEtoile?: number;
+}
+const { anneau = false, rayonEtoile = 11 } = Astro.props;
 const etoiles = Array.from({ length: 12 }, (_, i) => {
   const angle = (i * Math.PI) / 6 - Math.PI / 2;
   return { x: 100 + 70 * Math.cos(angle), y: 100 + 70 * Math.sin(angle) };
@@ -15,6 +22,7 @@ const branche = (cx: number, cy: number, r: number) =>
 ---
 <div class="etoiles" aria-hidden="true">
   <svg class="etoiles__cercle" viewBox="0 0 200 200" focusable="false">
-    {etoiles.map((e) => <polygon points={branche(e.x, e.y, 11)} fill="#FFCC00" />)}
+    {anneau && <circle class="etoiles__anneau" cx="100" cy="100" r="70" fill="none" />}
+    {etoiles.map((e) => <polygon points={branche(e.x, e.y, rayonEtoile)} fill="#FFCC00" />)}
   </svg>
 </div>

@@ -39,7 +39,7 @@ const parType = types.map((type) => {
       <h2 id="titre-organisations">Organisations</h2>
       <form class="filtres" data-filtres onsubmit="return false">
         <div class="champ">
-          <label for="filtre-texte">Nom ou domaine</label>
+          <label for="filtre-texte">Nom, département ou domaine</label>
           <input id="filtre-texte" type="search" name="texte" autocomplete="off" />
         </div>
         <div class="champ">
@@ -95,7 +95,7 @@ const parType = types.map((type) => {
               entrees.map((e) => (
                 <tr
                   data-nom={e.nom}
-                  data-texte={`${e.nom} ${e.domaine}`.toLowerCase()}
+                  data-texte={`${e.nom} ${e.departement_nom ?? ""} ${e.domaine}`.toLowerCase()}
                   data-departement={e.departement ?? ""}
                   data-type={e.type}
                   data-population={e.population ?? 0}
@@ -166,6 +166,7 @@ const parType = types.map((type) => {
     const aucunResultat = document.querySelector<HTMLElement>("[data-aucun-resultat]");
     champDepartement.value = parametres.get("departement") ?? "";
     champType.value = parametres.get("type") ?? "";
+    champTexte.value = parametres.get("texte") ?? "";
 
     const normaliser = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
     const filtrer = () => {

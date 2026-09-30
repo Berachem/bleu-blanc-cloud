@@ -76,8 +76,14 @@ for (const schema of ["light", "dark"]) {
   for (const fichier of pagesHtml(DIST)) {
     const url = `${origine}/${path.relative(DIST, fichier).replace(/index\.html$/, "").replace(/\\/g, "/")}`;
     await onglet.goto(url, { waitUntil: "networkidle" });
-    // Déclenche la recherche instantanée (chargement différé de /recherche.json)
-    const champ = await onglet.$("input[type=search]");
+    // Déclenche la recherche instantanée (chargement différé de /recherche.json) : champ
+    // visible de la page, sinon celui du panneau ouvert par la loupe de l'en-tête
+    let champ = await onglet.$("input[type=search]:visible");
+    const loupe = await onglet.$("[data-bouton-recherche]");
+    if (!champ && loupe && (await loupe.isVisible())) {
+      await loupe.click();
+      champ = await onglet.$("#panneau-recherche input[type=search]:visible");
+    }
     if (champ) {
       await champ.fill("ex");
       await onglet.waitForTimeout(150);

@@ -7,6 +7,7 @@ import EtoilesEurope from "../composants/EtoilesEurope.astro";
 import Recherche from "../composants/Recherche.astro";
 import Base from "../mises-en-page/Base.astro";
 import { departements, meta, observatoire, organisations } from "../lib/donnees";
+import { URL_DEMANDE_FORMULAIRE } from "../lib/demandes";
 import { date, nombre } from "../lib/format";
 
 // Statistiques et derniers scans : observatoire seulement (hors analyses sur demande)
@@ -35,23 +36,25 @@ const chiffres = [
 ---
 <Base titre="Bleu Blanc Cloud">
   <section class="accroche" aria-labelledby="titre-accueil">
-    <EtoilesEurope />
+    <div class="accroche__decor" aria-hidden="true"><EtoilesEurope anneau rayonEtoile={8} /></div>
     <div class="conteneur">
       <div class="accroche__texte">
-        <span class="surtitre">Observatoire indépendant · open source</span>
+        <p class="accroche__badge">
+          <span class="accroche__point" aria-hidden="true"></span>
+          Observatoire indépendant · open source
+        </p>
         <h1 id="titre-accueil">
-          Nos services publics dépendent-ils du <span class="degrade">cloud américain</span>&nbsp;?
+          Nos services publics <span class="insecable">dépendent-ils</span> du <span class="degrade">cloud américain</span>&nbsp;?
         </h1>
         <p class="accroche__intro">
-          Bleu Blanc Cloud mesure, de façon passive et transparente, où vivent les sites, la
-          messagerie et les services numériques des collectivités françaises, et propose des pistes
-          vers des alternatives françaises et européennes.
+          Hébergement, messagerie, services tiers : Bleu Blanc Cloud mesure, de façon passive et
+          transparente, la dépendance numérique des collectivités françaises — et propose des
+          pistes européennes.
         </p>
-        <Recherche />
-        <BoutonAnalyse secondaire />
-        <p class="accroche__meta">
-          Campagne du {date(infos.date_campagne)} ·
-          <a href="/methodologie/">méthodologie v{infos.version_methodo}</a>
+        <Recherche variante="accroche" />
+        <p class="accroche__analyse">
+          Votre site n'est pas analysé&nbsp;?
+          <a href={URL_DEMANDE_FORMULAIRE} data-ouvrir-analyse aria-haspopup="dialog">Analyser mon site&nbsp;→</a>
         </p>
       </div>
     </div>
@@ -71,6 +74,10 @@ const chiffres = [
         ))
       }
     </ul>
+    <p class="bande-chiffres__meta">
+      Campagne du {date(infos.date_campagne)} ·
+      <a href="/methodologie/">méthodologie v{infos.version_methodo}</a>
+    </p>
   </div>
 
   <div class="conteneur">

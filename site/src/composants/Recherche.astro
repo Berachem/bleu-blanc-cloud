@@ -1,29 +1,55 @@
 ---
 // Recherche instantanée : l'index léger (/recherche.json) n'est chargé qu'à la première saisie.
+// C'est aussi un formulaire : Entrée (ou « Rechercher ») ouvre les classements filtrés,
+// y compris sans JavaScript.
+// Variantes : « accroche » (page d'accueil : champ en pilule et bouton, sans libellé visible)
+// et « entete » (panneau ouvert par la loupe de l'en-tête).
 import { URL_DEMANDE_FORMULAIRE } from "../lib/demandes";
 interface Props {
   identifiant?: string;
+  variante?: "standard" | "accroche" | "entete";
 }
-const { identifiant = "recherche" } = Astro.props;
+const { identifiant = "recherche", variante = "standard" } = Astro.props;
+const avecAide = variante !== "accroche";
 ---
-<div class="recherche" data-recherche data-url-demande={URL_DEMANDE_FORMULAIRE}>
+<form
+  class:list={["recherche", `recherche--${variante}`]}
+  role="search"
+  action="/classements/"
+  method="get"
+  data-recherche
+  data-url-demande={URL_DEMANDE_FORMULAIRE}
+>
   <div class="champ">
-    <label for={identifiant}>Rechercher une organisation</label>
-    <input
-      id={identifiant}
-      type="search"
-      autocomplete="off"
-      spellcheck="false"
-      placeholder="Commune, département, domaine…"
-      aria-describedby={`${identifiant}-aide`}
-      aria-controls={`${identifiant}-resultats`}
-    />
-    <span id={`${identifiant}-aide`} class="texte-secondaire petit">
-      Ou consultez <a href="/classements/">la liste complète</a>.
-    </span>
+    <label for={identifiant} class:list={[variante === "accroche" && "visuellement-cache"]}>
+      Rechercher une organisation
+    </label>
+    <div class="recherche__saisie">
+      <input
+        id={identifiant}
+        name="texte"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Commune, département, domaine…"
+        aria-describedby={avecAide ? `${identifiant}-aide` : undefined}
+        aria-controls={`${identifiant}-resultats`}
+      />
+      <button class="recherche__bouton" type="submit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+        <span>Rechercher</span>
+      </button>
+    </div>
+    {
+      avecAide && (
+        <span id={`${identifiant}-aide`} class="texte-secondaire petit">
+          Ou consultez <a href="/classements/">la liste complète</a>.
+        </span>
+      )
+    }
   </div>
   <ul id={`${identifiant}-resultats`} class="recherche__resultats" aria-live="polite"></ul>
-</div>
+</form>
 
 <script>
   type Ligne = [
@@ -40,7 +66,7 @@ const { identifiant = "recherche" } = Astro.props;
 
   // Relancé après chaque transition de page (View Transitions)
   document.addEventListener("astro:page-load", () => {
-  for (const bloc of document.querySelectorAll<HTMLElement>("[data-recherche]")) {
+  for (const bloc of document.querySelectorAll<HTMLFormElement>("[data-recherche]")) {
     const champ = bloc.querySelector("input");
     const liste = bloc.querySelector("ul");
     if (!champ || !liste) continue;
@@ -97,6 +123,13 @@ const { identifiant = "recherche" } = Astro.props;
       if (evenement.key === "Escape") {
         champ.value = "";
         liste.replaceChildren();
+      }
+    });
+    // Entrée ou « Rechercher » : classements filtrés, seulement à partir de 2 caractères
+    bloc.addEventListener("submit", (evenement) => {
+      if (champ.value.trim().length < 2) {
+        evenement.preventDefault();
+        champ.focus();
       }
     });
   }

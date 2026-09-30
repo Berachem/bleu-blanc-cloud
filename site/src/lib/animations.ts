@@ -82,10 +82,64 @@ function brancherMenu(): void {
     },
     { signal },
   );
-  matchMedia("(min-width: 1080px)").addEventListener(
+  matchMedia("(min-width: 1120px)").addEventListener(
     "change",
     (evenement) => {
       if (evenement.matches) basculer(false);
+    },
+    { signal },
+  );
+  document.addEventListener("astro:before-swap", () => arret.abort(), { once: true });
+}
+
+// Loupe de l'en-tête : ouvre le panneau de recherche et place le curseur dans le champ.
+// Fermeture : clic à l'extérieur, touche Échap (retour sur la loupe) ou lien choisi. La
+// touche « / » l'ouvre depuis n'importe quelle page (hors saisie en cours).
+function brancherRecherche(): void {
+  const bouton = document.querySelector<HTMLButtonElement>("[data-bouton-recherche]");
+  const panneau = document.getElementById("panneau-recherche");
+  if (!bouton || !panneau) return;
+  const champ = panneau.querySelector<HTMLInputElement>('input[type="search"]');
+  const ouvert = () => !panneau.hidden;
+  const basculer = (etat: boolean, rendreFocus = false) => {
+    panneau.hidden = !etat;
+    bouton.setAttribute("aria-expanded", String(etat));
+    bouton.setAttribute("aria-label", etat ? "Fermer la recherche" : "Rechercher une organisation");
+    if (etat) champ?.focus();
+    else if (rendreFocus) bouton.focus();
+  };
+  const arret = new AbortController();
+  const { signal } = arret;
+  bouton.addEventListener("click", () => basculer(!ouvert()), { signal });
+  panneau.addEventListener(
+    "click",
+    (evenement) => {
+      if ((evenement.target as HTMLElement).closest("a")) basculer(false);
+    },
+    { signal },
+  );
+  document.addEventListener(
+    "click",
+    (evenement) => {
+      const cible = evenement.target as Node;
+      if (ouvert() && !panneau.contains(cible) && !bouton.contains(cible)) basculer(false);
+    },
+    { signal },
+  );
+  document.addEventListener(
+    "keydown",
+    (evenement) => {
+      if (evenement.key === "Escape" && ouvert()) {
+        basculer(false, true);
+        return;
+      }
+      const cible = evenement.target as HTMLElement;
+      const enSaisie = cible.closest("input, textarea, select, [contenteditable]") !== null;
+      const modificateur = evenement.ctrlKey || evenement.metaKey || evenement.altKey;
+      if (evenement.key === "/" && !ouvert() && !enSaisie && !modificateur) {
+        evenement.preventDefault();
+        basculer(true);
+      }
     },
     { signal },
   );
@@ -217,6 +271,7 @@ function lancerAnimations(): void {
 document.addEventListener("astro:page-load", () => {
   brancherBascule();
   brancherMenu();
+  brancherRecherche();
   brancherFenetreAnalyse();
   brancherLienRapport();
   lancerAnimations();
