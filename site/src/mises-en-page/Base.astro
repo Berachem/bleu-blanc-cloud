@@ -4,6 +4,8 @@ import "../styles/theme.css";
 import Logo from "../composants/Logo.astro";
 import { NAVIGATION, SITE } from "../config";
 import { meta } from "../lib/donnees";
+import { date } from "../lib/format";
+import { DATE_BUILD, VERSION_SITE } from "../lib/version";
 
 interface Props {
   titre: string;
@@ -47,6 +49,8 @@ const demonstration = meta().donnees_demonstration;
           } catch {}
           const racine = document.documentElement;
           racine.dataset.theme = theme;
+          // Sans JavaScript, le menu mobile reste déplié (aucun lien caché)
+          racine.classList.add("js");
           if (!matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window) {
             racine.classList.add("js-animations");
           }
@@ -72,7 +76,17 @@ const demonstration = meta().donnees_demonstration;
         <a class="logo" href="/" aria-label={`${SITE.nom} — accueil`} transition:name="logo">
           <Logo />
         </a>
-        <nav class="navigation" aria-label="Navigation principale">
+        <button
+          class="bouton-menu"
+          type="button"
+          data-bouton-menu
+          aria-expanded="false"
+          aria-controls="navigation-principale"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" focusable="false"><path class="menu-trait-1" d="M4 7h16"></path><path class="menu-trait-2" d="M4 12h16"></path><path class="menu-trait-3" d="M4 17h16"></path></svg>
+          <span>Menu</span>
+        </button>
+        <nav class="navigation" id="navigation-principale" aria-label="Navigation principale">
           <ul>
             {
               NAVIGATION.map((entree) => (
@@ -126,6 +140,10 @@ const demonstration = meta().donnees_demonstration;
           </ul>
         </div>
       </div>
+      <p class="conteneur pied__version">
+        Version du site <a href={`${SITE.depot}/commit/${VERSION_SITE}`}><code>{VERSION_SITE}</code></a>,
+        construite le {date(DATE_BUILD.toISOString())}
+      </p>
     </footer>
     <script>
       import "../lib/animations";

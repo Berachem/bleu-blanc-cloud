@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
 import socket
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -17,6 +19,27 @@ from bleublanccloud.sondes.dns import ChaineResolution, ErreurDns
 from bleublanccloud.sondes.ip import PlagesCloud, ResolveurAsn
 
 DOSSIER_FIXTURES = Path(__file__).parent / "fixtures"
+
+
+@pytest.fixture(autouse=True)
+def isoler_configuration(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Les tests ignorent le fichier .env et les variables d'environnement de la machine.
+
+    Sur le serveur, le .env contient de vraies valeurs (clé Mistral, jeton Codeberg…) : sans
+    cette isolation, des tests échouaient là-bas seulement, et la mise à jour automatique
+    rejetait alors chaque nouvelle version. Un test peut toujours fixer une variable avec
+    monkeypatch.setenv (cette fixture s'exécute avant lui).
+    """
+    from bleublanccloud import configuration
+
+    monkeypatch.setitem(configuration.Parametres.model_config, "env_file", None)
+    champs = set(configuration.Parametres.model_fields)
+    for nom in list(os.environ):
+        if nom.lower() in champs:
+            monkeypatch.delenv(nom)
+    configuration.obtenir_parametres.cache_clear()
+    yield
+    configuration.obtenir_parametres.cache_clear()
 
 
 @pytest.fixture(autouse=True)

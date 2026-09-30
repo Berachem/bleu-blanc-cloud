@@ -41,6 +41,28 @@ function brancherBascule(): void {
   }
 }
 
+// Menu mobile : bouton « Menu » qui déplie la navigation (fermée par Échap ou au clic sur
+// un lien ; sur grand écran, le bouton est masqué et la navigation toujours visible).
+function brancherMenu(): void {
+  const bouton = document.querySelector<HTMLButtonElement>("[data-bouton-menu]");
+  const navigation = document.getElementById("navigation-principale");
+  if (!bouton || !navigation) return;
+  const basculer = (ouvert: boolean) => {
+    bouton.setAttribute("aria-expanded", String(ouvert));
+    navigation.classList.toggle("navigation--ouverte", ouvert);
+  };
+  bouton.addEventListener("click", () => basculer(bouton.getAttribute("aria-expanded") !== "true"));
+  navigation.addEventListener("click", (evenement) => {
+    if ((evenement.target as HTMLElement).closest("a")) basculer(false);
+  });
+  document.addEventListener("keydown", (evenement) => {
+    if (evenement.key === "Escape" && bouton.getAttribute("aria-expanded") === "true") {
+      basculer(false);
+      bouton.focus();
+    }
+  });
+}
+
 function animerCompteur(element: HTMLElement): void {
   const cible = Number(element.dataset.compteur);
   const decimales = Number(element.dataset.decimales ?? 0);
@@ -112,6 +134,7 @@ function lancerAnimations(): void {
 
 document.addEventListener("astro:page-load", () => {
   brancherBascule();
+  brancherMenu();
   lancerAnimations();
 });
 
