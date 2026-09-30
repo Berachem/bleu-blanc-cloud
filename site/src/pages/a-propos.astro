@@ -1,6 +1,6 @@
 ---
 import BoutonAnalyse from "../composants/BoutonAnalyse.astro";
-import { DEMANDES, SITE } from "../config";
+import { DEMANDES, MENTIONS_LEGALES, SITE } from "../config";
 import Base from "../mises-en-page/Base.astro";
 ---
 <Base
@@ -40,8 +40,9 @@ import Base from "../mises-en-page/Base.astro";
     <p>
       Le code, la méthodologie et les référentiels sont publics sous licence
       <a href="https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12">EUPL-1.2</a> :
-      <a href={SITE.depot}>dépôt du projet</a>. Chaque score est reproductible et chaque point
-      retiré est justifié par une preuve.
+      <a href={SITE.depot}>dépôt du projet</a>. Les données publiées sont réutilisables sous
+      <a href={MENTIONS_LEGALES.licenceDonnees.url}>{MENTIONS_LEGALES.licenceDonnees.nom}</a>.
+      Chaque score est reproductible et chaque point retiré est justifié par une preuve.
     </p>
 
     <h2>Analyses sur demande</h2>
@@ -64,6 +65,10 @@ import Base from "../mises-en-page/Base.astro";
       <li>
         Le contenu des tickets n'est jamais exécuté : seul le nom de domaine, strictement validé,
         est utilisé ; les adresses locales ou privées sont refusées.
+      </li>
+      <li>
+        Le nom du compte Codeberg n'est conservé que {DEMANDES.conservationCompteJours} jours
+        (<a href="/mentions-legales/#donnees-personnelles">données personnelles</a>).
       </li>
     </ul>
     <BoutonAnalyse secondaire />

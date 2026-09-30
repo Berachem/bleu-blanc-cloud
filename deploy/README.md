@@ -359,7 +359,7 @@ Le ticket doit recevoir une réponse (note, score, lien vers la fiche), l'étiqu
 - **Limites** : 10 demandes acceptées par jour au total, 1 par jour et par compte (`DEMANDES_LIMITE_JOUR`, `DEMANDES_LIMITE_COMPTE`). Une analyse de moins de 7 jours est réutilisée.
 - **Fiches « sur demande »** : visibles par leur lien et la recherche, exclues de la carte, des classements et des statistiques, jamais rescannées par la campagne hebdomadaire. Si le domaine appartient déjà à une organisation de l'observatoire, c'est sa fiche qui est mise à jour.
 - **Rapport IA** : généré avec le cache habituel si `MISTRAL_API_KEY` est renseignée (10 rapports par jour au plus).
-- Le compte Codeberg de l'auteur est conservé dans la base locale pour appliquer les limites ; il n'est jamais publié.
+- Le compte Codeberg de l'auteur est conservé dans la base locale pour appliquer les limites ; il n'est jamais publié et `bbcloud demandes traiter` l'efface au bout de 30 jours (durée annoncée dans les mentions légales ; les sauvegardes, gardées 30 jours, suivent).
 - Même **verrou** que la campagne et la mise à jour automatique : si l'une d'elles tourne, le traitement est reporté au passage suivant.
 
 ---
@@ -389,8 +389,8 @@ Tant que le dépôt GitHub est privé, renseigne dans le formulaire de migration
 
 ## 9. Avant d'ouvrir le site au public ✅
 
-- [ ] **Mentions légales** : complète `site/src/config.ts` (adresse de l'éditeur ou recours à l'anonymat LCEN, adresse de contact) — l'adresse de l'hébergeur Codeberg e.V. est aussi à vérifier.
-- [ ] **Adresse de contact** pour les retraits et corrections (`SITE.contact`, actuellement `contact@berachem.dev`).
+- [ ] **Mentions légales** : l'adresse de l'éditeur n'est pas publiée (régime des particuliers non professionnels, LCEN art. 1-1 II). Condition : avoir **communiqué ton identité (nom, prénom, adresse) à Codeberg e.V.**, par exemple par e-mail à `contact@codeberg.org` en indiquant le dépôt Pages concerné. Garde une trace de l'envoi.
+- [ ] **Adresse de contact** `contact@berachem.dev` (`SITE.contact`) : vérifier qu'elle arrive bien dans ta boîte (mentions légales, retraits, demandes par e-mail).
 - [ ] **Référentiels** : relire les faits marqués « à vérifier » (`uv run bbcloud referentiels verifier` liste les remarques), puis passer `a_verifier: false` fait par fait.
 - [ ] **Campagne de test** (10 organisations) relue sur le site local.
 - [ ] **Première campagne complète** lancée puis publiée.

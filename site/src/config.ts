@@ -1,6 +1,4 @@
 // Configuration éditoriale du site.
-// ⚠️ Les informations marquées « À COMPLÉTER » doivent être fournies par l'éditeur
-// avant la mise en ligne (mentions légales, loi LCEN).
 
 export const SITE = {
   nom: "Bleu Blanc Cloud",
@@ -12,7 +10,7 @@ export const SITE = {
   auteur: "Berachem Markria",
   siteAuteur: "https://berachem.dev",
   // Adresse de contact pour les demandes de retrait, corrections et droits de réponse.
-  contact: "contact@berachem.dev", // À CONFIRMER
+  contact: "contact@berachem.dev",
   licenceCode: "EUPL-1.2",
 } as const;
 
@@ -24,20 +22,35 @@ export const DEMANDES = {
   depot: "berachem/bleublanccloud-pages",
   modele: ".forgejo/issue_template/analyse.yaml",
   limiteJour: 10,
+  // Compte Codeberg des demandeurs effacé de la base au-delà de cette durée
+  // (CONSERVATION_AUTEUR dans scanner/src/bleublanccloud/demandes/traitement.py)
+  conservationCompteJours: 30,
 } as const;
 
+// Mentions légales (LCEN, art. 1-1 depuis la loi SREN du 21 mai 2024). L'éditeur publie à
+// titre non professionnel : son adresse n'est pas publiée (art. 1-1 II), ses éléments
+// d'identification ayant été communiqués à l'hébergeur.
 export const MENTIONS_LEGALES = {
   editeur: {
     nom: "Berachem Markria",
-    statut: "Particulier, projet personnel non commercial",
-    adresse: "À COMPLÉTER (ou recours à l'anonymat prévu par l'article 6-III-2 de la LCEN)",
+    statut: "Particulier, projet personnel non professionnel et non commercial",
     contact: SITE.contact,
   },
   directeurPublication: "Berachem Markria",
   hebergeur: {
     nom: "Codeberg e.V.",
-    adresse: "Arminiusstraße 2-4, 10551 Berlin, Allemagne (à vérifier)",
+    forme: "Association enregistrée de droit allemand, à but non lucratif",
+    registre: "Amtsgericht Charlottenburg, VR 36929 B",
+    adresse: "Arminiusstraße 2-4, 10551 Berlin, Allemagne",
+    contact: "contact@codeberg.org",
     site: "https://codeberg.org",
+    // Codeberg ne publie pas de numéro de téléphone : contact par e-mail uniquement
+    mentions: "https://codeberg.org/Codeberg/org/src/branch/main/Imprint.md",
+    confidentialite: "https://codeberg.org/Codeberg/org/src/branch/main/PrivacyPolicy.md",
+  },
+  licenceDonnees: {
+    nom: "Licence Ouverte 2.0 (Etalab)",
+    url: "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
   },
 } as const;
 

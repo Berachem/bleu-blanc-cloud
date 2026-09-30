@@ -574,6 +574,17 @@ class Base:
         )
         return [self._demande(ligne) for ligne in lignes]
 
+    def effacer_auteurs_demandes(self, recues_avant: datetime) -> int:
+        """Efface le compte Codeberg des demandes reçues avant la date (durée de conservation
+        annoncée dans les mentions légales). Le suivi du ticket est gardé. Renvoie le nombre
+        de demandes concernées."""
+        with self.transaction() as c:
+            curseur = c.execute(
+                "UPDATE demandes SET auteur = '', maj_le = ? WHERE auteur != '' AND recue_le < ?",
+                (_maintenant(), recues_avant.astimezone(UTC).isoformat()),
+            )
+            return curseur.rowcount
+
     # ------------------------------------------------------------------ #
     # Contours des communes (carte de situation)
     # ------------------------------------------------------------------ #

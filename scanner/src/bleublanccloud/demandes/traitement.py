@@ -50,6 +50,9 @@ LIMITE_JOUR: Final = 10
 LIMITE_COMPTE: Final = 1
 DELAI_REUTILISATION: Final = timedelta(days=7)
 TENTATIVES_MAX: Final = 3
+CONSERVATION_AUTEUR: Final = timedelta(days=30)
+"""Durée de conservation du compte Codeberg des demandeurs (annoncée dans les mentions
+légales) : il ne sert qu'à la limite d'une demande par jour et par compte."""
 SOURCE: Final = "demande-codeberg"
 SOURCE_EMAIL: Final = "demande-email"
 
@@ -79,6 +82,7 @@ class BilanDemandes:
     erreurs: list[tuple[int, str]] = field(default_factory=list)
     publication: bool | None = None
     reponses_en_attente: list[int] = field(default_factory=list)
+    auteurs_effaces: int = 0
 
 
 @dataclass(frozen=True)
@@ -110,6 +114,7 @@ class TraiteurDemandes:
     limite_compte: int = LIMITE_COMPTE
     delai_reutilisation: timedelta = DELAI_REUTILISATION
     tentatives_max: int = TENTATIVES_MAX
+    conservation_auteur: timedelta = CONSERVATION_AUTEUR
     source: str = SOURCE
     """Origine enregistrée sur les fiches créées (ticket Codeberg ou e-mail)."""
     maintenant: Callable[[], datetime] = field(default=lambda: datetime.now(UTC))
@@ -125,6 +130,10 @@ class TraiteurDemandes:
     async def traiter(self) -> BilanDemandes:
         """Traite les demandes ouvertes. Lève ErreurForge si la forge est injoignable."""
         bilan = BilanDemandes()
+        # Purge d'abord : elle a lieu même si la forge est injoignable
+        bilan.auteurs_effaces = self.base.effacer_auteurs_demandes(
+            self.maintenant() - self.conservation_auteur
+        )
         tickets = sorted(
             (t for t in await self.forge.tickets_ouverts() if t.est_demande),
             key=lambda t: t.numero,

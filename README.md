@@ -69,7 +69,7 @@ npm run dev                   # http://localhost:4321
 | `bbcloud schemas` | schéma JSON du contrat de données (types TypeScript : `npm run types`) |
 | `bbcloud demo` | données de démonstration fictives |
 | `bbcloud publier` | export + build + publication sur Codeberg Pages |
-| `bbcloud demandes traiter` · `bbcloud demandes lister` | analyses sur demande (tickets « Analyser mon site » sur Codeberg) |
+| `bbcloud demandes traiter` · `bbcloud demandes lister` | analyses sur demande (tickets « Analyser mon site » sur Codeberg) ; efface le compte des demandeurs au-delà de 30 jours |
 | `bbcloud demandes analyser <domaine> [--sans-publier]` | analyse sur demande reçue par e-mail : mêmes contrôles et même fiche qu'un ticket, puis publication et réponse type à renvoyer |
 
 ## Qualité
@@ -100,6 +100,7 @@ Le workflow [`qualite.yml`](.github/workflows/qualite.yml) lance l'ensemble à c
 ## Licence et crédits
 
 - Code : [EUPL-1.2](LICENSE) — © Berachem Markria ([berachem.dev](https://berachem.dev)).
+- Données publiées (scores, constats, fiches) : [Licence Ouverte 2.0 (Etalab)](https://www.etalab.gouv.fr/licence-ouverte-open-licence/), en citant « Bleu Blanc Cloud ».
 - Police [Luciole](https://www.luciole-vision.com/) © Laurent Bourcellier & Jonathan Perez — CC-BY 4.0.
 - Contours des départements : IGN Admin Express COG (Licence Ouverte Etalab 2.0), via [france-geojson](https://github.com/gregoiredavid/france-geojson).
 - Données des organisations : API Annuaire de l'administration (DILA) et API Découpage administratif, Licence Ouverte.

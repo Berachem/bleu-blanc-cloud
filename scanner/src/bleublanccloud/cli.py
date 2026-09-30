@@ -726,6 +726,10 @@ def demandes_traiter() -> None:
         console.print(
             f"[yellow]Réponses reportées au prochain passage : {bilan.reponses_en_attente}[/]"
         )
+    if bilan.auteurs_effaces:
+        console.print(
+            f"{bilan.auteurs_effaces} compte(s) de demandeur effacé(s) (plus de 30 jours)"
+        )
     if bilan.publication is False:
         raise typer.Exit(code=1)
 

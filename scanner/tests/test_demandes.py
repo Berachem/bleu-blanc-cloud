@@ -776,3 +776,55 @@ async def test_demande_par_email_reseau_prive_et_retrait(
         await banc.traiteur(referentiels=avec_retrait).analyser_directement("www.exempleville.fr")
     # Le retrait est vérifié avant toute requête DNS (seule « piege » a été résolue)
     assert banc.analyses == [] and banc.resolveur.appels == ["piege-exemple.fr|A"]
+
+
+# --------------------------------------------------------------------------- #
+# Conservation limitée du compte des demandeurs (mentions légales : 30 jours)
+# --------------------------------------------------------------------------- #
+
+
+async def test_compte_du_demandeur_efface_apres_30_jours(
+    forge_simulee: ForgeSimulee, banc: Banc
+) -> None:
+    forge_simulee.ouvrir(1, corps_formulaire("exempleville.fr"), auteur="alice")
+    await banc.traiteur().traiter()
+
+    dans_29_jours = datetime.now(UTC) + timedelta(days=29)
+    bilan = await banc.traiteur(maintenant=lambda: dans_29_jours).traiter()
+    suivi = banc.base.demande(DEPOT, 1)
+    assert bilan.auteurs_effaces == 0 and suivi is not None and suivi.auteur == "alice"
+
+    dans_31_jours = datetime.now(UTC) + timedelta(days=31)
+    bilan = await banc.traiteur(maintenant=lambda: dans_31_jours).traiter()
+    suivi = banc.base.demande(DEPOT, 1)
+    assert bilan.auteurs_effaces == 1
+    assert suivi is not None and suivi.auteur == "" and suivi.statut == "traitee"
+    # Seul le compte disparaît : le suivi et la fiche restent
+    assert banc.base.organisation_par_slug("sur-demande-exempleville-fr") is not None
+    bilan = await banc.traiteur(maintenant=lambda: dans_31_jours).traiter()
+    assert bilan.auteurs_effaces == 0
+
+
+async def test_compte_efface_meme_si_codeberg_injoignable(
+    forge_simulee: ForgeSimulee, banc: Banc
+) -> None:
+    forge_simulee.ouvrir(1, corps_formulaire("exempleville.fr"), auteur="alice")
+    await banc.traiteur().traiter()
+    forge_simulee.panne = True
+    dans_31_jours = datetime.now(UTC) + timedelta(days=31)
+    with pytest.raises(ErreurForge):
+        await banc.traiteur(maintenant=lambda: dans_31_jours).traiter()
+    suivi = banc.base.demande(DEPOT, 1)
+    assert suivi is not None and suivi.auteur == ""
+
+
+async def test_compte_efface_ne_compte_plus_dans_les_limites(
+    forge_simulee: ForgeSimulee, banc: Banc
+) -> None:
+    forge_simulee.ouvrir(1, corps_formulaire("exempleville.fr"), auteur="alice")
+    await banc.traiteur().traiter()
+    banc.base.effacer_auteurs_demandes(datetime.now(UTC) + timedelta(seconds=1))
+    # Même jour, autre compte : seule la limite par compte est concernée
+    forge_simulee.ouvrir(2, corps_formulaire("exempleville.fr"), auteur="bob")
+    bilan = await banc.traiteur().traiter()
+    assert bilan.traitees == [2]

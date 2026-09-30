@@ -1,50 +1,223 @@
 ---
 import Base from "../mises-en-page/Base.astro";
-import { MENTIONS_LEGALES, SITE } from "../config";
-const { editeur, hebergeur, directeurPublication } = MENTIONS_LEGALES;
+import { DEMANDES, MENTIONS_LEGALES, SITE } from "../config";
+const { editeur, hebergeur, directeurPublication, licenceDonnees } = MENTIONS_LEGALES;
+const jours = DEMANDES.conservationCompteJours;
+const sujetDonnees = encodeURIComponent("Bleu Blanc Cloud — données personnelles");
 ---
-<Base titre="Mentions légales" description="Éditeur, hébergeur et informations légales du site Bleu Blanc Cloud.">
+<Base
+  titre="Mentions légales"
+  description="Éditeur, hébergeur, données personnelles, cookies et licences du site Bleu Blanc Cloud."
+>
   <div class="conteneur prose">
     <header class="entete-page">
       <span class="surtitre">Informations légales</span>
       <h1>Mentions légales</h1>
     </header>
 
-    <h2>Éditeur</h2>
+    <h2 id="editeur">Éditeur</h2>
     <p>
-      {editeur.nom} — {editeur.statut}<br />
-      Adresse : {editeur.adresse}<br />
+      Le site {SITE.nom} est édité par <strong>{editeur.nom}</strong>, particulier, à titre
+      personnel, non professionnel et non commercial.<br />
       Contact : <a href={`mailto:${editeur.contact}`}>{editeur.contact}</a>
     </p>
-    <p>Directeur de la publication : {directeurPublication}</p>
-
-    <h2>Hébergeur</h2>
     <p>
-      {hebergeur.nom}<br />
+      Conformément à l'article 1-1 (II) de la loi n° 2004-575 du 21 juin 2004 pour la confiance
+      dans l'économie numérique (LCEN), l'adresse personnelle de l'éditeur n'est pas publiée :
+      ses éléments d'identification ont été communiqués à l'hébergeur.
+    </p>
+    <p>Directeur de la publication : {directeurPublication}.</p>
+
+    <h2 id="hebergeur">Hébergeur</h2>
+    <p>
+      <strong>{hebergeur.nom}</strong> — {hebergeur.forme}<br />
       {hebergeur.adresse}<br />
-      <a href={hebergeur.site}>{hebergeur.site}</a>
+      Registre des associations : {hebergeur.registre}<br />
+      Contact : <a href={`mailto:${hebergeur.contact}`}>{hebergeur.contact}</a> (l'hébergeur ne
+      publie pas de numéro de téléphone)<br />
+      <a href={hebergeur.site}>{hebergeur.site}</a> ·
+      <a href={hebergeur.mentions}>mentions légales de l'hébergeur</a>
+    </p>
+    <p>
+      Le site est un ensemble de pages statiques servies par Codeberg Pages. Les analyses sont
+      calculées sur un serveur personnel situé en France, qui n'est joignable depuis Internet par
+      aucun port.
     </p>
 
-    <h2>Nature du site</h2>
+    <h2 id="nature">Nature du site</h2>
     <p>
-      {SITE.nom} est un projet personnel, indépendant et non commercial. Il n'est pas un site
-      officiel et n'a <strong>aucun lien avec l'État, une administration ou l'Union européenne</strong>.
-      Les scores publiés sont indicatifs et fondés uniquement sur des informations publiquement
-      accessibles.
+      {SITE.nom} est un projet personnel, indépendant et non commercial. Il n'a
+      <strong>aucun lien avec l'État, une administration ou l'Union européenne</strong> et ne
+      reçoit aucun financement de fournisseurs. Les scores sont <strong>indicatifs</strong> : ils
+      ne reflètent que l'empreinte technique externe et visible publiquement des organisations
+      (voir la <a href="/methodologie/">méthodologie</a>). Pour signaler une erreur, exercer un
+      droit de réponse ou demander un retrait : <a href="/retrait/">page dédiée</a>.
     </p>
 
-    <h2>Données personnelles et cookies</h2>
+    <h2 id="donnees-personnelles">Données personnelles</h2>
     <p>
-      Ce site ne dépose aucun cookie, n'utilise aucun traceur ni aucune mesure d'audience, et ne
-      charge aucune ressource externe. Aucune donnée personnelle n'est collectée lors de la
-      consultation.
+      Responsable des traitements : {editeur.nom}, joignable à
+      <a href={`mailto:${editeur.contact}`}>{editeur.contact}</a>. Le site est conçu pour
+      collecter le moins de données possible : <strong>la consultation du site ne donne lieu à
+      aucune collecte par l'éditeur</strong>, sans compte, sans formulaire et sans mesure
+      d'audience.
     </p>
 
-    <h2>Propriété intellectuelle</h2>
+    <table class="traitements">
+      <caption class="visuellement-cache">Traitements de données personnelles</caption>
+      <thead>
+        <tr>
+          <th scope="col">Situation</th>
+          <th scope="col">Données</th>
+          <th scope="col">Pourquoi</th>
+          <th scope="col">Durée</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Consultation du site</th>
+          <td data-libelle="Données">Journaux techniques de l'hébergeur (adresse IP tronquée, page demandée, date)</td>
+          <td data-libelle="Pourquoi">Fonctionnement et sécurité du service, par Codeberg</td>
+          <td data-libelle="Durée">
+            Selon la <a href={hebergeur.confidentialite}>politique de confidentialité de
+            Codeberg</a> (7 jours au plus)
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Demande d'analyse par ticket Codeberg</th>
+          <td data-libelle="Données">Nom du compte Codeberg, domaine demandé, dates de traitement</td>
+          <td data-libelle="Pourquoi">
+            Traiter la demande et appliquer la limite d'une demande par jour et par compte
+            (intérêt légitime : prévenir les abus)
+          </td>
+          <td data-libelle="Durée">
+            Compte effacé de la base au bout de {jours} jours (puis des sauvegardes,
+            elles-mêmes conservées 30 jours)
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Message envoyé par e-mail</th>
+          <td data-libelle="Données">Adresse e-mail, nom éventuel, contenu du message</td>
+          <td data-libelle="Pourquoi">Répondre à la demande (analyse, correction, droit de réponse, retrait)</td>
+          <td data-libelle="Durée">Le temps de traiter la demande et d'assurer le suivi de l'échange</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ul>
+      <li>
+        Un ticket ouvert sur Codeberg est <strong>public</strong> et hébergé par Codeberg, selon
+        ses propres conditions : il peut être supprimé sur simple demande.
+      </li>
+      <li>
+        Les données ne sont ni vendues, ni cédées, ni utilisées à d'autres fins. Le serveur
+        d'analyse (France) et l'hébergeur du site (Allemagne) sont situés dans l'Union
+        européenne.
+      </li>
+      <li>
+        Les rapports rédigés par l'IA (Mistral, entreprise française) sont produits à partir des
+        seuls constats techniques : aucun nom, aucune adresse e-mail, aucun numéro de téléphone
+        n'est transmis.
+      </li>
+      <li>
+        Les fiches décrivent l'infrastructure technique de domaines (hébergeur, messagerie, DNS,
+        services tiers) à partir d'informations publiquement accessibles. Si une fiche concerne
+        le site personnel d'un particulier, celui-ci peut s'y opposer : elle est alors retirée.
+      </li>
+    </ul>
     <p>
-      Le code source est publié sous licence <a href={SITE.depot}>EUPL-1.2</a>. Les données
-      publiées peuvent être réutilisées en citant la source « Bleu Blanc Cloud ». La police
-      Luciole est distribuée sous licence CC-BY 4.0.
+      Vous disposez d'un droit d'accès, de rectification, d'effacement, d'opposition et de
+      limitation du traitement de vos données (règlement général sur la protection des données,
+      articles 15 à 21). Pour l'exercer : <a href={`mailto:${editeur.contact}?subject=${sujetDonnees}`}>{editeur.contact}</a>,
+      réponse sous un mois. Vous pouvez également adresser une réclamation à la
+      <a href="https://www.cnil.fr/fr/adresser-une-plainte">CNIL</a>.
+    </p>
+
+    <h2 id="cookies">Cookies et stockage local</h2>
+    <p>
+      Ce site ne dépose <strong>aucun cookie</strong>, n'utilise aucun traceur publicitaire ni
+      aucune mesure d'audience, et ne charge aucune ressource externe (polices, scripts et cartes
+      sont servis par le site lui-même). Seule exception : si vous changez le thème clair ou
+      sombre, ce choix est mémorisé dans votre navigateur (stockage local, clé
+      <code>bbc-theme</code>). Il ne quitte jamais votre appareil ; ce stockage, demandé
+      expressément par vous, ne nécessite pas de consentement. Vous pouvez l'effacer à tout
+      moment depuis les réglages de votre navigateur.
+    </p>
+
+    <h2 id="licences">Propriété intellectuelle et licences</h2>
+    <ul>
+      <li>
+        Code source : licence <a href="https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12">EUPL-1.2</a>
+        (<a href={SITE.depot}>dépôt du projet</a>).
+      </li>
+      <li>
+        Données publiées (scores, constats, fiches, fichiers JSON) :
+        <a href={licenceDonnees.url}>{licenceDonnees.nom}</a>. Réutilisation libre, y compris
+        commerciale, en mentionnant la source « {SITE.nom} » et la date de mise à jour.
+      </li>
+      <li>
+        Textes rédigés par l'IA : produits automatiquement à partir des constats, ils peuvent
+        contenir des erreurs et sont signalés comme tels sur chaque fiche.
+      </li>
+      <li>Police Luciole : licence CC-BY 4.0.</li>
+      <li>
+        Contours administratifs et données des organisations : IGN et administrations sources,
+        Licence Ouverte (Etalab 2.0). Le détail figure dans les <a href="/a-propos/">crédits</a>.
+      </li>
+      <li>
+        Les marques et logos cités (dont celui de Mistral AI) appartiennent à leurs titulaires
+        et ne sont affichés qu'à titre d'information.
+      </li>
+    </ul>
+    <p class="texte-secondaire petit">
+      Liens hypertextes : les liens vers des sites tiers sont fournis à titre d'information ;
+      l'éditeur n'est pas responsable de leur contenu.
     </p>
   </div>
 </Base>
+
+<style>
+  .traitements th[scope="row"] {
+    font-size: 1rem;
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--texte);
+  }
+  .traitements th[scope="row"],
+  .traitements td {
+    vertical-align: top;
+  }
+  /* Sur petit écran : une carte par situation, libellé de colonne au-dessus de chaque valeur */
+  @media (max-width: 40rem) {
+    .traitements thead {
+      display: none;
+    }
+    .traitements tbody,
+    .traitements tr,
+    .traitements th,
+    .traitements td {
+      display: block;
+    }
+    .traitements tr {
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--bordure);
+    }
+    .traitements tr:last-child {
+      border-bottom: 0;
+    }
+    .traitements th[scope="row"],
+    .traitements td {
+      padding: 0.45rem 1rem;
+      border-bottom: 0;
+    }
+    .traitements td::before {
+      content: attr(data-libelle);
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--texte-secondaire);
+    }
+  }
+</style>
