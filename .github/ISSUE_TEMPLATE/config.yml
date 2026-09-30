@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Corriger une fiche, droit de réponse ou retrait
+    url: https://bleublanccloud.fr/retrait/
+    about: Demandes des organisations analysées, traitées sous 30 jours.
+  - name: Signaler une vulnérabilité
+    url: https://github.com/Berachem/bleu-blanc-cloud/security/advisories/new
+    about: Signalement privé ; voir SECURITY.md.
+  - name: Faire analyser un site
+    url: https://bleublanccloud.fr/
+    about: Bouton « Analyser mon site » (ticket sur Codeberg ou e-mail).

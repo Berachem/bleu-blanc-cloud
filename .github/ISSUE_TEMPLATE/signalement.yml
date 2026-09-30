@@ -1,0 +1,52 @@
+name: Signaler un problème ou proposer une amélioration
+description: Bogue du scanner ou du site, erreur de référentiel, documentation, suggestion.
+labels: ["à trier"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de signaler un problème.
+
+        - **Fiche d'une organisation** (correction, droit de réponse, retrait) : utilisez [bleublanccloud.fr/retrait](https://bleublanccloud.fr/retrait/).
+        - **Vulnérabilité** : suivez la [politique de sécurité](https://github.com/Berachem/bleu-blanc-cloud/blob/main/SECURITY.md), sans ticket public.
+        - **Faire analyser un site** : bouton « Analyser mon site » sur [bleublanccloud.fr](https://bleublanccloud.fr).
+
+        N'indiquez aucune donnée personnelle ni aucun secret (clé, jeton) dans ce ticket.
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Bogue du scanner
+        - Bogue ou accessibilité du site
+        - Référentiel (fournisseur, règle de détection, alternative)
+        - Méthodologie
+        - Documentation
+        - Suggestion
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Ce qui se passe, et ce qui était attendu.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes pour reproduire
+      description: Commande lancée (avec un domaine de test si possible), page du site, navigateur…
+      placeholder: |
+        1. uv run bbcloud scanner example.org
+        2. …
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: Pour un référentiel, au moins une URL source par fait (siège, maison mère, ASN, exposition au Cloud Act…).
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Commit, ou « Version du site » affichée en pied de page.
