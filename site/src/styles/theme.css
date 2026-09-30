@@ -962,11 +962,6 @@ html:has(.fenetre[open]) {
 [data-theme="dark"] .accroche .etoiles {
   opacity: 0.3;
 }
-.etoiles__anneau {
-  stroke: var(--texte-secondaire);
-  stroke-width: 0.25;
-  opacity: 0.35;
-}
 .accroche .conteneur {
   position: relative;
 }
@@ -992,19 +987,20 @@ html:has(.fenetre[open]) {
   font-weight: 700;
   line-height: 1.3;
 }
-.accroche__point {
+/* Trait tricolore (même dessin que les surtitres) */
+.accroche__drapeau {
   flex: none;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 0 3px rgb(34 197 94 / 22%);
-  animation: pulsation 2.4s ease-in-out infinite;
+  width: 1.6rem;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--bleu-france) 33%, #fff 33% 66%, var(--rouge-france) 66%);
 }
-@keyframes pulsation {
-  50% {
-    box-shadow: 0 0 0 6px rgb(34 197 94 / 8%);
-  }
+[data-theme="light"] .accroche__drapeau {
+  box-shadow: inset 0 0 0 1px rgb(14 19 48 / 14%);
+}
+/* Flèche vers les chiffres clés : téléphone seulement (accroche sur tout l'écran) */
+.accroche__suite {
+  display: none;
 }
 .accroche h1 {
   max-width: 13.5em;
@@ -1038,9 +1034,35 @@ html:has(.fenetre[open]) {
   font-weight: 700;
   white-space: nowrap;
 }
+/* Téléphone : l'accroche occupe toute la hauteur visible sous l'en-tête (≈ 4,5 rem), pour
+   qu'aucune carte à moitié affichée n'apparaisse en bas ; les chiffres suivent au défilement. */
 @media (max-width: 600px) {
   .accroche {
-    padding: 1.6rem 0 4.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100vh - 4.5rem);
+    min-height: calc(100svh - 4.5rem);
+    padding: 1.6rem 0 4rem;
+  }
+  .accroche__suite {
+    position: absolute;
+    bottom: 0.9rem;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-left: -1.375rem;
+    border: 1px solid var(--bordure);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    color: var(--texte-secondaire);
+    box-shadow: var(--ombre);
+    animation: rebond 2.2s ease-in-out infinite;
+  }
+  .accroche__suite:hover {
+    color: var(--texte);
   }
   .accroche__badge {
     margin-bottom: 1rem;
@@ -1077,6 +1099,12 @@ html:has(.fenetre[open]) {
   }
 }
 
+@keyframes rebond {
+  50% {
+    transform: translateY(5px);
+  }
+}
+
 /* Bande des chiffres clés, à cheval sur l'accroche */
 .bande-chiffres__meta {
   margin: 0.9rem 0 0;
@@ -1088,6 +1116,12 @@ html:has(.fenetre[open]) {
   position: relative;
   z-index: 2;
   margin-top: clamp(-4.5rem, -3rem - 1vw, -3rem);
+}
+/* Téléphone : plus de chevauchement, les chiffres commencent sous l'accroche plein écran */
+@media (max-width: 600px) {
+  .bande-chiffres {
+    margin-top: 1.5rem;
+  }
 }
 .chiffres {
   display: grid;

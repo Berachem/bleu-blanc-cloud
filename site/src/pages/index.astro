@@ -36,11 +36,11 @@ const chiffres = [
 ---
 <Base titre="Bleu Blanc Cloud">
   <section class="accroche" aria-labelledby="titre-accueil">
-    <div class="accroche__decor" aria-hidden="true"><EtoilesEurope anneau rayonEtoile={8} /></div>
+    <div class="accroche__decor" aria-hidden="true"><EtoilesEurope rayonEtoile={8} /></div>
     <div class="conteneur">
       <div class="accroche__texte">
         <p class="accroche__badge">
-          <span class="accroche__point" aria-hidden="true"></span>
+          <span class="accroche__drapeau" aria-hidden="true"></span>
           Observatoire indépendant · open source
         </p>
         <h1 id="titre-accueil">
@@ -58,9 +58,12 @@ const chiffres = [
         </p>
       </div>
     </div>
+    <a class="accroche__suite" href="#chiffres-cles" aria-label="Voir les chiffres clés">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"></path></svg>
+    </a>
   </section>
 
-  <div class="conteneur bande-chiffres">
+  <div class="conteneur bande-chiffres" id="chiffres-cles">
     <h2 class="visuellement-cache">Chiffres clés</h2>
     <ul class="chiffres">
       {
