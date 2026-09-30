@@ -11,10 +11,12 @@ interface PropsId {
 const { identifiant = "nuage-logo" } = Astro.props as PropsId;
 const id = identifiant;
 ---
+<!-- Cadre élargi au nuage entier, trait compris (x de 0,2 à 66,3 ; y de −2,1 à 45,1) :
+     l'ancien cadre 0 0 64 45 coupait le haut et la droite du contour. -->
 <svg
   width={taille}
-  height={Math.round(taille * 0.7)}
-  viewBox="0 0 64 45"
+  height={Math.round((taille * 48.6) / 67.5)}
+  viewBox="-0.5 -2.8 67.5 48.6"
   aria-hidden="true"
   focusable="false"
 >
@@ -24,9 +26,9 @@ const id = identifiant;
     </clipPath>
   </defs>
   <g clip-path={`url(#${id})`}>
-    <rect x="0" y="0" width="22" height="45" fill="#002395"></rect>
-    <rect x="22" y="0" width="20" height="45" fill="#ffffff"></rect>
-    <rect x="42" y="0" width="22" height="45" fill="#ED2939"></rect>
+    <rect x="-1" y="-3" width="23" height="49" fill="#002395"></rect>
+    <rect x="22" y="-3" width="20" height="49" fill="#ffffff"></rect>
+    <rect x="42" y="-3" width="26" height="49" fill="#ED2939"></rect>
   </g>
   <path
     d="M16 44a15 15 0 0 1-2.2-29.8A19 19 0 0 1 50.5 12 16 16 0 0 1 48 44Z"
