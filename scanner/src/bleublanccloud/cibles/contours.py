@@ -23,8 +23,9 @@ from bleublanccloud.cibles.communes import URL_GEO
 from bleublanccloud.stockage.base import Base
 
 SOURCE_CONTOURS: Final = "geo.api.gouv.fr / IGN, licence Etalab 2.0"
-TOLERANCE_DEGRES: Final = 0.001
-"""Écart maximal toléré par la simplification (≈ 80 à 110 m en France métropolitaine)."""
+TOLERANCE_DEGRES: Final = 0.0002
+"""Écart maximal toléré par la simplification (≈ 15 à 22 m en France métropolitaine) : le
+contour reste aligné sur le fond de plan IGN quand le visiteur zoome sur la carte."""
 DECIMALES: Final = 4
 """Précision des coordonnées conservées (≈ 10 m)."""
 CONCURRENCE: Final = 4

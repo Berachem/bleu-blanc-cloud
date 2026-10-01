@@ -63,3 +63,9 @@ test("le tracé compacté est nettement plus court", () => {
   const d = "M155.9,127.5L153.5,129L152.4,130L152.4,133.1L150.4,135.2L147.9,133.7Z";
   assert.ok(compacter(d).length < d.length * 0.75);
 });
+
+test("précision paramétrable : centièmes sans perte ni cumul d'arrondis", () => {
+  const d = "M12.34,6.79L12.35,6.78L12.4,6.7Z";
+  assert.equal(compacter(d, 2), "M12.34,6.79l.01-.01 .05-.08z");
+  assert.equal(compacter("M1.004,2L1.009,2Z", 2), "M1,2l.01,0z");
+});

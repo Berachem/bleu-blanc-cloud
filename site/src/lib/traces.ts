@@ -1,11 +1,13 @@
 // Compaction des tracés SVG produits par d3-geo (module pur, testé par traces.test.ts).
 
-/** Réécrit un tracé d3 (« M12.3,45.6L13.1,46Z », coordonnées absolues au dixième) en
- * coordonnées relatives et nombres abrégés : environ 40 % de caractères en moins. Les calculs
- * se font en dixièmes entiers, sans cumul d'arrondis. */
-export function compacter(d: string): string {
-  const nombre = (dixiemes: number) => {
-    const texte = String(dixiemes / 10);
+/** Réécrit un tracé d3 (« M12.3,45.6L13.1,46Z », coordonnées absolues arrondies à
+ * `decimales` chiffres après la virgule) en coordonnées relatives et nombres abrégés :
+ * environ 40 % de caractères en moins. Les calculs se font en entiers (dixièmes par défaut),
+ * sans cumul d'arrondis. */
+export function compacter(d: string, decimales = 1): string {
+  const facteur = 10 ** decimales;
+  const nombre = (unites: number) => {
+    const texte = String(unites / facteur);
     return texte.replace(/^(-?)0\./, "$1.");
   };
   const paire = (x: number, y: number) => {
@@ -22,7 +24,7 @@ export function compacter(d: string): string {
       precedente = "z";
       continue;
     }
-    const [x, y] = valeurs.split(",").map((v) => Math.round(Number(v) * 10));
+    const [x, y] = valeurs.split(",").map((v) => Math.round(Number(v) * facteur));
     const [dx, dy] = [x - cx, y - cy];
     if (commande === "M") {
       // Premier point en absolu (« M »), les suivants en relatif (« m »)

@@ -1,6 +1,8 @@
 // Vérifie qu'aucune page du site construit (dist/) ne déclenche de requête externe
-// ni ne dépose de cookie. Usage : npm run build && npm run verifier:externe [-- --captures dossier]
-import { createReadStream, existsSync, readdirSync, statSync } from "node:fs";
+// ni ne dépose de cookie. Seule exception admise : le fond de plan IGN d'une fiche, après
+// choix explicite du visiteur, qui ne doit contacter que data.geopf.fr (ADR-0005).
+// Usage : npm run build && npm run verifier:externe [-- --captures dossier]
+import { createReadStream, existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
@@ -98,6 +100,40 @@ for (const schema of ["light", "dark"]) {
   if (cookies.length > 0) externes.push(`cookies déposés : ${cookies.map((c) => c.name).join(", ")}`);
   await contexte.close();
 }
+// Fond de plan IGN : aucune tuile avant le choix du visiteur (vérifié ci-dessus sur toutes
+// les pages), puis uniquement des requêtes vers la Géoplateforme. Tuiles simulées : la
+// vérification ne dépend pas du réseau.
+const HOTE_FOND = "https://data.geopf.fr/";
+const PNG_VIDE = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+  "base64",
+);
+const ficheAvecCarte = pagesHtml(DIST).find(
+  (f) => f.includes(`${path.sep}organisation${path.sep}`) && readFileSync(f, "utf8").includes('name="fond-carte"'),
+);
+let tuilesFond = 0;
+if (ficheAvecCarte) {
+  const contexte = await navigateur.newContext({ viewport: { width: 1280, height: 900 } });
+  const onglet = await contexte.newPage();
+  await onglet.route(`${HOTE_FOND}**`, (route) => {
+    tuilesFond += 1;
+    return route.fulfill({ status: 200, contentType: "image/png", body: PNG_VIDE });
+  });
+  onglet.on("request", (requete) => {
+    const url = requete.url();
+    if (!url.startsWith(origine) && !url.startsWith("data:") && !url.startsWith(HOTE_FOND)) {
+      externes.push(`${url} (fond de plan activé)`);
+    }
+  });
+  const url = `${origine}/${path.relative(DIST, ficheAvecCarte).replace(/index\.html$/, "").replace(/\\/g, "/")}`;
+  await onglet.goto(url, { waitUntil: "networkidle" });
+  await onglet.check("input[name='fond-carte'][value='plan']");
+  await onglet.waitForTimeout(800);
+  if (tuilesFond === 0) externes.push(`fond de plan IGN : aucune tuile demandée après activation (${url})`);
+  const cookies = await contexte.cookies();
+  if (cookies.length > 0) externes.push(`cookies déposés (fond de plan) : ${cookies.map((c) => c.name).join(", ")}`);
+  await contexte.close();
+}
 await navigateur.close();
 serveur.close();
 
@@ -107,3 +143,6 @@ if (externes.length > 0) {
   process.exit(1);
 }
 console.log(`✓ ${pagesVisitees} pages visitées (thèmes clair et sombre) : aucune requête externe, aucun cookie.`);
+if (ficheAvecCarte) {
+  console.log(`✓ Fond de plan IGN activé : ${tuilesFond} tuile(s), uniquement vers data.geopf.fr.`);
+}

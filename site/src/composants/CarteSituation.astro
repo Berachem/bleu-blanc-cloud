@@ -1,8 +1,9 @@
 ---
-// Carte de situation de la fiche (SVG calculé au build, voir lib/situation.ts). Fiche sur
-// demande ou contour manquant : illustration maison à la place.
+// Carte de situation de la fiche (SVG calculé au build, voir lib/situation.ts), avec zoom et
+// fond de plan IGN à la demande (lib/carte-situation.ts). Fiche sur demande ou contour
+// manquant : illustration maison à la place.
 import EtoilesEurope from "./EtoilesEurope.astro";
-import { carteSituation, HAUTEUR, LARGEUR } from "../lib/situation";
+import { carteSituation, HAUTEUR, LARGEUR, ZOOM_MAX } from "../lib/situation";
 import type { OrganisationExport } from "../lib/types";
 interface Props {
   organisation: OrganisationExport;
@@ -10,34 +11,68 @@ interface Props {
 const { organisation } = Astro.props;
 const situation = carteSituation(organisation);
 const URL_LICENCE = "https://www.etalab.gouv.fr/licence-ouverte-open-licence/";
+const projection = situation?.projection;
+const cadre = situation?.cadreCible;
+const lien = situation?.lien;
+const urlGeoportail = lien
+  ? `https://www.geoportail.gouv.fr/carte?c=${lien.lon},${lien.lat}&z=${lien.zoom}&l0=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2::GEOPORTAIL:OGC:WMTS(1)&permalink=yes`
+  : null;
+const urlOsm = lien ? `https://www.openstreetmap.org/#map=${lien.zoom}/${lien.lat}/${lien.lon}` : null;
+const icone = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": 2.2, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true", focusable: "false" } as const;
 ---
-<figure class="carte-situation">
+<figure class="carte-situation" data-carte-situation>
   <div class="carte-situation__cadre">
     {
       situation ? (
-        <svg viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`} role="img" aria-label={situation.libelle}>
-          {situation.encart && (
-            <rect
-              class="situation-encart"
-              x={situation.encart.x}
-              y={situation.encart.y}
-              width={situation.encart.largeur}
-              height={situation.encart.hauteur}
-              rx="6"
-            />
-          )}
-          <path class="situation-fond" d={situation.fond} />
-          {situation.limites && <path class="situation-limites" d={situation.limites} />}
-          <path class={`situation-cible remplissage-${organisation.score.note}`} d={situation.cible} />
-          {situation.repere && (
-            <circle
-              class="situation-repere"
-              cx={situation.repere.cx}
-              cy={situation.repere.cy}
-              r={situation.repere.r}
-            />
-          )}
-        </svg>
+        <>
+          <svg
+            viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`}
+            role="img"
+            aria-label={situation.libelle}
+            data-carte
+            data-zoom-max={ZOOM_MAX}
+            data-projection={projection ? `${projection.k} ${projection.tx} ${projection.ty}` : undefined}
+            data-cadre-cible={cadre ? `${cadre.x} ${cadre.y} ${cadre.largeur} ${cadre.hauteur}` : undefined}
+          >
+            {situation.encart && (
+              <rect
+                class="situation-encart"
+                x={situation.encart.x}
+                y={situation.encart.y}
+                width={situation.encart.largeur}
+                height={situation.encart.hauteur}
+                rx="6"
+              />
+            )}
+            <path class="situation-fond" d={situation.fond} />
+            {situation.limites && <path class="situation-limites" d={situation.limites} />}
+            <path class={`situation-cible remplissage-${organisation.score.note}`} d={situation.cible} />
+            {situation.repere && (
+              <circle
+                class="situation-repere"
+                cx={situation.repere.cx}
+                cy={situation.repere.cy}
+                r={situation.repere.r}
+              />
+            )}
+          </svg>
+          <div class="carte-situation__commandes" role="group" aria-label="Zoom de la carte">
+            <button type="button" data-zoom="plus" aria-label="Zoomer" title="Zoomer">
+              <svg {...icone}><path d="M12 5v14M5 12h14" /></svg>
+            </button>
+            <button type="button" data-zoom="moins" aria-label="Dézoomer" title="Dézoomer" disabled>
+              <svg {...icone}><path d="M5 12h14" /></svg>
+            </button>
+            <button type="button" data-zoom="cible" aria-label={`Centrer sur ${organisation.nom}`} title={`Centrer sur ${organisation.nom}`}>
+              <svg {...icone}><circle cx="12" cy="12" r="7" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>
+            </button>
+            <button type="button" data-zoom="ensemble" aria-label="Vue d'ensemble" title="Vue d'ensemble">
+              <svg {...icone}><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>
+            </button>
+          </div>
+          <p class="carte-situation__aide" data-aide-zoom aria-hidden="true">Ctrl + molette pour zoomer</p>
+          <p class="carte-situation__erreur" aria-hidden="true">Fond de plan IGN momentanément indisponible</p>
+        </>
       ) : (
         <div class="illustration-organisation" aria-hidden="true">
           <EtoilesEurope />
@@ -48,10 +83,43 @@ const URL_LICENCE = "https://www.etalab.gouv.fr/licence-ouverte-open-licence/";
   </div>
   {
     situation && (
+      <div class="carte-situation__options">
+        {projection && (
+          <fieldset class="choix-fond">
+            <legend>Fond de carte</legend>
+            <div class="choix-fond__options">
+              <label><input type="radio" name="fond-carte" value="contours" checked /> Contours</label>
+              <label><input type="radio" name="fond-carte" value="plan" /> Plan IGN</label>
+              <label><input type="radio" name="fond-carte" value="photo" /> Photo aérienne</label>
+            </div>
+            <p class="choix-fond__note">
+              Plan et photo sont chargés depuis les serveurs de l'IGN, seulement si vous les
+              choisissez (<a href="/mentions-legales/#cookies">détails</a>).
+            </p>
+          </fieldset>
+        )}
+        {urlGeoportail && urlOsm && (
+          <p class="carte-situation__liens">
+            Voir sur <a href={urlGeoportail}>Géoportail (IGN)</a> ·{" "}
+            <a href={urlOsm}>OpenStreetMap</a>
+          </p>
+        )}
+      </div>
+    )
+  }
+  {
+    situation && (
       <figcaption>
         {situation.source === "communes" ? "Contours : geo.api.gouv.fr / IGN" : "Contours : IGN Admin Express"},{" "}
         <a href={URL_LICENCE}>licence Etalab 2.0</a>
+        <span class="carte-situation__attribution">
+          {" "}· Fond de plan : IGN – Géoplateforme, Licence Ouverte
+        </span>
       </figcaption>
     )
   }
 </figure>
+
+<script>
+  import "../lib/carte-situation";
+</script>

@@ -68,6 +68,12 @@ export const MENTIONS_LEGALES = {
     nom: "Licence Ouverte 2.0 (Etalab)",
     url: "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
   },
+  // Fond de plan des cartes de situation, chargé uniquement à la demande (ADR-0005)
+  fondDePlan: {
+    nom: "IGN – Géoplateforme",
+    operateur: "Institut national de l'information géographique et forestière (IGN), établissement public français",
+    site: "https://geoservices.ign.fr/",
+  },
 } as const;
 
 export const NAVIGATION = [

@@ -1,5 +1,7 @@
-// Cartes de situation des fiches, calculées au build avec d3-geo : chaque page ne contient
-// qu'un petit SVG (aucune tuile, aucun script, aucune bibliothèque côté visiteur).
+// Cartes de situation des fiches, calculées au build avec d3-geo : chaque page contient un
+// petit SVG (aucune bibliothèque côté visiteur). Projection de Mercator (celle des tuiles
+// web) : le fond de plan IGN, chargé seulement à la demande du visiteur, se superpose
+// exactement aux tracés (voir lib/carte-situation.ts et ADR-0005).
 //
 // - commune : contour du département en neutre, commune remplie avec la couleur de sa note ;
 // - département : sa silhouette dans sa région ;
@@ -9,7 +11,8 @@
 // via france-geojson), Licence Ouverte Etalab 2.0.
 import {
   geoArea,
-  geoConicConformal,
+  geoBounds,
+  geoCentroid,
   geoMercator,
   geoPath,
   type GeoPermissibleObjects,
@@ -38,6 +41,12 @@ const MARGE = 14;
  * une commune, plus large pour les vues étendues (région, France) très riches en détails. */
 const SEUIL_PIXELS = 0.75;
 const SEUIL_VUE_ETENDUE = 1.4;
+/** Contour de la commune : conservé finement (au centième d'unité) pour rester net et
+ * aligné sur le fond de plan quand le visiteur zoome. */
+const SEUIL_DETAIL = 0.02;
+const DECIMALES_DETAIL = 2;
+/** Agrandissement maximal proposé au visiteur. */
+export const ZOOM_MAX = 64;
 const REGIONS_OUTRE_MER = new Set(["01", "02", "03", "04", "06"]);
 
 /** d3-geo attend des anneaux extérieurs dans le sens horaire : un polygone décrit dans
@@ -90,8 +99,9 @@ const FRONTIERES_REGIONS = mesh(
   (a, b) => a !== b && !REGIONS_OUTRE_MER.has((a.properties as ProprietesRegion).code),
 );
 
-function projectionPour(outreMer: boolean): GeoProjection {
-  return outreMer ? geoMercator() : geoConicConformal().parallels([44, 49]).rotate([-3, 0]);
+/** Projection de Mercator, commune aux tracés et aux tuiles du fond de plan (Web Mercator). */
+function projectionPour(): GeoProjection {
+  return geoMercator();
 }
 
 /** Générateur de tracés qui ignore les points distants de moins de `seuil` pixels : le
@@ -99,6 +109,7 @@ function projectionPour(outreMer: boolean): GeoProjection {
 function traceur(
   projection: GeoProjection,
   seuil = SEUIL_PIXELS,
+  decimales = 1,
 ): (objet: GeoPermissibleObjects) => string {
   const allege = {
     stream(sortie: GeoStream): GeoStream {
@@ -143,8 +154,8 @@ function traceur(
       });
     },
   };
-  const chemin = geoPath(allege).digits(1);
-  return (objet) => compacter(chemin(objet) ?? "");
+  const chemin = geoPath(allege).digits(decimales);
+  return (objet) => compacter(chemin(objet) ?? "", decimales);
 }
 
 function cadrer(projection: GeoProjection, objet: GeoPermissibleObjects, zone: number[][]) {
@@ -176,6 +187,49 @@ export interface Situation {
   libelle: string;
   /** Mention des sources des contours. */
   source: "communes" | "ign";
+  /** Paramètres de la projection de Mercator (x = tx + k·λ, y = ty − k·ln tan(π/4 + φ/2)),
+   * pour placer les tuiles du fond de plan ; null si la carte combine plusieurs projections
+   * (encart d'outre-mer). */
+  projection: { k: number; tx: number; ty: number } | null;
+  /** Cadre (unités du SVG) qui montre le territoire de l'organisation en grand. */
+  cadreCible: Encart;
+  /** Centre et niveau de zoom pour ouvrir le territoire dans une carte en ligne. */
+  lien: { lon: number; lat: number; zoom: number };
+}
+
+const arrondir = (valeur: number, decimales = 1) => {
+  const facteur = 10 ** decimales;
+  return Math.round(valeur * facteur) / facteur;
+};
+
+function parametres(projection: GeoProjection): Situation["projection"] {
+  const [tx, ty] = projection.translate();
+  return { k: arrondir(projection.scale(), 3), tx: arrondir(tx, 3), ty: arrondir(ty, 3) };
+}
+
+/** Cadre du territoire projeté, avec une marge, au format du SVG (4:3), sans dépasser
+ * l'agrandissement maximal. */
+function cadrerCible(projection: GeoProjection, objet: GeoPermissibleObjects): Encart {
+  const [[x0, y0], [x1, y1]] = geoPath(projection).bounds(objet);
+  const largeurMin = LARGEUR / ZOOM_MAX;
+  let largeur = Math.max((x1 - x0) * 1.35, ((y1 - y0) * 1.35 * LARGEUR) / HAUTEUR, largeurMin);
+  largeur = Math.min(largeur, LARGEUR);
+  const hauteur = (largeur * HAUTEUR) / LARGEUR;
+  return {
+    x: arrondir((x0 + x1) / 2 - largeur / 2, 2),
+    y: arrondir((y0 + y1) / 2 - hauteur / 2, 2),
+    largeur: arrondir(largeur, 2),
+    hauteur: arrondir(hauteur, 2),
+  };
+}
+
+/** Centre géographique et niveau de zoom adapté à l'étendue du territoire. */
+function lienCarte(objet: GeoPermissibleObjects): Situation["lien"] {
+  const [lon, lat] = geoCentroid(objet);
+  const [[ouest], [est]] = geoBounds(objet);
+  const etendue = Math.max(est - ouest, 0.01);
+  const zoom = Math.min(16, Math.max(5, Math.floor(Math.log2(360 / (etendue * 1.6)))));
+  return { lon: arrondir(lon, 5), lat: arrondir(lat, 5), zoom };
 }
 
 /** Taille (en pixels) en dessous de laquelle un cercle de repérage entoure la commune. */
@@ -197,20 +251,19 @@ function situationCommune(org: OrganisationExport): Situation | null {
     properties: null,
     geometry: orienter({ type: "MultiPolygon", coordinates: org.contour }),
   };
-  const projection = cadrer(
-    projectionPour(REGIONS_OUTRE_MER.has(departement.properties.region)),
-    departement,
-    ZONE_PLEINE,
-  );
+  const projection = cadrer(projectionPour(), departement, ZONE_PLEINE);
   const tracer = traceur(projection);
   return {
     fond: tracer(departement),
     limites: "",
-    cible: tracer(commune),
+    cible: traceur(projection, SEUIL_DETAIL, DECIMALES_DETAIL)(commune),
     encart: null,
     repere: reperer(projection, commune),
     libelle: `Localisation de ${org.nom}, ${org.departement_nom ?? departement.properties.nom}`,
     source: "communes",
+    projection: parametres(projection),
+    cadreCible: cadrerCible(projection, commune),
+    lien: lienCarte(commune),
   };
 }
 
@@ -219,7 +272,7 @@ function situationDepartement(org: OrganisationExport): Situation | null {
   const region = departement ? REGIONS.get(departement.properties.region) : undefined;
   if (!departement || !region) return null;
   const outreMer = REGIONS_OUTRE_MER.has(region.properties.code);
-  const projection = cadrer(projectionPour(outreMer), region, ZONE_PLEINE);
+  const projection = cadrer(projectionPour(), region, ZONE_PLEINE);
   const tracer = traceur(projection, SEUIL_VUE_ETENDUE);
   const code = region.properties.code;
   const limites = mesh(
@@ -240,6 +293,9 @@ function situationDepartement(org: OrganisationExport): Situation | null {
       ? `Localisation du département ${departement.properties.nom}, région d'outre-mer`
       : `Localisation du département ${departement.properties.nom} dans la région ${region.properties.nom}`,
     source: "ign",
+    projection: parametres(projection),
+    cadreCible: cadrerCible(projection, departement),
+    lien: lienCarte(departement),
   };
 }
 
@@ -248,10 +304,8 @@ function situationRegion(org: OrganisationExport): Situation | null {
   if (!region) return null;
   const libelle = `Localisation de la région ${region.properties.nom} en France`;
   if (!REGIONS_OUTRE_MER.has(region.properties.code)) {
-    const tracer = traceur(
-      cadrer(projectionPour(false), REGIONS_METROPOLE, ZONE_PLEINE),
-      SEUIL_VUE_ETENDUE,
-    );
+    const projection = cadrer(projectionPour(), REGIONS_METROPOLE, ZONE_PLEINE);
+    const tracer = traceur(projection, SEUIL_VUE_ETENDUE);
     return {
       fond: tracer(REGIONS_METROPOLE),
       limites: tracer(FRONTIERES_REGIONS),
@@ -260,12 +314,15 @@ function situationRegion(org: OrganisationExport): Situation | null {
       repere: null,
       libelle,
       source: "ign",
+      projection: parametres(projection),
+      cadreCible: cadrerCible(projection, region),
+      lien: lienCarte(region),
     };
   }
   // Outre-mer : la France métropolitaine à droite, la région dans un encart à gauche
   const encart: Encart = { x: 8, y: HAUTEUR - 8 - 84, largeur: 96, hauteur: 84 };
   const metropole = traceur(
-    cadrer(projectionPour(false), REGIONS_METROPOLE, [
+    cadrer(projectionPour(), REGIONS_METROPOLE, [
       [encart.x + encart.largeur + 8, MARGE],
       [LARGEUR - MARGE, HAUTEUR - MARGE],
     ]),
@@ -278,11 +335,14 @@ function situationRegion(org: OrganisationExport): Situation | null {
   return {
     fond: metropole(REGIONS_METROPOLE),
     limites: metropole(FRONTIERES_REGIONS),
-    cible: traceur(cadrer(projectionPour(true), region, zoneEncart))(region),
+    cible: traceur(cadrer(projectionPour(), region, zoneEncart))(region),
     encart,
     repere: null,
     libelle,
     source: "ign",
+    projection: null,
+    cadreCible: { x: encart.x, y: encart.y, largeur: encart.largeur, hauteur: encart.hauteur },
+    lien: lienCarte(region),
   };
 }
 

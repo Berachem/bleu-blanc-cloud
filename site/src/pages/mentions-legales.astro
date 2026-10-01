@@ -1,7 +1,7 @@
 ---
 import Base from "../mises-en-page/Base.astro";
 import { DEMANDES, MENTIONS_LEGALES, SITE } from "../config";
-const { editeur, hebergeur, directeurPublication, licenceDonnees } = MENTIONS_LEGALES;
+const { editeur, hebergeur, directeurPublication, licenceDonnees, fondDePlan } = MENTIONS_LEGALES;
 const jours = DEMANDES.conservationCompteJours;
 const sujetDonnees = encodeURIComponent("Bleu Blanc Cloud — données personnelles");
 ---
@@ -84,6 +84,17 @@ const sujetDonnees = encodeURIComponent("Bleu Blanc Cloud — données personnel
           </td>
         </tr>
         <tr>
+          <th scope="row">Fond de plan IGN, seulement si vous l'activez sur une fiche</th>
+          <td data-libelle="Données">Adresse IP et zone de carte affichée (tuiles demandées), reçues par l'IGN</td>
+          <td data-libelle="Pourquoi">
+            Afficher le plan ou la photo aérienne demandés ; l'éditeur ne reçoit rien
+          </td>
+          <td data-libelle="Durée">
+            Selon les règles de l'IGN, opérateur public de la
+            <a href={fondDePlan.site}>Géoplateforme</a>
+          </td>
+        </tr>
+        <tr>
           <th scope="row">Demande d'analyse par ticket Codeberg</th>
           <td data-libelle="Données">Nom du compte Codeberg, domaine demandé, dates de traitement</td>
           <td data-libelle="Pourquoi">
@@ -136,12 +147,23 @@ const sujetDonnees = encodeURIComponent("Bleu Blanc Cloud — données personnel
     <h2 id="cookies">Cookies et stockage local</h2>
     <p>
       Ce site ne dépose <strong>aucun cookie</strong>, n'utilise aucun traceur publicitaire ni
-      aucune mesure d'audience, et ne charge aucune ressource externe (polices, scripts et cartes
-      sont servis par le site lui-même). Seule exception : si vous changez le thème clair ou
-      sombre, ce choix est mémorisé dans votre navigateur (stockage local, clé
-      <code>bbc-theme</code>). Il ne quitte jamais votre appareil ; ce stockage, demandé
-      expressément par vous, ne nécessite pas de consentement. Vous pouvez l'effacer à tout
-      moment depuis les réglages de votre navigateur.
+      aucune mesure d'audience. Par défaut, il ne charge aucune ressource externe : polices,
+      scripts et cartes sont servis par le site lui-même.
+    </p>
+    <p>
+      Seule exception, à votre initiative : sur la carte de situation d'une fiche, les fonds
+      « Plan IGN » et « Photo aérienne » sont chargés depuis les serveurs de l'IGN
+      ({fondDePlan.operateur}). Votre navigateur leur transmet alors votre adresse IP et la zone
+      affichée ; aucun cookie n'est déposé. Avec le fond « Contours », proposé par défaut, aucune
+      requête ne part vers un tiers.
+    </p>
+    <p>
+      Deux préférences peuvent être mémorisées dans votre navigateur (stockage local) : le thème
+      clair ou sombre (clé <code>bbc-theme</code>) et le fond de carte choisi (clé
+      <code>bbc-fond-carte</code>, effacée quand vous revenez au fond « Contours »). Elles ne
+      quittent jamais votre appareil ; ce stockage, demandé expressément par vous, ne nécessite
+      pas de consentement. Vous pouvez l'effacer à tout moment depuis les réglages de votre
+      navigateur.
     </p>
 
     <h2 id="licences">Propriété intellectuelle et licences</h2>
@@ -161,8 +183,9 @@ const sujetDonnees = encodeURIComponent("Bleu Blanc Cloud — données personnel
       </li>
       <li>Police Luciole : licence CC-BY 4.0.</li>
       <li>
-        Contours administratifs et données des organisations : IGN et administrations sources,
-        Licence Ouverte (Etalab 2.0). Le détail figure dans les <a href="/a-propos/">crédits</a>.
+        Contours administratifs, fonds de plan (Plan IGN, photographies aériennes) et données
+        des organisations : IGN et administrations sources, Licence Ouverte (Etalab 2.0). Le
+        détail figure dans les <a href="/a-propos/">crédits</a>.
       </li>
       <li>
         Les marques et logos cités (dont celui de Mistral AI) appartiennent à leurs titulaires

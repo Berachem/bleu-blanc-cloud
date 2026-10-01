@@ -2176,14 +2176,20 @@ select:focus {
   background: var(--situation-cadre);
   box-shadow: var(--ombre-forte);
 }
-.carte-situation svg {
+.carte-situation__cadre > svg {
   display: block;
   width: 100%;
   height: 100%;
+  /* Défilement vertical de la page conservé ; pincement et glisser gérés par la carte */
+  touch-action: pan-y;
 }
-.carte-situation path {
+.carte-situation__cadre > svg path,
+.carte-situation__cadre > svg circle,
+.carte-situation__cadre > svg rect {
   stroke-linejoin: round;
   stroke-linecap: round;
+  /* Épaisseur des traits constante quel que soit le zoom */
+  vector-effect: non-scaling-stroke;
 }
 .situation-fond {
   fill: var(--situation-terre);
@@ -2231,6 +2237,185 @@ select:focus {
   margin-top: 0.6rem;
   font-size: 0.8rem;
   color: var(--texte-secondaire);
+}
+
+/* Zoom (lib/carte-situation.ts) : commandes affichées seulement avec JavaScript */
+.carte-situation--zoomee .carte-situation__cadre > svg {
+  touch-action: none;
+  cursor: grab;
+}
+.carte-situation--glisse .carte-situation__cadre > svg {
+  cursor: grabbing;
+}
+.carte-situation--zoom-fort .situation-repere {
+  display: none;
+}
+.carte-situation__commandes {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: none;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.carte-situation--interactive .carte-situation__commandes {
+  display: flex;
+}
+.carte-situation__commandes button {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--bordure-forte);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--texte);
+  box-shadow: var(--ombre);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.carte-situation__commandes button:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.carte-situation__commandes button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.carte-situation__aide,
+.carte-situation__erreur {
+  position: absolute;
+  bottom: 0.8rem;
+  left: 50%;
+  z-index: 2;
+  margin: 0;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgb(10 15 36 / 82%);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.carte-situation__aide {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.carte-situation__aide--visible {
+  opacity: 1;
+}
+.carte-situation__erreur {
+  display: none;
+}
+.carte-situation--fond-erreur .carte-situation__erreur {
+  display: block;
+}
+
+/* Fond de plan IGN actif : territoire en surimpression, contours toujours lisibles */
+.carte-situation--fond .carte-situation__cadre {
+  background: #e8eaef;
+}
+.carte-situation--fond .situation-fond {
+  fill: none;
+  stroke: rgb(14 19 48 / 60%);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+.carte-situation--fond .situation-limites {
+  stroke: rgb(14 19 48 / 45%);
+}
+.carte-situation--fond .situation-cible {
+  fill-opacity: 0.3;
+  stroke: #0e1330;
+  stroke-width: 2.5;
+}
+.carte-situation--fond .situation-repere {
+  stroke: #0e1330;
+  stroke-width: 2;
+}
+.carte-situation__attribution {
+  display: none;
+}
+.carte-situation--fond .carte-situation__attribution {
+  display: inline;
+}
+
+/* Choix du fond et liens vers les cartes en ligne */
+.carte-situation__options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6rem 1.2rem;
+  margin-top: 0.8rem;
+}
+.choix-fond {
+  display: none;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.carte-situation--interactive .choix-fond {
+  display: block;
+}
+.choix-fond legend {
+  margin-bottom: 0.35rem;
+  padding: 0;
+  color: var(--texte-secondaire);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.choix-fond__options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  padding: 0.25rem;
+  border: 1px solid var(--bordure);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--ombre);
+}
+.choix-fond__options label {
+  position: relative;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  color: var(--texte-secondaire);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.choix-fond__options input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.choix-fond__options label:has(input:checked) {
+  background: var(--bleu-france);
+  color: #fff;
+}
+.choix-fond__options label:has(input:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.choix-fond__note {
+  max-width: 27rem;
+  margin: 0.4rem 0 0;
+  color: var(--texte-secondaire);
+  font-size: 0.75rem;
+}
+.carte-situation__liens {
+  margin: 0;
+  color: var(--texte-secondaire);
+  font-size: 0.85rem;
 }
 .illustration-organisation {
   position: relative;
