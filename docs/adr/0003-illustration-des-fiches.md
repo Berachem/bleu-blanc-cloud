@@ -1,7 +1,7 @@
 # ADR-0003 : illustration des fiches — des photos Wikimedia à la carte de situation
 
 - **Statut** : acceptée (révisée : la carte de situation remplace les photos ; complétée par
-  l'[ADR-0005](0005-zoom-et-fond-de-plan-ign.md) : zoom et fond de plan IGN à la demande)
+  l'[ADR-0005](0005-zoom-et-fond-de-plan-ign.md) : zoom et fond de plan IGN)
 - **Date** : 2026-09-29 (photos) · révision 2026-09-29 (carte de situation)
 
 ## Contexte

@@ -84,10 +84,12 @@ const sujetDonnees = encodeURIComponent("Bleu Blanc Cloud — données personnel
           </td>
         </tr>
         <tr>
-          <th scope="row">Fond de plan IGN, seulement si vous l'activez sur une fiche</th>
+          <th scope="row">Carte de situation d'une fiche (fond de plan IGN)</th>
           <td data-libelle="Données">Adresse IP et zone de carte affichée (tuiles demandées), reçues par l'IGN</td>
           <td data-libelle="Pourquoi">
-            Afficher le plan ou la photo aérienne demandés ; l'éditeur ne reçoit rien
+            Afficher le plan ou la photo aérienne sous la carte (intérêt légitime : situer le
+            territoire ; les tuiles de toute la France ne peuvent pas être hébergées par le
+            site). L'éditeur ne reçoit rien. Le fond « Contours » supprime cette transmission
           </td>
           <td data-libelle="Durée">
             Selon les règles de l'IGN, opérateur public de la
@@ -147,20 +149,20 @@ const sujetDonnees = encodeURIComponent("Bleu Blanc Cloud — données personnel
     <h2 id="cookies">Cookies et stockage local</h2>
     <p>
       Ce site ne dépose <strong>aucun cookie</strong>, n'utilise aucun traceur publicitaire ni
-      aucune mesure d'audience. Par défaut, il ne charge aucune ressource externe : polices,
-      scripts et cartes sont servis par le site lui-même.
+      aucune mesure d'audience. Polices, scripts et tracés des cartes sont servis par le site
+      lui-même.
     </p>
     <p>
-      Seule exception, à votre initiative : sur la carte de situation d'une fiche, les fonds
-      « Plan IGN » et « Photo aérienne » sont chargés depuis les serveurs de l'IGN
+      Seule exception : sur la carte de situation d'une fiche, le fond de plan (« Plan IGN » par
+      défaut, ou « Photo aérienne ») est chargé depuis les serveurs de l'IGN
       ({fondDePlan.operateur}). Votre navigateur leur transmet alors votre adresse IP et la zone
-      affichée ; aucun cookie n'est déposé. Avec le fond « Contours », proposé par défaut, aucune
-      requête ne part vers un tiers.
+      affichée ; aucun cookie n'est déposé. Choisissez le fond « Contours » sous la carte : plus
+      aucune requête ne part vers un tiers, et ce choix est mémorisé pour les fiches suivantes.
     </p>
     <p>
       Deux préférences peuvent être mémorisées dans votre navigateur (stockage local) : le thème
       clair ou sombre (clé <code>bbc-theme</code>) et le fond de carte choisi (clé
-      <code>bbc-fond-carte</code>, effacée quand vous revenez au fond « Contours »). Elles ne
+      <code>bbc-fond-carte</code>, effacée quand vous revenez au fond « Plan IGN »). Elles ne
       quittent jamais votre appareil ; ce stockage, demandé expressément par vous, ne nécessite
       pas de consentement. Vous pouvez l'effacer à tout moment depuis les réglages de votre
       navigateur.

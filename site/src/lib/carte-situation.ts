@@ -1,12 +1,12 @@
-// Carte de situation des fiches : zoom, déplacement et fond de plan IGN à la demande.
+// Carte de situation des fiches : zoom, déplacement et fond de plan IGN.
 // JavaScript maison, sans bibliothèque ; sans JavaScript, la carte reste le SVG statique.
 //
 // - Zoom : boutons, Ctrl (ou ⌘) + molette, pincement, double-clic ; déplacement au glisser
 //   une fois la carte agrandie. Le zoom modifie la « viewBox » du SVG : le tracé reste net.
-// - Fond de plan : aucune tuile n'est chargée tant que le visiteur n'a pas choisi « Plan IGN »
-//   ou « Photo aérienne ». Les tuiles WMTS de la Géoplateforme de l'IGN (projection Web
-//   Mercator) sont alors placées sous les tracés, projetés eux aussi en Mercator au build
-//   (paramètres k, tx, ty dans data-projection). Choix mémorisé dans le navigateur.
+// - Fond de plan : « Plan IGN » par défaut, « Photo aérienne » ou « Contours » (aucune requête
+//   externe). Les tuiles WMTS de la Géoplateforme de l'IGN (projection Web Mercator) sont
+//   placées sous les tracés, projetés eux aussi en Mercator au build (paramètres k, tx, ty
+//   dans data-projection). Choix mémorisé dans le navigateur s'il diffère du défaut.
 
 const ESPACE_SVG = "http://www.w3.org/2000/svg";
 const CLE_FOND = "bbc-fond-carte";
@@ -16,6 +16,7 @@ const TAILLE_TUILE = 256;
 const TUILES_MAX = 160;
 
 type Fond = "contours" | "plan" | "photo";
+const FOND_DEFAUT: Fond = "plan";
 const COUCHES: Record<Exclude<Fond, "contours">, { couche: string; format: string; zoomMax: number }> = {
   plan: { couche: "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2", format: "image/png", zoomMax: 18 },
   photo: { couche: "ORTHOIMAGERY.ORTHOPHOTOS", format: "image/jpeg", zoomMax: 19 },
@@ -31,15 +32,15 @@ interface Vue {
 function lireFond(): Fond {
   try {
     const valeur = localStorage.getItem(CLE_FOND);
-    return valeur === "plan" || valeur === "photo" ? valeur : "contours";
+    return valeur === "contours" || valeur === "plan" || valeur === "photo" ? valeur : FOND_DEFAUT;
   } catch {
-    return "contours";
+    return FOND_DEFAUT;
   }
 }
 
 function ecrireFond(fond: Fond): void {
   try {
-    if (fond === "contours") localStorage.removeItem(CLE_FOND);
+    if (fond === FOND_DEFAUT) localStorage.removeItem(CLE_FOND);
     else localStorage.setItem(CLE_FOND, fond);
   } catch {
     // Stockage indisponible (navigation privée…) : le choix vaut pour la page seulement

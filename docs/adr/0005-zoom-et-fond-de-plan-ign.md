@@ -1,6 +1,6 @@
-# ADR-0005 : zoom et fond de plan IGN à la demande sur la carte de situation
+# ADR-0005 : zoom et fond de plan IGN sur la carte de situation
 
-- **Statut** : acceptée
+- **Statut** : acceptée (révisée : « Plan IGN » devient le fond par défaut, voir l'historique)
 - **Date** : 2026-10-01
 - **Complète** : [ADR-0003](0003-illustration-des-fiches.md) (carte de situation des fiches)
 
@@ -24,7 +24,6 @@ Options étudiées :
 | Tuiles OpenStreetMap, Carto, Mapbox, Google | Serveurs hors de France ou soumis au Cloud Act, conditions d'usage restrictives (OSM interdit l'usage intensif de ses serveurs de tuiles) |
 | Tuiles hébergées par le site (export d'images) | Plusieurs centaines de Mo à plusieurs Go pour la France entière jusqu'au niveau de la rue, intenable sur Codeberg Pages |
 | Bibliothèque cartographique (Leaflet, MapLibre, OpenLayers) | 40 à 250 Ko de JavaScript pour un besoin limité ; le tracé existant est déjà en SVG |
-| Fond IGN chargé dès l'affichage | Requête vers un tiers pour chaque visiteur, sans qu'il l'ait demandé |
 
 ## Décision
 
@@ -42,13 +41,14 @@ Options étudiées :
    paramètres de la projection (`k`, `tx`, `ty`) sont exportés dans `data-projection` ; le
    script en déduit les tuiles à afficher. À l'échelle d'un département ou d'une région, la
    différence de forme avec Lambert est imperceptible.
-4. **Fond de plan IGN à la demande** : un sélecteur « Fond de carte » propose *Contours*
-   (par défaut), *Plan IGN* et *Photo aérienne*. Les deux derniers chargent les tuiles WMTS de
-   la **Géoplateforme de l'IGN** (`data.geopf.fr`, couches `GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2`
-   et `ORTHOIMAGERY.ORTHOPHOTOS`, sans clé, Licence Ouverte Etalab 2.0, attribution
-   « IGN – Géoplateforme » affichée sous la carte). **Aucune tuile n'est demandée tant que le
-   visiteur n'a pas fait ce choix.** Le choix est mémorisé dans le stockage local
-   (`bbc-fond-carte`), effacé au retour sur *Contours* ; jamais de cookie.
+4. **Fond de plan IGN, « Plan IGN » par défaut** : un sélecteur « Fond de carte » propose
+   *Plan IGN* (par défaut), *Photo aérienne* et *Contours*. Les deux premiers chargent les
+   tuiles WMTS de la **Géoplateforme de l'IGN** (`data.geopf.fr`, couches
+   `GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2` et `ORTHOIMAGERY.ORTHOPHOTOS`, sans clé, Licence
+   Ouverte Etalab 2.0, attribution « IGN – Géoplateforme » affichée sous la carte).
+   *Contours* n'appelle aucun service extérieur. Un choix différent du défaut est mémorisé
+   dans le stockage local (`bbc-fond-carte`) ; jamais de cookie. Sans JavaScript, la carte
+   reste le SVG des contours et aucune tuile n'est demandée.
 5. **Liens sortants** « Voir sur Géoportail (IGN) · OpenStreetMap », centrés sur le territoire,
    pour une exploration complète hors du site.
 6. Cartes de région d'outre-mer présentées en encart (projection propre) : sans projection
@@ -56,15 +56,16 @@ Options étudiées :
 
 ## Conséquences
 
-- **Par défaut, rien ne change pour le visiteur** : aucune requête externe, aucun cookie.
-  Le script `verifier-requetes.mjs` le contrôle sur toutes les pages, puis active le fond
-  « Plan IGN » sur une fiche (tuiles simulées) et vérifie que seules des requêtes vers
-  `data.geopf.fr` partent, sans cookie.
-- **Exception assumée et documentée** à la règle « aucune ressource externe » : le visiteur
-  qui active le fond de plan transmet son adresse IP et la zone affichée à l'IGN,
-  établissement public français. Les mentions légales le précisent (tableau des traitements
-  et section « Cookies et stockage local ») ; la règle correspondante de `docs/CLAUDE.md` est
-  nuancée en conséquence.
+- **Exception assumée et documentée** à la règle « aucune ressource externe » : sur les
+  fiches dotées d'une carte de situation, le navigateur du visiteur transmet par défaut son
+  adresse IP et la zone affichée à l'IGN, établissement public français. Les mentions
+  légales le précisent (tableau des traitements et section « Cookies et stockage local ») ;
+  la règle correspondante de `docs/CLAUDE.md` est nuancée en conséquence. Toutes les autres
+  pages restent sans aucune requête externe.
+- **Contrôle automatique** : `verifier-requetes.mjs` (tuiles simulées, sans réseau) vérifie
+  qu'aucune page ne contacte de tiers, à l'exception des fiches avec carte qui ne doivent
+  appeler que `data.geopf.fr` ; puis que le choix « Contours » est mémorisé et supprime
+  toute requête externe après rechargement. Jamais de cookie.
 - **Dogfooding** : le scan du site par Bleu Blanc Cloud analyse le HTML publié, qui ne
   contient aucune URL de tuile ; et même détecté, l'IGN est un fournisseur de niveau A. La
   note A du site n'est pas affectée.
@@ -73,5 +74,16 @@ Options étudiées :
 - **Mise à jour des contours** : la nouvelle tolérance ne s'applique qu'aux contours
   téléchargés après ce changement. Sur un serveur déjà installé, lancer une fois
   `uv run bbcloud cibles contours --forcer` puis republier (voir le guide de déploiement).
-- **Disponibilité** : si la Géoplateforme ne répond pas, un message discret s'affiche et les
-  contours restent lisibles ; le site ne dépend pas de l'IGN pour fonctionner.
+- **Disponibilité** : si la Géoplateforme ne répond pas (panne, bloqueur, réseau filtré), un
+  message discret s'affiche et les contours restent lisibles ; le site ne dépend pas de l'IGN
+  pour fonctionner.
+
+## Historique
+
+- **2026-10-01, première version** : *Contours* par défaut, fond IGN chargé seulement sur
+  choix explicite du visiteur, pour qu'aucune page ne contacte de tiers sans action de sa
+  part.
+- **2026-10-01, révision** : *Plan IGN* par défaut, placé en premier dans le sélecteur, à la
+  demande de l'auteur : le plan rend la carte nettement plus lisible et informative, et
+  l'IGN est un opérateur public français, sans traceur ni cookie. Le choix *Contours* reste
+  proposé et mémorisé pour qui ne veut aucune requête externe.

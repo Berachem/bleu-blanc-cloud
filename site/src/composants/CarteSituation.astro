@@ -1,7 +1,7 @@
 ---
 // Carte de situation de la fiche (SVG calculé au build, voir lib/situation.ts), avec zoom et
-// fond de plan IGN à la demande (lib/carte-situation.ts). Fiche sur demande ou contour
-// manquant : illustration maison à la place.
+// fond de plan IGN, « Plan IGN » par défaut (lib/carte-situation.ts). Sans JavaScript, le SVG
+// seul. Fiche sur demande ou contour manquant : illustration maison à la place.
 import EtoilesEurope from "./EtoilesEurope.astro";
 import { carteSituation, HAUTEUR, LARGEUR, ZOOM_MAX } from "../lib/situation";
 import type { OrganisationExport } from "../lib/types";
@@ -88,13 +88,13 @@ const icone = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", strok
           <fieldset class="choix-fond">
             <legend>Fond de carte</legend>
             <div class="choix-fond__options">
-              <label><input type="radio" name="fond-carte" value="contours" checked /> Contours</label>
-              <label><input type="radio" name="fond-carte" value="plan" /> Plan IGN</label>
+              <label><input type="radio" name="fond-carte" value="plan" checked /> Plan IGN</label>
               <label><input type="radio" name="fond-carte" value="photo" /> Photo aérienne</label>
+              <label><input type="radio" name="fond-carte" value="contours" /> Contours</label>
             </div>
             <p class="choix-fond__note">
-              Plan et photo sont chargés depuis les serveurs de l'IGN, seulement si vous les
-              choisissez (<a href="/mentions-legales/#cookies">détails</a>).
+              Plan et photo sont chargés depuis les serveurs de l'IGN ; « Contours » n'appelle
+              aucun service extérieur (<a href="/mentions-legales/#cookies">détails</a>).
             </p>
           </fieldset>
         )}
