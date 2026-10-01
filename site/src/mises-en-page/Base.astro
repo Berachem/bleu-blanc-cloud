@@ -144,6 +144,10 @@ const imagePartage = new URL(`${IMAGE_PARTAGE.chemin}?v=${IMAGE_PARTAGE.empreint
       <slot />
     </main>
     <FenetreAnalyse />
+    <!-- Retour en haut de page, affiché par JavaScript après un écran de défilement -->
+    <a class="remonter" href="#contenu" data-remonter aria-label="Remonter en haut de la page" title="Remonter en haut">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"></path></svg>
+    </a>
     <footer class="pied">
       <div class="conteneur">
         <div>

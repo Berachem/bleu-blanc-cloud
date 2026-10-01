@@ -268,12 +268,70 @@ function lancerAnimations(): void {
   document.addEventListener("astro:before-swap", () => observateur.disconnect(), { once: true });
 }
 
+// Défilement : ombre sous l'en-tête (collant sur téléphone et tablette) dès que la page
+// défile, et bouton « Remonter en haut » affiché au-delà d'un écran de défilement. Le bouton
+// ramène en haut et place le focus sur le logo, pour la navigation au clavier.
+function brancherDefilement(): void {
+  const entete = document.querySelector<HTMLElement>(".entete");
+  const bouton = document.querySelector<HTMLAnchorElement>("[data-remonter]");
+  const arret = new AbortController();
+  const { signal } = arret;
+  let demande = 0;
+  const mettreAJour = () => {
+    demande = 0;
+    const position = window.scrollY;
+    entete?.classList.toggle("entete--defilee", position > 4);
+    bouton?.classList.toggle("remonter--visible", position > Math.max(400, window.innerHeight));
+  };
+  const planifier = () => {
+    if (!demande) demande = requestAnimationFrame(mettreAJour);
+  };
+  window.addEventListener("scroll", planifier, { passive: true, signal });
+  window.addEventListener("resize", planifier, { passive: true, signal });
+  // Clavier : un élément du contenu qui reçoit le focus ne reste pas caché sous l'en-tête
+  // collant (Maj + Tab en remontant : le navigateur ne défile pas si l'élément est « visible »
+  // en haut de l'écran). Vérifié après le défilement propre au navigateur.
+  document.addEventListener(
+    "focusin",
+    (evenement) => {
+      const cible = evenement.target as HTMLElement;
+      if (!entete || !cible.closest("main, .pied")) return;
+      requestAnimationFrame(() => {
+        if (getComputedStyle(entete).position !== "sticky") return;
+        const bas = entete.getBoundingClientRect().bottom;
+        const haut = cible.getBoundingClientRect().top;
+        if (haut < bas) window.scrollBy({ top: haut - bas - 12, behavior: "instant" });
+      });
+    },
+    { signal },
+  );
+  bouton?.addEventListener(
+    "click",
+    (evenement) => {
+      evenement.preventDefault();
+      window.scrollTo({ top: 0, behavior: mouvementReduit() ? "auto" : "smooth" });
+      document.querySelector<HTMLElement>(".logo")?.focus({ preventScroll: true });
+    },
+    { signal },
+  );
+  mettreAJour();
+  document.addEventListener(
+    "astro:before-swap",
+    () => {
+      arret.abort();
+      cancelAnimationFrame(demande);
+    },
+    { once: true },
+  );
+}
+
 document.addEventListener("astro:page-load", () => {
   brancherBascule();
   brancherMenu();
   brancherRecherche();
   brancherFenetreAnalyse();
   brancherLienRapport();
+  brancherDefilement();
   lancerAnimations();
 });
 
