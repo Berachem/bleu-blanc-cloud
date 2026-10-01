@@ -1,6 +1,7 @@
 # ADR-0003 : illustration des fiches — des photos Wikimedia à la carte de situation
 
-- **Statut** : acceptée (révisée : la carte de situation remplace les photos)
+- **Statut** : acceptée (révisée : la carte de situation remplace les photos ; complétée par
+  l'[ADR-0005](0005-zoom-et-fond-de-plan-ign.md) : zoom et fond de plan IGN à la demande)
 - **Date** : 2026-09-29 (photos) · révision 2026-09-29 (carte de situation)
 
 ## Contexte
@@ -40,8 +41,9 @@ Chaque fiche affiche une **carte de situation** en SVG, calculée **au build** a
 Sources des contours, toutes sous **Licence Ouverte Etalab 2.0** :
 
 - communes : API Découpage administratif (`geo.api.gouv.fr`, tracés IGN), un contour demandé
-  **par code INSEE lors de l'import des cibles**, simplifié (Douglas-Peucker, ≈ 100 m) et
-  stocké en base ; seuls les contours manquants sont redemandés ;
+  **par code INSEE lors de l'import des cibles**, simplifié (Douglas-Peucker, ≈ 100 m, puis
+  ≈ 20 m depuis l'[ADR-0005](0005-zoom-et-fond-de-plan-ign.md)) et stocké en base ; seuls les
+  contours manquants sont redemandés ;
 - départements et régions : IGN Admin Express COG via france-geojson, la source déjà utilisée
   pour la carte de France ; fond préparé une fois (`npm run carte`), régions obtenues par
   fusion des départements (frontières identiques), simplification relative à la taille de

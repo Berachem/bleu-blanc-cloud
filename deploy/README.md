@@ -473,6 +473,7 @@ Le code se modifie uniquement dans le dépôt GitHub : le conteneur récupère c
 | Ajout d'un hébergeur non identifié | compléter `fournisseurs.yaml` (avec sources) à partir de `bbcloud referentiels inconnus` ; les réseaux de transit se déclarent dans `transitaires.yaml`, jamais comme fournisseurs |
 | Application d'un référentiel mis à jour sans nouveau scan | automatique via `bbcloud-maj-auto` ; à la main : `uv run bbcloud scores recalculer --dry-run`, puis sans `--dry-run`, puis `uv run bbcloud publier`. Les rapports IA des fiches modifiées sont retirés jusqu'au prochain `rapports generer` |
 | Poids encore inconnu de l'observatoire | `uv run bbcloud scores couverture` |
+| Contours de communes plus détaillés (après un changement de la simplification, par exemple l'ADR-0005) | `su - bbcloud -c 'cd /opt/bleu-blanc-cloud/scanner && uv run bbcloud cibles contours --forcer && uv run bbcloud publier'` : retélécharge tous les contours depuis `geo.api.gouv.fr` (une requête par commune), puis republie |
 | Modification de la méthodologie | nouvelle version dans `analyse/score.py` et entrée dans `docs/methodologie.md` |
 | Modification des consignes IA | incrémenter `VERSION_INVITE` dans `ia/invites.py` (rapports régénérés) |
 | Mise à jour immédiate du code | `systemctl start bbcloud-maj-auto.service` |
@@ -538,5 +539,7 @@ Le code se modifie uniquement dans le dépôt GitHub : le conteneur récupère c
 | Étiquette `erreur` | erreur technique (site injoignable, publication impossible) : nouvel essai à chaque passage, trois au maximum, puis fermeture motivée. Cause : `journalctl -u bbcloud-demandes -p warning`. |
 
 ### Nettoyage d'anciennes versions
+
+Depuis l'ADR-0005, les contours de communes sont simplifiés à ≈ 20 m au lieu de ≈ 100 m. Sur un serveur installé avant ce changement, les contours déjà en base restent grossiers au zoom : les retélécharger une fois (section 12, « Contours de communes plus détaillés »).
 
 Les photos Wikimedia des premières versions ne sont plus utilisées. Suppression facultative, après sauvegarde : `rm -rf /opt/bleu-blanc-cloud/donnees/photos` et `sqlite3 /opt/bleu-blanc-cloud/donnees/bleublanccloud.db "DROP TABLE IF EXISTS photos"`.

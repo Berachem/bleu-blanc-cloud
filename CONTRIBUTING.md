@@ -66,7 +66,7 @@ Toute modification des règles de calcul du score crée une **nouvelle version**
 
 ### Site
 
-- **Aucune ressource externe** (police, script, image, carte), aucun cookie, aucun traceur.
+- **Aucune ressource externe** (police, script, image, carte), aucun cookie, aucun traceur. Seule exception, décrite dans l'[ADR-0005](docs/adr/0005-zoom-et-fond-de-plan-ign.md) : le fond de plan IGN des cartes de situation, chargé uniquement si le visiteur le choisit.
 - Pas de DSFR, de police ou de logo Marianne, ni de « gouv » dans les noms : le site ne doit jamais ressembler à un site officiel de l'État ou de l'Union européenne.
 - Accessibilité visée : RGAA / WCAG 2.1 AA (contrastes, focus visible, textes alternatifs).
 - Ton factuel : le score décrit une dépendance, pas une faute.

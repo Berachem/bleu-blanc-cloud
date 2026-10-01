@@ -34,9 +34,9 @@ Bleu Blanc Cloud rend cette dépendance **visible, mesurable et vérifiable**, o
 - **Attribution sourcée** : 158 fournisseurs, 116 règles de détection de services (mesure d'audience, polices, vidéos, cartes, captchas, suites bureautiques, envoi d'e-mails…) et 55 alternatives européennes, chaque fait étant accompagné d'au moins une source.
 - **Score de 0 à 100 et note de A à E** selon une méthodologie publique et versionnée ; chaque point retiré est justifié par un constat et sa preuve.
 - **Rapports rédigés par Mistral** pour les décideurs : synthèse, risques et plan de migration limité aux alternatives du référentiel. L'IA ne calcule jamais le score ; chaque texte généré est signalé comme tel.
-- **Site 100 % statique** : carte de France par département, classements filtrables, fiche détaillée par organisation, recherche instantanée, mode sombre, accessibilité (RGAA / WCAG 2.1 AA visés).
+- **Site 100 % statique** : carte de France par département, classements filtrables, fiche détaillée par organisation avec carte de situation zoomable, recherche instantanée, mode sombre, accessibilité (RGAA / WCAG 2.1 AA visés).
 - **Analyses sur demande** : tout visiteur peut faire analyser son site via un ticket Codeberg, traité par le serveur sans aucun port entrant.
-- **Cohérent avec son sujet** : aucun cookie, aucun traceur, aucune ressource externe ; hébergement sur Codeberg Pages (Allemagne), zone DNS chez OVHcloud (France) ; le site obtient la note A sur son propre scan.
+- **Cohérent avec son sujet** : aucun cookie, aucun traceur, aucune ressource externe par défaut (le fond de plan IGN des cartes de situation n'est chargé qu'à la demande du visiteur) ; hébergement sur Codeberg Pages (Allemagne), zone DNS chez OVHcloud (France) ; le site obtient la note A sur son propre scan.
 
 ![Fiche d'une organisation (données de démonstration fictives)](docs/images/fiche.png)
 

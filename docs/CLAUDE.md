@@ -121,7 +121,7 @@ Serveur Proxmox (domicile) — conteneur LXC Debian 12
 |---|---|
 | Framework | Astro (sortie statique), TypeScript |
 | Style | CSS maison avec variables (pas de framework CSS externe) |
-| Carte | SVG des départements généré **au build** avec `d3-geo` (aucune tuile, aucune lib cartographique côté client) |
+| Carte | SVG des départements généré **au build** avec `d3-geo` (aucune lib cartographique côté client ; carte de situation zoomable, fond de plan IGN uniquement à la demande du visiteur, ADR-0005) |
 | Interactions | JavaScript vanilla minimal (infobulles, recherche, filtres) |
 | Types | Types TypeScript générés depuis les schémas JSON exportés par pydantic (`json-schema-to-typescript`) |
 
@@ -417,7 +417,7 @@ class RapportIA(BaseModel):
 - **Mobile d'abord**, responsive.
 - **Accessibilité** WCAG 2.1 AA / RGAA : contrastes vérifiés (le jaune n'est jamais utilisé pour du texte sur fond blanc), focus visible, textes alternatifs, carte doublée d'un tableau.
 - **Ton** factuel et pédagogique, jamais accusateur : parler de « dépendance » et de « pistes », pas de « mauvais élèves ».
-- **Aucune ressource externe, aucun cookie, aucun traceur.** Mesure d'audience : aucune en v1 (Matomo auto-hébergé éventuellement plus tard).
+- **Aucune ressource externe, aucun cookie, aucun traceur.** Mesure d'audience : aucune en v1 (Matomo auto-hébergé éventuellement plus tard). Seule exception, à l'initiative du visiteur : le fond de plan IGN (Géoplateforme, établissement public français) des cartes de situation, jamais chargé par défaut et mentionné dans les mentions légales (ADR-0005).
 - Performance : Lighthouse ≥ 95 sur toutes les catégories, page d'accueil < 200 Ko.
 
 ### Contrat de données entre scanner et site
