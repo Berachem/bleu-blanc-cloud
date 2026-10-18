@@ -26,6 +26,7 @@ from bleublanccloud.stockage.base import Base
 
 if TYPE_CHECKING:
     from bleublanccloud.analyse.couverture import CouvertureObservatoire
+    from bleublanccloud.statistiques import Compte, Statistiques
 
 app = typer.Typer(
     help="Bleu Blanc Cloud — observatoire de la souveraineté numérique.",
@@ -832,6 +833,199 @@ def demandes_lister() -> None:
             "oui" if case_cochee(ticket) else "non",
         )
     console.print(tableau)
+
+
+# --------------------------------------------------------------------------- #
+# Statistiques de l'observatoire
+# --------------------------------------------------------------------------- #
+
+_LIBELLES_ETATS = {
+    "A": "A",
+    "B": "B",
+    "C": "C",
+    "D": "D",
+    "inconnu": "Fournisseur inconnu",
+    "indisponible": "Données indisponibles",
+    "sans_objet": "Sans objet",
+}
+
+
+def _effectif(nombre: int, total: int) -> str:
+    return f"{nombre} ({_pourcentage(100 * nombre / total)})" if total else str(nombre)
+
+
+def _provisoires(compte: Compte) -> str:
+    """Notes provisoires d'un chiffre : nombre et part (affichage de « bbcloud stats »)."""
+    if not compte.nombre:
+        return "—"
+    return f"{compte.provisoires} ({_pourcentage(compte.part_provisoire)})"
+
+
+def _score(valeur: float | None) -> str:
+    return "—" if valeur is None else f"{valeur:.1f}".replace(".", ",")
+
+
+def afficher_statistiques(stats: Statistiques) -> None:
+    from bleublanccloud.analyse.score import LIBELLES
+
+    total = stats.ensemble.compte.nombre
+    console.print(
+        f"[bold]Chiffres clés de l'observatoire[/] — {total} organisation(s), dernier scan noté "
+        "de chacune"
+    )
+    if stats.premier_scan and stats.dernier_scan:
+        console.print(f"  Scans du {stats.premier_scan:%d/%m/%Y} au {stats.dernier_scan:%d/%m/%Y}")
+    console.print(
+        f"  Score moyen : [bold]{_score(stats.ensemble.score_moyen)}/100[/] "
+        f"(note {stats.ensemble.note_moyenne})"
+    )
+    console.print(
+        f"  Notes provisoires (plus de 30 % du poids non évalué) : "
+        f"{_provisoires(stats.ensemble.compte)}"
+    )
+    console.print(
+        "  [dim]Colonne « Provisoires » : notes provisoires parmi l'effectif de la ligne.[/]"
+    )
+
+    tableau = Table(title="Répartition des notes", expand=True)
+    tableau.add_column("Note")
+    tableau.add_column("Organisations", justify="right")
+    tableau.add_column("Provisoires", justify="right")
+    for note, compte in stats.notes.items():
+        tableau.add_row(note, _effectif(compte.nombre, total), _provisoires(compte))
+    console.print(tableau)
+
+    for categorie, etats in stats.niveaux.items():
+        tableau = Table(title=f"{LIBELLES[categorie]} : niveau retenu", expand=True)
+        tableau.add_column("Niveau")
+        tableau.add_column("Organisations", justify="right")
+        tableau.add_column("Provisoires", justify="right")
+        for etat, compte in etats.items():
+            if compte.nombre:
+                tableau.add_row(
+                    _LIBELLES_ETATS[etat], _effectif(compte.nombre, total), _provisoires(compte)
+                )
+        console.print(tableau)
+
+    titres: dict[str, str] = {"toutes": "toutes catégories notées"}
+    titres.update(LIBELLES.items())
+    for cle, liste in stats.fournisseurs.items():
+        if not liste:
+            continue
+        tableau = Table(title=f"Fournisseurs les plus présents ({titres[cle]})", expand=True)
+        tableau.add_column("Fournisseur")
+        tableau.add_column("Niveau", justify="center")
+        tableau.add_column("Organisations", justify="right")
+        tableau.add_column("Provisoires", justify="right")
+        for present in liste:
+            tableau.add_row(
+                present.nom,
+                _badge(present.niveau),
+                _effectif(present.compte.nombre, total),
+                _provisoires(present.compte),
+            )
+        console.print(tableau)
+
+    for titre, groupes in (
+        ("Moyenne par région", stats.regions),
+        ("Moyenne par tranche de population (communes)", stats.tranches_population),
+    ):
+        if not groupes:
+            continue
+        tableau = Table(title=titre, expand=True)
+        tableau.add_column("Groupe")
+        tableau.add_column("Organisations", justify="right")
+        tableau.add_column("Score moyen", justify="right")
+        tableau.add_column("Note", justify="center")
+        tableau.add_column("Provisoires", justify="right")
+        for groupe in groupes:
+            tableau.add_row(
+                groupe.libelle,
+                str(groupe.moyenne.compte.nombre),
+                _score(groupe.moyenne.score_moyen),
+                groupe.moyenne.note_moyenne or "—",
+                _provisoires(groupe.moyenne.compte),
+            )
+        console.print(tableau)
+
+    grandes = stats.grandes_collectivites
+    notees_a = stats.grandes_collectivites_a
+    console.print(
+        f"[bold]Collectivités de plus de 100 000 habitants notées A[/] : {len(notees_a)} sur "
+        f"{grandes.nombre} (notes provisoires : {sum(g.provisoire for g in notees_a)} parmi les "
+        f"notées A, {_provisoires(grandes)} sur l'ensemble des plus de 100 000 habitants)"
+    )
+    if not notees_a:
+        return
+    tableau = Table(expand=True)
+    tableau.add_column("Collectivité")
+    tableau.add_column("Population", justify="right")
+    tableau.add_column("Score", justify="right")
+    tableau.add_column("Provisoire", justify="center")
+    for grande in notees_a:
+        tableau.add_row(
+            grande.nom,
+            f"{grande.population:,}".replace(",", "\u202f"),
+            str(grande.score),
+            "oui" if grande.provisoire else "",
+        )
+    console.print(tableau)
+
+
+@app.command()
+def stats(
+    image: Annotated[
+        Path | None,
+        typer.Option(
+            "--image",
+            help="Image PNG de la carte (défaut : donnees/stats/carte-departements.png).",
+        ),
+    ] = None,
+    sans_image: Annotated[
+        bool, typer.Option("--sans-image", help="Ne génère pas l'image de la carte.")
+    ] = False,
+    fichier_json: Annotated[
+        Path | None,
+        typer.Option("--json", help="Écrit aussi les chiffres dans ce fichier JSON."),
+    ] = None,
+) -> None:
+    """Chiffres clés de l'observatoire et carte de France par département (PNG 1080 × 1080).
+
+    Calculés sur le dernier scan noté de chaque organisation, hors analyses sur demande ;
+    chaque chiffre indique sa part de notes provisoires.
+    """
+    from bleublanccloud.export.carte_png import DonneeDepartement, dessiner_carte
+    from bleublanccloud.statistiques import statistiques_observatoire
+
+    parametres = obtenir_parametres()
+    with Base(parametres.base_sqlite) as base:
+        resultat = statistiques_observatoire(base, referentiels_par_defaut())
+    if resultat.ensemble.compte.nombre == 0:
+        console.print("[yellow]Aucun scan noté dans l'observatoire.[/]")
+        raise typer.Exit(code=1)
+    afficher_statistiques(resultat)
+
+    if fichier_json is not None:
+        fichier_json.parent.mkdir(parents=True, exist_ok=True)
+        fichier_json.write_text(
+            json.dumps(resultat.en_dict(), ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        console.print(f"[green]✓[/] Chiffres écrits dans {fichier_json}")
+    if not sans_image:
+        chemin = image or parametres.base_sqlite.parent / "stats" / "carte-departements.png"
+        carte = dessiner_carte(
+            {
+                g.code: DonneeDepartement(g.moyenne.note_moyenne, g.moyenne.compte.part_provisoire)
+                for g in resultat.departements
+            },
+            nombre_organisations=resultat.ensemble.compte.nombre,
+            part_provisoire=resultat.ensemble.compte.part_provisoire,
+            dernier_scan=resultat.dernier_scan,
+            domaine_site=parametres.domaine_site,
+        )
+        carte.enregistrer(chemin)
+        console.print(f"[green]✓[/] Carte des départements (1080 × 1080) : {chemin}")
 
 
 @app.command()

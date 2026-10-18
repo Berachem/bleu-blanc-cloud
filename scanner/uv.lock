@@ -82,7 +82,9 @@ name = "bleublanccloud"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "brotli" },
     { name = "dnspython" },
+    { name = "fonttools" },
     { name = "httpx", extra = ["http2"] },
     { name = "idna" },
     { name = "maxminddb" },
@@ -98,8 +100,6 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "brotli" },
-    { name = "fonttools" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -112,7 +112,9 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "brotli", specifier = ">=1.1" },
     { name = "dnspython", specifier = ">=2.7" },
+    { name = "fonttools", specifier = ">=4.55" },
     { name = "httpx", extras = ["http2"], specifier = ">=0.28" },
     { name = "idna", specifier = ">=3.7" },
     { name = "maxminddb", specifier = ">=2.6" },
@@ -128,8 +130,6 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "brotli", specifier = ">=1.1" },
-    { name = "fonttools", specifier = ">=4.55" },
     { name = "mypy", specifier = ">=1.14" },
     { name = "pre-commit", specifier = ">=4.0" },
     { name = "pytest", specifier = ">=8.3" },

@@ -19,6 +19,9 @@ dependencies = [
     "tenacity>=9.0",
     "mistralai>=3.0,<4",
     "idna>=3.7",
+    # Visuels PNG de « bbcloud stats » : texte dessiné avec la police Luciole (WOFF2)
+    "fonttools>=4.55",
+    "brotli>=1.1",
 ]
 
 [project.scripts]
@@ -34,9 +37,6 @@ dev = [
     "mypy>=1.14",
     "types-PyYAML>=6.0",
     "pre-commit>=4.0",
-    # Sous-ensemble de la police Luciole (script site/scripts/polices.py)
-    "fonttools>=4.55",
-    "brotli>=1.1",
 ]
 
 [build-system]
@@ -83,7 +83,7 @@ module = ["bleublanccloud.analyse.*", "bleublanccloud.modeles"]
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["selectolax.*", "maxminddb.*"]
+module = ["selectolax.*", "maxminddb.*", "fontTools.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

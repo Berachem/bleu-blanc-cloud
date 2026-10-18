@@ -457,6 +457,7 @@ bbcloud campagne lancer [--limite N] [--dry-run]
 bbcloud rapports generer [--max N] [--dry-run]
 bbcloud exporter --vers ../site/public/donnees
 bbcloud publier                                   # export + build + push Pages
+bbcloud stats [--json F] [--image F.png]          # chiffres clés + carte PNG 1080 × 1080
 ```
 
 ---
