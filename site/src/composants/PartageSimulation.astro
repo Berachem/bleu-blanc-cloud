@@ -1,0 +1,16 @@
+---
+// Partage d'une simulation : lien et texte prêts à copier (mis à jour par le simulateur libre).
+interface Props {
+  phrase: string;
+}
+const { phrase } = Astro.props;
+---
+<section class="carte simulation-partage" aria-labelledby="titre-partage">
+  <h2 id="titre-partage">Partager cette simulation</h2>
+  <p class="simulation-partage__phrase" data-champ="phrase">{phrase}</p>
+  <div class="simulation-partage__actions">
+    <button type="button" class="bouton bouton--secondaire" data-copier="lien">Copier le lien</button>
+    <button type="button" class="bouton bouton--secondaire" data-copier="phrase">Copier le texte</button>
+  </div>
+  <p class="texte-secondaire petit" data-etat-copie aria-live="polite"></p>
+</section>

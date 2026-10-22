@@ -1,0 +1,102 @@
+---
+// Résultats d'une simulation, rendus au build (fonctionnent sans JavaScript). Le simulateur
+// libre met à jour les mêmes champs (data-champ, data-barre) dans le navigateur.
+// Totaux uniquement : jamais de liste nominative de collectivités touchées.
+import { champsResultats, nombre, part } from "../lib/simulation-texte";
+import type { Agregat, ExportSimulations } from "../lib/simulation";
+
+interface Props {
+  agregat: Agregat;
+  meta: ExportSimulations["meta"];
+  nomsRegions: Record<string, string>;
+}
+const { agregat, meta, nomsRegions } = Astro.props;
+const champs = champsResultats(agregat);
+const services = [
+  { cle: "sites_hors_ligne", libelle: "Sites hors ligne", aide: "Hébergeur ou CDN entièrement tombé, ou DNS injoignable." },
+  { cle: "messageries_coupees", libelle: "Messageries coupées", aide: "Courriels non reçus et boîtes inaccessibles ; les expéditeurs réessaient en général quelques jours." },
+  { cle: "sites_degrades", libelle: "Sites dégradés", aide: "Une partie de l'hébergement, ou des cartes, vidéos, polices ou formulaires tiers ne répondent plus." },
+  { cle: "injoignables", libelle: "Injoignables (DNS)", aide: "Tous les serveurs DNS tombent : site et messagerie ne répondent plus, même s'ils fonctionnent." },
+] as const;
+const regions = Object.entries(agregat.par_region)
+  .map(([code, groupe]) => ({ code, nom: nomsRegions[code] ?? code, ...groupe }))
+  .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+const tranches = Object.entries(meta.tranches_population)
+  .filter(([code]) => agregat.par_tranche[code])
+  .map(([code, libelle]) => ({ code, libelle, ...agregat.par_tranche[code] }));
+const largeur = (valeur: number, total: number) => `${total ? Math.round((1000 * valeur) / total) / 10 : 0}%`;
+---
+<div class="simulation-resultats" data-resultats aria-live="polite">
+  <div class="chiffres-heros">
+    <p class="chiffre-heros">
+      <strong data-champ="touchees">{champs.touchees}</strong>
+      <span>
+        <span data-champ="libelle_touchees">{champs.libelle_touchees}</span> sur
+        <span data-champ="total">{champs.total}</span>
+        (<span data-champ="part_touchees">{champs.part_touchees}</span>)
+      </span>
+    </p>
+    <p class="chiffre-heros">
+      <strong data-champ="habitants_touches">{champs.habitants_touches}</strong>
+      <span>habitants des communes touchées (<span data-champ="part_habitants">{champs.part_habitants}</span>)</span>
+    </p>
+  </div>
+  <p class="texte-secondaire petit" data-champ="dont_territoires">{champs.dont_territoires}</p>
+
+  <h2 class="simulation-titre">Par service</h2>
+  <ul class="simulation-services">
+    {
+      services.map((service) => (
+        <li>
+          <span class="simulation-services__valeur" data-champ={service.cle}>{champs[service.cle]}</span>
+          <span class="simulation-services__libelle">{service.libelle}</span>
+          <span class="simulation-services__aide">{service.aide}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="texte-secondaire petit">
+    <span data-champ="dns_resilients">{champs.dns_resilients}</span> collectivité(s) résistent
+    côté DNS grâce à des serveurs répartis chez plusieurs opérateurs.
+    <span data-champ="indeterminees">{champs.indeterminees}</span> ne peuvent pas être évaluées
+    (fournisseur non identifié) : elles ne sont jamais comptées comme touchées.
+  </p>
+
+  <h2 class="simulation-titre">Par région</h2>
+  <ul class="barres-simulation">
+    {
+      regions.map((r) => (
+        <li data-barre={`par_region:${r.code}`}>
+          <span class="barres-simulation__nom">{r.nom}</span>
+          <span class="barres-simulation__piste" aria-hidden="true">
+            <span class="barres-simulation__barre" style={`--part: ${largeur(r.touchees, r.total)}`} />
+          </span>
+          <span class="barres-simulation__valeur" data-valeur>
+            {nombre(r.touchees)} / {nombre(r.total)} ({part(r.touchees, r.total)})
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+
+  {
+    tranches.length > 0 && (
+      <>
+        <h2 class="simulation-titre">Par taille de commune</h2>
+        <ul class="barres-simulation">
+          {tranches.map((t) => (
+            <li data-barre={`par_tranche:${t.code}`}>
+              <span class="barres-simulation__nom">{t.libelle}</span>
+              <span class="barres-simulation__piste" aria-hidden="true">
+                <span class="barres-simulation__barre" style={`--part: ${largeur(t.touchees, t.total)}`} />
+              </span>
+              <span class="barres-simulation__valeur" data-valeur>
+                {nombre(t.touchees)} / {nombre(t.total)} ({part(t.touchees, t.total)})
+              </span>
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+</div>

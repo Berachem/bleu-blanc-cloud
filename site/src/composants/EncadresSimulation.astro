@@ -1,0 +1,55 @@
+---
+// Encadrés communs aux pages du simulateur : « Ma commune serait-elle touchée ? » (une seule
+// collectivité, choisie par le visiteur), hypothèses et limites, leçon positive.
+import { date } from "../lib/format";
+import type { ExportSimulations } from "../lib/simulation";
+
+interface Props {
+  meta: ExportSimulations["meta"];
+}
+const { meta } = Astro.props;
+const dateDonnees = meta.date_donnees ? date(meta.date_donnees) : "—";
+const nonEvalues = `${meta.part_criteres_non_evalues.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`;
+---
+<section class="carte simulation-commune" data-ma-commune aria-labelledby="titre-ma-commune">
+  <h2 id="titre-ma-commune">Ma commune serait-elle touchée ?</h2>
+  <p class="texte-secondaire petit">
+    Choisissez une collectivité : la réponse ne porte que sur elle, comme sa fiche.
+  </p>
+  <label for="champ-ma-commune">Collectivité</label>
+  <input id="champ-ma-commune" type="search" list="liste-ma-commune" autocomplete="off" placeholder="Nom de la commune, du département…" />
+  <datalist id="liste-ma-commune"></datalist>
+  <div class="simulation-commune__reponse" data-reponse aria-live="polite"></div>
+</section>
+
+<aside class="encadre-hypotheses" aria-labelledby="titre-hypotheses">
+  <h2 id="titre-hypotheses">Hypothèses et limites</h2>
+  <ul>
+    <li>
+      Il s'agit d'une <strong>simulation</strong>, pas d'une prédiction, calculée à partir des
+      dépendances détectées le <strong>{dateDonnees}</strong> sur les {meta.nombre_collectivites.toLocaleString("fr-FR")} collectivités de l'observatoire.
+    </li>
+    <li>
+      Elle ne tient pas compte des plans de secours, des sauvegardes, des contrats ni des
+      délais de reprise des fournisseurs.
+    </li>
+    <li>
+      {nonEvalues} des critères ne sont pas évalués (fournisseur non identifié ou données
+      indisponibles) : les collectivités concernées ne sont jamais comptées comme touchées.
+    </li>
+    <li>
+      Seuls les fournisseurs dont la fiche est vérifiée dans notre référentiel sont proposés.
+      Habitants : population des communes seulement (départements et régions comptés à part).
+    </li>
+  </ul>
+  <p><a href="/methodologie/">Lire la méthodologie</a></p>
+</aside>
+
+<aside class="encadre-lecon" aria-labelledby="titre-lecon">
+  <h2 id="titre-lecon">Ce qui protège</h2>
+  <p>
+    Répartir ses serveurs DNS chez deux opérateurs, avoir un plan de reprise testé, et choisir
+    des services sans dépendance tierce (par exemple un site statique, comme celui-ci).
+  </p>
+  <p><a href="/dossiers/souverainete-securite/">Souveraineté ≠ sécurité : pourquoi il faut les deux</a></p>
+</aside>

@@ -10,6 +10,7 @@ import type {
   MetaExport,
   OrganisationExport,
 } from "../types/donnees";
+import type { ExportSimulations } from "./simulation";
 
 const DOSSIER_REEL = path.resolve("public/donnees");
 const DOSSIER_DEMO = path.resolve("src/donnees-demo");
@@ -46,3 +47,6 @@ export const organisations = (): OrganisationExport[] =>
 // lien et la recherche, mais sont exclues de la carte, des classements et des statistiques.
 export const estSurDemande = (type: string): boolean => type === "sur_demande";
 export const observatoire = (): EntreeIndex[] => index().filter((e) => !estSurDemande(e.type));
+
+// Simulateur « Et si… ? » : dépendances de chaque collectivité (simulations.json)
+export const simulations = (): ExportSimulations => lire<ExportSimulations>("simulations.json");

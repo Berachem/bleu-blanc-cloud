@@ -1,0 +1,77 @@
+---
+// Préréglage du simulateur : résultats calculés au build (fonctionne sans JavaScript, pour le
+// partage et le référencement), image de partage générée par le serveur.
+import EncadresSimulation from "../../composants/EncadresSimulation.astro";
+import PartageSimulation from "../../composants/PartageSimulation.astro";
+import ResultatsSimulation from "../../composants/ResultatsSimulation.astro";
+import Base from "../../mises-en-page/Base.astro";
+import { SITE } from "../../config";
+import { simulations } from "../../lib/donnees";
+import { phrasePartage } from "../../lib/simulation-texte";
+import { imagePrereglage, nomsRegions, prereglages, resultatPrereglage, type Prereglage } from "../../lib/simulateur";
+
+export function getStaticPaths() {
+  return prereglages().map((prereglage) => ({ params: { slug: prereglage.slug }, props: { prereglage } }));
+}
+interface Props {
+  prereglage: Prereglage;
+}
+const { prereglage } = Astro.props;
+const donnees = simulations();
+const agregat = resultatPrereglage(prereglage);
+const url = new URL(`/simulateur/${prereglage.slug}/`, SITE.url).href;
+const phrase = phrasePartage(prereglage.titre, agregat, url);
+const image = imagePrereglage(prereglage.slug);
+const modeLibre = `/simulateur/?scenario=${prereglage.scenario}${prereglage.fournisseur ? `&fournisseur=${encodeURIComponent(prereglage.fournisseur)}` : ""}`;
+---
+<Base
+  titre={prereglage.titre}
+  description={`${prereglage.accroche} Simulation : ${agregat.touchees} collectivités touchées sur ${agregat.total}.`}
+  image={image ? { chemin: image, texte: `${prereglage.titre} Simulation : ${agregat.touchees} collectivités touchées sur ${agregat.total}.` } : undefined}
+>
+  <div class="conteneur" data-simulation data-scenario={prereglage.scenario} data-fournisseur={prereglage.fournisseur ?? ""}>
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a href="/simulateur/">Simulateur</a></li>
+        <li aria-current="page">{prereglage.titre}</li>
+      </ol>
+    </nav>
+    <header class="entete-page">
+      <span class="surtitre">Simulation</span>
+      <h1>{prereglage.titre}</h1>
+      <p class="chapeau">{prereglage.accroche}</p>
+    </header>
+
+    {
+      prereglage.precedent && (
+        <aside class="encadre-precedent" aria-label="Précédent réel">
+          <p><strong>Ce n'est pas qu'une hypothèse.</strong> {prereglage.precedent.texte}</p>
+          <p class="petit">
+            Sources :{" "}
+            {prereglage.precedent.sources.map((source, rang) => (
+              <>
+                {rang > 0 && " · "}
+                <a href={source.url}>{source.titre}</a>
+              </>
+            ))}
+          </p>
+        </aside>
+      )
+    }
+
+    <section class="section" aria-labelledby="titre-resultats">
+      <h2 id="titre-resultats" class="visuellement-cache">Résultats de la simulation</h2>
+      <ResultatsSimulation agregat={agregat} meta={donnees.meta} nomsRegions={nomsRegions()} />
+      <p><a href={modeLibre}>Modifier le scénario dans le simulateur</a></p>
+    </section>
+
+    <div class="grille-encadres-simulation">
+      <PartageSimulation phrase={phrase} />
+      <EncadresSimulation meta={donnees.meta} />
+    </div>
+  </div>
+</Base>
+
+<script>
+  import "../../lib/simulateur-client";
+</script>
