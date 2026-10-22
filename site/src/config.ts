@@ -80,7 +80,9 @@ export const NAVIGATION = [
   { href: "/", libelle: "Accueil" },
   { href: "/carte/", libelle: "Carte" },
   { href: "/classements/", libelle: "Classements" },
+  { href: "/simulateur/", libelle: "Simulateur" },
   { href: "/alternatives/", libelle: "Alternatives" },
   { href: "/methodologie/", libelle: "Méthodologie" },
+  { href: "/dossiers/", libelle: "Dossiers" },
   { href: "/a-propos/", libelle: "À propos" },
 ] as const;

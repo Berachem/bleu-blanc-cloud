@@ -1,0 +1,173 @@
+---
+// Dossier « Souveraineté ≠ sécurité ». Tous les chiffres viennent de simulations.json
+// (aucun chiffre écrit en dur) ; aucune collectivité n'est associée à une faille.
+import fs from "node:fs";
+import path from "node:path";
+import Base from "../../../mises-en-page/Base.astro";
+import contenu from "../../../contenu/dossiers.json";
+import { date } from "../../../lib/format";
+import { BONUS_KIT, CHEMIN_PDF_KIT, QUESTIONS_KIT } from "../../../lib/kit";
+import { chiffresDossier } from "../../../lib/simulateur";
+
+const dossier = contenu.dossiers.find((d) => d.slug === "souverainete-securite")!;
+const chiffres = chiffresDossier();
+const pct = (valeur: number) =>
+  `${valeur.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+const premier = chiffres.premierHebergeur;
+const pdfDisponible = fs.existsSync(path.resolve("public", CHEMIN_PDF_KIT.slice(1)));
+const SOURCES_PHP = [
+  { titre: "Help Net Security : correctifs PHP2Shell (21 octobre 2026)", url: "https://www.helpnetsecurity.com/2026/10/21/php2shell-php-vulnerabilities-patched-cve-2026-109618-cve-2026-109619/" },
+  { titre: "CISA : alerte du 21 octobre 2026 sur les vulnérabilités critiques de PHP", url: "https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching" },
+  { titre: "SecurityWeek : fuite des détails avant l'annonce", url: "https://www.securityweek.com/php2shell-mass-exploitation-looms-for-leaked-critical-php-flaws/" },
+  { titre: "The Hacker News : correctifs d'urgence et tentatives d'exploitation", url: "https://thehackernews.com/2026/10/php-issues-emergency-patches-for-two.html" },
+];
+---
+<Base titre={dossier.titre} description={dossier.resume}>
+  <article class="conteneur prose dossier">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <ol>
+        <li><a href="/dossiers/">Dossiers</a></li>
+        <li aria-current="page">Souveraineté ≠ sécurité</li>
+      </ol>
+    </nav>
+    <header class="entete-page">
+      <span class="surtitre">Dossier</span>
+      <h1>{dossier.titre}</h1>
+      <p class="chapeau">
+        {pct(chiffres.partHebergementEuropeen)} des sites de collectivités dont l'hébergeur est
+        identifié sont hébergés chez un acteur de l'Union européenne. C'est une bonne nouvelle
+        pour la souveraineté. Mais un serveur français non mis à jour reste un serveur
+        vulnérable : les failles PHP révélées en octobre 2026 le rappellent.
+      </p>
+      <p class="texte-secondaire petit">
+        Publié le {date(dossier.publie_le)} · mis à jour le {date(dossier.mis_a_jour_le)} ·
+        chiffres issus des dépendances détectées le {chiffres.date ? date(chiffres.date) : "—"}
+      </p>
+    </header>
+
+    <h2>Deux questions différentes</h2>
+    <ul>
+      <li>
+        <strong>La souveraineté</strong> répond à la question « <strong>qui</strong> peut
+        accéder à nos données, et sous quelle loi ? ». Un fournisseur soumis au Cloud Act peut
+        être contraint par la justice américaine de transmettre des données, même hébergées en
+        Europe.
+      </li>
+      <li>
+        <strong>La sécurité</strong> répond à la question « <strong>est-ce que</strong>
+        quelqu'un peut entrer sans y être autorisé ? ». Une faille non corrigée ouvre la porte,
+        quel que soit le pays de l'hébergeur.
+      </li>
+    </ul>
+    <div class="tableau-defilant">
+      <table class="tableau-dossier">
+        <caption class="visuellement-cache">Comparaison entre souveraineté et sécurité</caption>
+        <thead>
+          <tr><th scope="col"></th><th scope="col">Souveraineté</th><th scope="col">Sécurité</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">La question posée</th>
+            <td>Qui peut accéder à nos données, et sous quelle loi ?</td>
+            <td>Quelqu'un peut-il entrer sans y être autorisé ?</td>
+          </tr>
+          <tr>
+            <th scope="row">Le risque</th>
+            <td>Transmission de données imposée par une loi étrangère, coupure décidée hors d'Europe</td>
+            <td>Prise de contrôle d'un serveur, vol ou destruction de données, site défiguré</td>
+          </tr>
+          <tr>
+            <th scope="row">Ce qui protège</th>
+            <td>Le choix du fournisseur et les contrats</td>
+            <td>Les mises à jour, les sauvegardes, la surveillance</td>
+          </tr>
+          <tr>
+            <th scope="row">Mesuré par Bleu Blanc Cloud ?</th>
+            <td>Oui : c'est l'objet de l'observatoire</td>
+            <td>Non : nous ne mesurons pas la sécurité des sites</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>L'exemple d'octobre 2026 : PHP2Shell</h2>
+    <p>
+      Le 21 octobre 2026, le projet PHP a publié des correctifs pour deux failles critiques
+      (CVE-2026-109618 et CVE-2026-109619), surnommées « PHP2Shell ». Elles peuvent permettre à
+      un attaquant, sans être connecté, de prendre le contrôle d'un serveur web qui exécute PHP.
+      Des détails ont fuité avant l'annonce prévue, et plusieurs éditeurs de sécurité signalent
+      des tentatives d'exploitation. Versions corrigées : PHP 8.5.12, 8.4.27, 8.3.36 et 8.2.35.
+      Les versions 8.1 et antérieures ne sont plus maintenues officiellement.
+    </p>
+    <p>
+      PHP fait tourner une grande partie des sites web, dont beaucoup de sites de collectivités
+      (CMS comme WordPress, Drupal ou Joomla). Être hébergé en France ne protège pas : seule la
+      mise à jour protège.
+    </p>
+    <p class="petit">Sources :</p>
+    <ul class="petit">
+      {SOURCES_PHP.map((source) => <li><a href={source.url}>{source.titre}</a></li>)}
+    </ul>
+    <aside class="encadre-hypotheses">
+      <p>
+        <strong>Bleu Blanc Cloud ne teste pas les failles des sites et ne publiera jamais de
+        liste de sites vulnérables.</strong> Pendant une vague d'attaques, une telle liste
+        servirait surtout aux attaquants.
+      </p>
+    </aside>
+
+    <h2>Ce que montrent nos données</h2>
+    <ul>
+      <li>
+        {pct(chiffres.partHebergementEuropeen)} des {chiffres.sitesEvalues.toLocaleString("fr-FR")} sites
+        dont l'hébergeur est identifié sont hébergés dans l'Union européenne.
+        {
+          premier && (
+            <>
+              {" "}Mais <strong>{pct(premier.part)} chez un seul et même hébergeur</strong> ({premier.nom}).
+              {premier.europeen ? " C'est européen, mais concentré : " : " "}une panne majeure
+              chez lui toucherait {premier.touchees.toLocaleString("fr-FR")} collectivité{premier.touchees > 1 ? "s" : ""}.
+              {premier.lienSimulation && (
+                <>
+                  {" "}<a href={premier.lienSimulation}>Voir la simulation</a>
+                </>
+              )}
+            </>
+          )
+        }
+      </li>
+      <li>
+        {pct(chiffres.partMessagerieCloudAct)} des collectivités dont la messagerie est
+        identifiée la confient à un acteur soumis au Cloud Act.
+      </li>
+      <li>
+        Notre propre site est <strong>statique</strong> : pas de PHP, pas de base de données
+        exposée. Exposition à PHP2Shell : aucune. Ce n'est pas de la chance, c'est un choix
+        d'architecture.
+      </li>
+    </ul>
+
+    <h2 id="kit">Le kit : 5 questions à poser à votre prestataire</h2>
+    <ol class="kit-questions">
+      {
+        QUESTIONS_KIT.map((q) => (
+          <li>
+            <strong>{q.titre}</strong> {q.texte}
+          </li>
+        ))
+      }
+    </ol>
+    <p><strong>Bonus :</strong> {BONUS_KIT}</p>
+    <p class="actions-dossier">
+      <a class="bouton bouton--secondaire" href="/dossiers/souverainete-securite/kit/">Version imprimable du kit</a>
+      {pdfDisponible && <a class="bouton bouton--secondaire" href={CHEMIN_PDF_KIT} download>Télécharger le kit (PDF)</a>}
+    </p>
+
+    <h2>Et maintenant ?</h2>
+    <ul>
+      <li><a href="/classements/">Consultez la fiche de votre collectivité</a></li>
+      <li><a href="/simulateur/">Testez un scénario de panne</a></li>
+      <li><a href="/methodologie/">Lisez la méthodologie</a></li>
+    </ul>
+  </article>
+</Base>

@@ -1,0 +1,723 @@
+{
+ "lignes": [
+  {
+   "id": "tout-chez-ovh",
+   "nom": "tout-chez-ovh",
+   "type": "commune",
+   "region": "84",
+   "departement": "00",
+   "population": 20000,
+   "tranche_population": "20000-50000",
+   "fournisseurs": {
+    "hebergement": [
+     "ovhcloud"
+    ],
+    "cdn": [],
+    "dns": [
+     "ovhcloud"
+    ],
+    "messagerie": [
+     "ovhcloud"
+    ],
+    "services_tiers": [],
+    "audience": []
+   },
+   "statuts": {
+    "hebergement": "evalue",
+    "dns": "evalue",
+    "messagerie": "evalue",
+    "services_tiers": "evalue",
+    "audience": "evalue"
+   }
+  },
+  {
+   "id": "dns-reparti",
+   "nom": "dns-reparti",
+   "type": "commune",
+   "region": "84",
+   "departement": "00",
+   "population": 15000,
+   "tranche_population": "10000-20000",
+   "fournisseurs": {
+    "hebergement": [
+     "ovhcloud"
+    ],
+    "cdn": [],
+    "dns": [
+     "ovhcloud",
+     "gandi"
+    ],
+    "messagerie": [
+     "microsoft"
+    ],
+    "services_tiers": [],
+    "audience": []
+   },
+   "statuts": {
+    "hebergement": "evalue",
+    "dns": "evalue",
+    "messagerie": "evalue",
+    "services_tiers": "evalue",
+    "audience": "evalue"
+   }
+  },
+  {
+   "id": "derriere-cloudflare",
+   "nom": "derriere-cloudflare",
+   "type": "commune",
+   "region": "75",
+   "departement": "00",
+   "population": 120000,
+   "tranche_population": "100000-200000",
+   "fournisseurs": {
+    "hebergement": [
+     "?"
+    ],
+    "cdn": [
+     "cloudflare"
+    ],
+    "dns": [
+     "cloudflare"
+    ],
+    "messagerie": [
+     "google"
+    ],
+    "services_tiers": [],
+    "audience": [
+     "google"
+    ]
+   },
+   "statuts": {
+    "hebergement": "evalue",
+    "dns": "evalue",
+    "messagerie": "evalue",
+    "services_tiers": "evalue",
+    "audience": "evalue"
+   }
+  },
+  {
+   "id": "hebergeur-inconnu",
+   "nom": "hebergeur-inconnu",
+   "type": "commune",
+   "region": "75",
+   "departement": "00",
+   "population": 11000,
+   "tranche_population": "10000-20000",
+   "fournisseurs": {
+    "hebergement": [
+     "?"
+    ],
+    "cdn": [],
+    "dns": [
+     "gandi"
+    ],
+    "messagerie": [],
+    "services_tiers": [
+     "google"
+    ],
+    "audience": []
+   },
+   "statuts": {
+    "hebergement": "inconnu",
+    "dns": "evalue",
+    "messagerie": "sans_objet",
+    "services_tiers": "evalue",
+    "audience": "evalue"
+   }
+  },
+  {
+   "id": "departement",
+   "nom": "departement",
+   "type": "departement",
+   "region": "75",
+   "departement": "00",
+   "population": null,
+   "tranche_population": null,
+   "fournisseurs": {
+    "hebergement": [
+     "ionos"
+    ],
+    "cdn": [],
+    "dns": [
+     "ionos"
+    ],
+    "messagerie": [
+     "microsoft",
+     "?"
+    ],
+    "services_tiers": [],
+    "audience": [
+     "google"
+    ]
+   },
+   "statuts": {
+    "hebergement": "evalue",
+    "dns": "evalue",
+    "messagerie": "evalue",
+    "services_tiers": "evalue",
+    "audience": "evalue"
+   }
+  },
+  {
+   "id": "deux-hebergeurs",
+   "nom": "deux-hebergeurs",
+   "type": "commune",
+   "region": "84",
+   "departement": "00",
+   "population": 30000,
+   "tranche_population": "20000-50000",
+   "fournisseurs": {
+    "hebergement": [
+     "ovhcloud",
+     "scaleway"
+    ],
+    "cdn": [],
+    "dns": [
+     "gandi"
+    ],
+    "messagerie": [
+     "ovhcloud"
+    ],
+    "services_tiers": [],
+    "audience": []
+   },
+   "statuts": {
+    "hebergement": "evalue",
+    "dns": "evalue",
+    "messagerie": "evalue",
+    "services_tiers": "evalue",
+    "audience": "evalue"
+   }
+  }
+ ],
+ "scenarios": [
+  {
+   "nom": "panne-ovhcloud",
+   "tombes": [
+    "ovhcloud"
+   ],
+   "impacts": {
+    "tout-chez-ovh": {
+     "statut": "injoignable",
+     "dns": "coupe",
+     "site": "injoignable",
+     "messagerie": "coupee"
+    },
+    "dns-reparti": {
+     "statut": "hors_service",
+     "dns": "resilient",
+     "site": "hors_ligne",
+     "messagerie": "ok"
+    },
+    "derriere-cloudflare": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "hebergeur-inconnu": {
+     "statut": "indetermine",
+     "dns": "ok",
+     "site": "inconnu",
+     "messagerie": "sans_objet"
+    },
+    "departement": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "deux-hebergeurs": {
+     "statut": "hors_service",
+     "dns": "ok",
+     "site": "degrade",
+     "messagerie": "coupee"
+    }
+   },
+   "agregat": {
+    "total": 6,
+    "touchees": 3,
+    "sites_hors_ligne": 2,
+    "messageries_coupees": 2,
+    "sites_degrades": 1,
+    "injoignables": 1,
+    "dns_resilients": 1,
+    "habitants_touches": 65000,
+    "habitants_total": 196000,
+    "departements_touches": 0,
+    "regions_touchees": 0,
+    "par_statut": {
+     "injoignable": 1,
+     "hors_service": 2,
+     "degrade": 0,
+     "indetermine": 1,
+     "non_touchee": 2
+    },
+    "par_region": {
+     "84": {
+      "total": 3,
+      "touchees": 3
+     },
+     "75": {
+      "total": 3,
+      "touchees": 0
+     }
+    },
+    "par_tranche": {
+     "20000-50000": {
+      "total": 2,
+      "touchees": 2
+     },
+     "10000-20000": {
+      "total": 2,
+      "touchees": 1
+     },
+     "100000-200000": {
+      "total": 1,
+      "touchees": 0
+     }
+    }
+   }
+  },
+  {
+   "nom": "panne-cloudflare",
+   "tombes": [
+    "cloudflare"
+   ],
+   "impacts": {
+    "tout-chez-ovh": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "dns-reparti": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "derriere-cloudflare": {
+     "statut": "injoignable",
+     "dns": "coupe",
+     "site": "injoignable",
+     "messagerie": "coupee"
+    },
+    "hebergeur-inconnu": {
+     "statut": "indetermine",
+     "dns": "ok",
+     "site": "inconnu",
+     "messagerie": "sans_objet"
+    },
+    "departement": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "deux-hebergeurs": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    }
+   },
+   "agregat": {
+    "total": 6,
+    "touchees": 1,
+    "sites_hors_ligne": 1,
+    "messageries_coupees": 1,
+    "sites_degrades": 0,
+    "injoignables": 1,
+    "dns_resilients": 0,
+    "habitants_touches": 120000,
+    "habitants_total": 196000,
+    "departements_touches": 0,
+    "regions_touchees": 0,
+    "par_statut": {
+     "injoignable": 1,
+     "hors_service": 0,
+     "degrade": 0,
+     "indetermine": 1,
+     "non_touchee": 4
+    },
+    "par_region": {
+     "84": {
+      "total": 3,
+      "touchees": 0
+     },
+     "75": {
+      "total": 3,
+      "touchees": 1
+     }
+    },
+    "par_tranche": {
+     "20000-50000": {
+      "total": 2,
+      "touchees": 0
+     },
+     "10000-20000": {
+      "total": 2,
+      "touchees": 0
+     },
+     "100000-200000": {
+      "total": 1,
+      "touchees": 1
+     }
+    }
+   }
+  },
+  {
+   "nom": "panne-microsoft",
+   "tombes": [
+    "microsoft"
+   ],
+   "impacts": {
+    "tout-chez-ovh": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "dns-reparti": {
+     "statut": "hors_service",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "coupee"
+    },
+    "derriere-cloudflare": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "hebergeur-inconnu": {
+     "statut": "indetermine",
+     "dns": "ok",
+     "site": "inconnu",
+     "messagerie": "sans_objet"
+    },
+    "departement": {
+     "statut": "degrade",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "degradee"
+    },
+    "deux-hebergeurs": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    }
+   },
+   "agregat": {
+    "total": 6,
+    "touchees": 2,
+    "sites_hors_ligne": 0,
+    "messageries_coupees": 1,
+    "sites_degrades": 0,
+    "injoignables": 0,
+    "dns_resilients": 0,
+    "habitants_touches": 15000,
+    "habitants_total": 196000,
+    "departements_touches": 1,
+    "regions_touchees": 0,
+    "par_statut": {
+     "injoignable": 0,
+     "hors_service": 1,
+     "degrade": 1,
+     "indetermine": 1,
+     "non_touchee": 3
+    },
+    "par_region": {
+     "84": {
+      "total": 3,
+      "touchees": 1
+     },
+     "75": {
+      "total": 3,
+      "touchees": 1
+     }
+    },
+    "par_tranche": {
+     "20000-50000": {
+      "total": 2,
+      "touchees": 0
+     },
+     "10000-20000": {
+      "total": 2,
+      "touchees": 1
+     },
+     "100000-200000": {
+      "total": 1,
+      "touchees": 0
+     }
+    }
+   }
+  },
+  {
+   "nom": "panne-gandi",
+   "tombes": [
+    "gandi"
+   ],
+   "impacts": {
+    "tout-chez-ovh": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "dns-reparti": {
+     "statut": "non_touchee",
+     "dns": "resilient",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "derriere-cloudflare": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "hebergeur-inconnu": {
+     "statut": "injoignable",
+     "dns": "coupe",
+     "site": "injoignable",
+     "messagerie": "sans_objet"
+    },
+    "departement": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "deux-hebergeurs": {
+     "statut": "injoignable",
+     "dns": "coupe",
+     "site": "injoignable",
+     "messagerie": "coupee"
+    }
+   },
+   "agregat": {
+    "total": 6,
+    "touchees": 2,
+    "sites_hors_ligne": 2,
+    "messageries_coupees": 1,
+    "sites_degrades": 0,
+    "injoignables": 2,
+    "dns_resilients": 1,
+    "habitants_touches": 41000,
+    "habitants_total": 196000,
+    "departements_touches": 0,
+    "regions_touchees": 0,
+    "par_statut": {
+     "injoignable": 2,
+     "hors_service": 0,
+     "degrade": 0,
+     "indetermine": 0,
+     "non_touchee": 4
+    },
+    "par_region": {
+     "84": {
+      "total": 3,
+      "touchees": 1
+     },
+     "75": {
+      "total": 3,
+      "touchees": 1
+     }
+    },
+    "par_tranche": {
+     "20000-50000": {
+      "total": 2,
+      "touchees": 1
+     },
+     "10000-20000": {
+      "total": 2,
+      "touchees": 1
+     },
+     "100000-200000": {
+      "total": 1,
+      "touchees": 0
+     }
+    }
+   }
+  },
+  {
+   "nom": "cloud-act",
+   "tombes": [
+    "cloudflare",
+    "google",
+    "microsoft"
+   ],
+   "impacts": {
+    "tout-chez-ovh": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "dns-reparti": {
+     "statut": "hors_service",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "coupee"
+    },
+    "derriere-cloudflare": {
+     "statut": "injoignable",
+     "dns": "coupe",
+     "site": "injoignable",
+     "messagerie": "coupee"
+    },
+    "hebergeur-inconnu": {
+     "statut": "degrade",
+     "dns": "ok",
+     "site": "degrade",
+     "messagerie": "sans_objet"
+    },
+    "departement": {
+     "statut": "degrade",
+     "dns": "ok",
+     "site": "degrade",
+     "messagerie": "degradee"
+    },
+    "deux-hebergeurs": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    }
+   },
+   "agregat": {
+    "total": 6,
+    "touchees": 4,
+    "sites_hors_ligne": 1,
+    "messageries_coupees": 2,
+    "sites_degrades": 2,
+    "injoignables": 1,
+    "dns_resilients": 0,
+    "habitants_touches": 146000,
+    "habitants_total": 196000,
+    "departements_touches": 1,
+    "regions_touchees": 0,
+    "par_statut": {
+     "injoignable": 1,
+     "hors_service": 1,
+     "degrade": 2,
+     "indetermine": 0,
+     "non_touchee": 2
+    },
+    "par_region": {
+     "84": {
+      "total": 3,
+      "touchees": 1
+     },
+     "75": {
+      "total": 3,
+      "touchees": 3
+     }
+    },
+    "par_tranche": {
+     "20000-50000": {
+      "total": 2,
+      "touchees": 0
+     },
+     "10000-20000": {
+      "total": 2,
+      "touchees": 2
+     },
+     "100000-200000": {
+      "total": 1,
+      "touchees": 1
+     }
+    }
+   }
+  },
+  {
+   "nom": "aucune",
+   "tombes": [],
+   "impacts": {
+    "tout-chez-ovh": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "dns-reparti": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "derriere-cloudflare": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "hebergeur-inconnu": {
+     "statut": "indetermine",
+     "dns": "ok",
+     "site": "inconnu",
+     "messagerie": "sans_objet"
+    },
+    "departement": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    },
+    "deux-hebergeurs": {
+     "statut": "non_touchee",
+     "dns": "ok",
+     "site": "ok",
+     "messagerie": "ok"
+    }
+   },
+   "agregat": {
+    "total": 6,
+    "touchees": 0,
+    "sites_hors_ligne": 0,
+    "messageries_coupees": 0,
+    "sites_degrades": 0,
+    "injoignables": 0,
+    "dns_resilients": 0,
+    "habitants_touches": 0,
+    "habitants_total": 196000,
+    "departements_touches": 0,
+    "regions_touchees": 0,
+    "par_statut": {
+     "injoignable": 0,
+     "hors_service": 0,
+     "degrade": 0,
+     "indetermine": 1,
+     "non_touchee": 5
+    },
+    "par_region": {
+     "84": {
+      "total": 3,
+      "touchees": 0
+     },
+     "75": {
+      "total": 3,
+      "touchees": 0
+     }
+    },
+    "par_tranche": {
+     "20000-50000": {
+      "total": 2,
+      "touchees": 0
+     },
+     "10000-20000": {
+      "total": 2,
+      "touchees": 0
+     },
+     "100000-200000": {
+      "total": 1,
+      "touchees": 0
+     }
+    }
+   }
+  }
+ ]
+}

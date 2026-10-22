@@ -7,7 +7,8 @@ import MentionIA from "../../composants/MentionIA.astro";
 import Niveau from "../../composants/Niveau.astro";
 import { SITE } from "../../config";
 import Base from "../../mises-en-page/Base.astro";
-import { index, organisation as lireOrganisation } from "../../lib/donnees";
+import { index, organisation as lireOrganisation, simulations } from "../../lib/donnees";
+import { fournisseurPrincipal, fournisseursProposes } from "../../lib/simulation";
 import {
   LIBELLES_CATEGORIES,
   LIBELLES_TYPES,
@@ -26,6 +27,12 @@ export function getStaticPaths() {
 const { slug } = Astro.params;
 const org = lireOrganisation(slug as string);
 const score = org.score;
+// Lien « Et si un de vos fournisseurs tombait ? » (fournisseur principal vérifié)
+const donneesSimulation = simulations();
+const ligneSimulation = donneesSimulation.collectivites.find((l) => l.id === org.slug);
+const principal = ligneSimulation
+  ? fournisseurPrincipal(ligneSimulation, new Set(fournisseursProposes(donneesSimulation).map((f) => f.id)))
+  : null;
 
 // Points retirés rattachés à chaque constat (index dans la liste des constats)
 const retraits = new Map<number, { points: number; raison: string }[]>();
@@ -202,6 +209,15 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
                 ))}
               </ul>
             </>
+          )
+        }
+        {
+          principal && (
+            <p class="lien-simulateur">
+              <a href={`/simulateur/?scenario=panne&fournisseur=${encodeURIComponent(principal)}`}>
+                Et si un de vos fournisseurs tombait ?
+              </a>
+            </p>
           )
         }
       </section>

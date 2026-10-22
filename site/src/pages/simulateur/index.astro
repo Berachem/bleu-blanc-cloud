@@ -1,0 +1,102 @@
+---
+// Simulateur « Et si… ? » : panne d'un fournisseur ou coupure des acteurs soumis au Cloud
+// Act. Résultats d'un scénario par défaut calculés au build ; le mode libre (JavaScript)
+// recalcule dans le navigateur et écrit le scénario dans l'URL (lien partageable).
+import EncadresSimulation from "../../composants/EncadresSimulation.astro";
+import PartageSimulation from "../../composants/PartageSimulation.astro";
+import ResultatsSimulation from "../../composants/ResultatsSimulation.astro";
+import Base from "../../mises-en-page/Base.astro";
+import { SITE } from "../../config";
+import { simulations } from "../../lib/donnees";
+import { agreger, fournisseursProposes, fournisseursTombes, type Scenario } from "../../lib/simulation";
+import { nombre, phrasePartage, titreScenario } from "../../lib/simulation-texte";
+import { nomsRegions, prereglages } from "../../lib/simulateur";
+
+const donnees = simulations();
+const proposes = fournisseursProposes(donnees);
+const scenario: Scenario = proposes.length ? "panne" : "cloud_act";
+const fournisseur = proposes[0]?.id ?? null;
+const agregat = agreger(donnees.collectivites, fournisseursTombes(donnees, scenario, fournisseur));
+const titre = titreScenario(scenario, proposes[0]?.nom);
+const url = new URL("/simulateur/", SITE.url).href;
+---
+<Base
+  titre="Simulateur « Et si… ? »"
+  description="Si un fournisseur tombe ou coupe l'accès, combien de collectivités françaises sont touchées, et sur quels services ? Simulation à partir des dépendances détectées."
+>
+  <div class="conteneur" data-simulation data-scenario={scenario} data-fournisseur={fournisseur ?? ""}>
+    <header class="entete-page">
+      <span class="surtitre">Simulateur</span>
+      <h1>Et si… ?</h1>
+      <p class="chapeau">
+        Si un fournisseur tombait en panne ou coupait l'accès, combien de collectivités
+        seraient touchées, et sur quels services ? Cette simulation montre des
+        <strong>dépendances</strong>, pas des failles : elle repose uniquement sur les
+        fournisseurs déjà affichés sur les fiches.
+      </p>
+    </header>
+
+    <section class="section" aria-labelledby="titre-prereglages">
+      <h2 id="titre-prereglages">Scénarios prêts à consulter</h2>
+      <ul class="grille-prereglages">
+        {
+          prereglages().map((p) => (
+            <li>
+              <a class="carte carte-prereglage" href={`/simulateur/${p.slug}/`}>
+                <strong>{p.titre}</strong>
+                <span class="texte-secondaire petit">{p.accroche}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="titre-mode-libre">
+      <h2 id="titre-mode-libre">Choisir un scénario</h2>
+      <form class="carte simulateur-formulaire" data-simulateur action="/simulateur/" method="get">
+        <fieldset>
+          <legend>Scénario</legend>
+          <label class="choix-radio">
+            <input type="radio" name="scenario" value="panne" checked={scenario === "panne"} />
+            Panne d'un fournisseur
+          </label>
+          <label class="choix-radio">
+            <input type="radio" name="scenario" value="cloud_act" checked={scenario === "cloud_act"} />
+            Coupure de tous les acteurs soumis au Cloud Act
+          </label>
+        </fieldset>
+        <label for="choix-fournisseur">Fournisseur</label>
+        <select id="choix-fournisseur" name="fournisseur">
+          {
+            proposes.map((f) => (
+              <option value={f.id} selected={f.id === fournisseur}>
+                {f.nom} — {nombre(f.nombre_collectivites)} collectivité{f.nombre_collectivites > 1 ? "s" : ""}
+              </option>
+            ))
+          }
+        </select>
+        <p class="texte-secondaire petit">
+          Fournisseurs vérifiés dans notre référentiel, du plus utilisé au moins utilisé.
+        </p>
+        <button type="submit" class="bouton">Simuler</button>
+        <noscript><p class="petit">Le choix libre nécessite JavaScript ; les scénarios ci-dessus fonctionnent sans.</p></noscript>
+      </form>
+    </section>
+
+    <section class="section" aria-labelledby="titre-resultats">
+      <h2 id="titre-resultats" class="visuellement-cache">Résultats</h2>
+      <p class="simulation-scenario" data-champ="titre">{titre}</p>
+      <ResultatsSimulation agregat={agregat} meta={donnees.meta} nomsRegions={nomsRegions()} />
+    </section>
+
+    <div class="grille-encadres-simulation">
+      <PartageSimulation phrase={phrasePartage(titre, agregat, url)} />
+      <EncadresSimulation meta={donnees.meta} />
+    </div>
+  </div>
+</Base>
+
+<script>
+  import "../../lib/simulateur-client";
+</script>

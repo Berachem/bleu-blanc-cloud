@@ -392,8 +392,8 @@ th {
   color: var(--texte-secondaire);
   text-decoration: none;
   font-weight: 700;
-  font-size: 0.95rem;
-  padding: 0.5rem 1rem;
+  font-size: 0.92rem;
+  padding: 0.5rem 0.72rem;
   border-radius: 999px;
   white-space: nowrap;
   transition: color 0.2s ease, background-color 0.2s ease;
@@ -518,8 +518,8 @@ th {
 
 /* Téléphones et tablettes : [logo] ………… [loupe] [thème] [☰], navigation masquée derrière le
    hamburger. Sans JavaScript, elle reste affichée en grille (aucun lien inaccessible).
-   Seuil : largeur nécessaire au menu complet, loupe comprise, sur une ligne (≈ 1 110 px). */
-@media (max-width: 1119px) {
+   Seuil : largeur nécessaire au menu complet (8 entrées), loupe comprise, sur une ligne (≈ 1 270 px). */
+@media (max-width: 1279px) {
   .entete .conteneur {
     min-height: 68px;
     gap: 0.5rem;
@@ -613,7 +613,7 @@ th {
    Les ancres (#rapport-ia, #cookies…) et les éléments qui prennent le focus s'arrêtent sous
    l'en-tête. Marge posée sur le contenu et non « scroll-padding » sur la page : sinon,
    Chromium fait défiler la page dès qu'un bouton de l'en-tête collant reçoit le focus. */
-@media (max-width: 1119px) {
+@media (max-width: 1279px) {
   main,
   main *,
   .pied * {
@@ -2634,7 +2634,7 @@ select:focus {
   scroll-margin-top: 1rem;
 }
 /* Sous l'en-tête collant des téléphones et tablettes */
-@media (max-width: 1119px) {
+@media (max-width: 1279px) {
   #rapport-ia {
     scroll-margin-top: 5.5rem;
   }
@@ -2773,6 +2773,239 @@ select:focus {
   font-size: inherit;
 }
 
+/* ---------------------------------------------------------------- Simulateur « Et si… ? » */
+
+.grille-prereglages {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.carte-prereglage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  height: 100%;
+  color: var(--texte);
+  text-decoration: none;
+  border: 1px solid var(--bordure);
+  transition: border-color 0.2s ease, transform 0.2s var(--adouci);
+}
+.carte-prereglage:hover {
+  color: var(--texte);
+  border-color: var(--bordure-forte);
+  transform: translateY(-2px);
+}
+.simulateur-formulaire {
+  display: grid;
+  gap: 0.7rem;
+  max-width: 40rem;
+}
+.simulateur-formulaire fieldset {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.simulateur-formulaire legend,
+.simulateur-formulaire > label,
+.simulation-commune > label {
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+.choix-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.choix-radio input {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--bleu-france);
+}
+.simulateur-formulaire select,
+.simulation-commune input {
+  width: 100%;
+  min-height: 2.9rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--bordure-forte);
+  border-radius: var(--rayon-petit);
+  background: var(--surface-2);
+  color: var(--texte);
+  font: inherit;
+}
+.simulateur-formulaire select:disabled {
+  opacity: 0.55;
+}
+.simulateur-formulaire .bouton {
+  justify-self: start;
+}
+.simulation-scenario {
+  margin: 0 0 1rem;
+  font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.6rem);
+  font-weight: 700;
+}
+.chiffres-heros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1rem;
+}
+.chiffre-heros {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 1.2rem 1.4rem;
+  border-radius: var(--rayon);
+  background: var(--surface);
+  box-shadow: var(--ombre);
+}
+.chiffre-heros strong {
+  font-size: clamp(2.4rem, 1.8rem + 3vw, 3.6rem);
+  line-height: 1;
+  color: var(--accent-rouge);
+  font-variant-numeric: tabular-nums;
+}
+[data-theme="light"] .chiffre-heros strong {
+  color: #b3122a;
+}
+.simulation-titre {
+  margin-top: 2rem;
+  font-size: 1.25rem;
+}
+.simulation-services {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+.simulation-services li {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-petit);
+  background: var(--surface);
+}
+.simulation-services__valeur {
+  font-size: 1.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.simulation-services__libelle {
+  font-weight: 700;
+}
+.simulation-services__aide {
+  font-size: 0.88rem;
+  color: var(--texte-secondaire);
+}
+.barres-simulation {
+  display: grid;
+  gap: 0.55rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.barres-simulation li {
+  display: grid;
+  grid-template-columns: minmax(8rem, 13rem) minmax(4rem, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+.barres-simulation__piste {
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.barres-simulation__barre {
+  display: block;
+  width: var(--part, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-rouge);
+  transition: width 0.4s var(--adouci);
+}
+[data-theme="light"] .barres-simulation__barre {
+  background: #c41e3a;
+}
+.barres-simulation__nom {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.barres-simulation__valeur {
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .barres-simulation li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.2rem 0.75rem;
+  }
+  .barres-simulation__piste {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+.grille-encadres-simulation {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 1.25rem;
+  margin-top: 2.5rem;
+}
+.grille-encadres-simulation h2 {
+  font-size: 1.2rem;
+  margin-top: 0;
+}
+.simulation-partage__phrase {
+  overflow-wrap: anywhere;
+  padding: 0.8rem 1rem;
+  border-left: 3px solid var(--bleu-france);
+  background: var(--surface-2);
+  border-radius: var(--rayon-petit);
+}
+.simulation-partage__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.simulation-commune {
+  display: none;
+}
+.js .simulation-commune {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+}
+.simulation-commune__reponse ul {
+  margin: 0.4rem 0;
+  padding-left: 1.2rem;
+}
+.encadre-hypotheses,
+.encadre-lecon,
+.encadre-precedent {
+  padding: 1.25rem 1.4rem;
+  border-radius: var(--rayon);
+  border: 1px solid var(--bordure-forte);
+}
+.encadre-hypotheses ul {
+  margin: 0 0 0.75rem;
+  padding-left: 1.2rem;
+}
+.encadre-lecon {
+  border-color: var(--accent-bleu);
+}
+.encadre-precedent {
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--jaune-europe);
+}
+
 /* ---------------------------------------------------------------- Remonter en haut */
 
 .remonter {
@@ -2830,7 +3063,51 @@ select:focus {
   }
 }
 
+/* Bandeau d'actualité (accueil) et lien vers le simulateur (fiche) */
+.bandeau-actualite {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--bordure);
+}
+.lien-simulateur {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+/* Dossiers */
+.tableau-dossier th[scope="row"] {
+  text-align: left;
+  white-space: normal;
+}
+.kit-questions li {
+  margin-bottom: 0.8rem;
+}
+.kit-questions p {
+  margin: 0.2rem 0 0;
+}
+.actions-dossier {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.js .kit-impression {
+  display: block;
+}
+.kit-impression {
+  display: none;
+}
+
 @media print {
+  .bandeau-demo,
+  .bandeau-actualite,
+  .fil-ariane,
+  .actions-dossier,
+  .kit-impression,
+  .js .kit-impression,
   .remonter,
   .entete,
   .pied,

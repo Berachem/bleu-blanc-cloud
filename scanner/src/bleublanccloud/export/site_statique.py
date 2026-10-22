@@ -237,6 +237,15 @@ def ecrire_export(
         ],
     )
     observatoire = [o for o in organisations if o.type != "sur_demande"]
+    # Simulateur « Et si… ? » : dépendances de chaque collectivité (aucune vulnérabilité)
+    from bleublanccloud.simulation import construire_export
+    from bleublanccloud.simulation import ecrire_export as ecrire_simulations
+
+    noms_regions = {o.region: o.region_nom for o in observatoire if o.region and o.region_nom}
+    ecrire_simulations(
+        dossier / "simulations.json",
+        construire_export(observatoire, referentiels, noms_regions),
+    )
     # La date de campagne ne dépend que de l'observatoire (les demandes arrivent chaque jour)
     dates = [o.date_scan for o in observatoire] or [o.date_scan for o in organisations]
     _ecrire(
@@ -253,12 +262,10 @@ def ecrire_export(
     return rapport
 
 
-def exporter(
-    base: Base,
-    referentiels: Referentiels,
-    dossier: Path,
-) -> RapportExport:
-    """Exporte le dernier scan noté de chaque organisation (avec le contour des communes)."""
+def organisations_a_exporter(
+    base: Base, referentiels: Referentiels
+) -> tuple[list[OrganisationExport], list[str]]:
+    """Dernier scan noté de chaque organisation, au format du site (retraits écartés)."""
     departements = base.territoires("departement")
     regions = base.territoires("region")
     noms_departements = {code: nom for code, (nom, _) in departements.items()}
@@ -287,9 +294,20 @@ def exporter(
                 contour,
             )
         )
+    return organisations, ignorees
+
+
+def exporter(
+    base: Base,
+    referentiels: Referentiels,
+    dossier: Path,
+) -> RapportExport:
+    """Exporte le dernier scan noté de chaque organisation (avec le contour des communes)."""
+    organisations, ignorees = organisations_a_exporter(base, referentiels)
     # Copies des anciennes photos Wikimedia (remplacées par la carte de situation)
     if (dossier / "photos").is_dir():
         shutil.rmtree(dossier / "photos")
+    departements = base.territoires("departement")
     rapport_export = ecrire_export(dossier, organisations, departements, referentiels)
     rapport_export.ignorees = ignorees
     return rapport_export

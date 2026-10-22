@@ -14,7 +14,8 @@
     "verifier": "astro check && tsc --noEmit -p tsconfig.json",
     "verifier:externe": "node scripts/verifier-requetes.mjs",
     "test": "node --experimental-strip-types --no-warnings --test src/lib/*.test.ts",
-    "image-partage": "node scripts/generer-image-partage.mjs"
+    "image-partage": "node scripts/generer-image-partage.mjs",
+    "kit-pdf": "node scripts/generer-kit-pdf.mjs"
   },
   "engines": {
     "node": ">=22.12.0"

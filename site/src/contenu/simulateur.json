@@ -1,0 +1,48 @@
+{
+  "prereglages": [
+    {
+      "slug": "microsoft-coupe-acces",
+      "titre": "Et si Microsoft coupait l'accès ?",
+      "accroche": "Hypothèse : Microsoft cesse de servir les collectivités françaises (Azure, Microsoft 365, messagerie Outlook).",
+      "scenario": "panne",
+      "fournisseur": "microsoft",
+      "precedent": null
+    },
+    {
+      "slug": "panne-ovhcloud",
+      "titre": "Et si OVHcloud subissait une panne majeure ?",
+      "accroche": "Hypothèse : tous les services d'OVHcloud deviennent indisponibles en même temps.",
+      "scenario": "panne",
+      "fournisseur": "ovhcloud",
+      "precedent": {
+        "texte": "Dans la nuit du 9 au 10 mars 2021, un incendie a détruit le datacenter SBG2 d'OVHcloud à Strasbourg et privé de courant les bâtiments voisins ; de nombreux sites sont restés hors ligne plusieurs jours.",
+        "sources": [
+          { "titre": "OVHcloud : « Incendie sur notre site de Strasbourg »", "url": "https://community.ovhcloud.com/t/incendie-sur-notre-site-de-strasbourg/22111" },
+          { "titre": "IT-Connect : un incendie ravage le datacenter SBG2", "url": "https://www.it-connect.fr/ovhcloud-un-incendie-ravage-le-datacenter-sgb2-situe-a-strasbourg/" }
+        ]
+      }
+    },
+    {
+      "slug": "panne-cloudflare",
+      "titre": "Et si Cloudflare tombait ?",
+      "accroche": "Hypothèse : le réseau de Cloudflare (CDN, DNS, protection) ne répond plus.",
+      "scenario": "panne",
+      "fournisseur": "cloudflare",
+      "precedent": {
+        "texte": "Le 18 novembre 2025, une panne mondiale de Cloudflare, déclenchée par un fichier de configuration défectueux, a rendu inaccessibles de nombreux sites qui passent par son réseau.",
+        "sources": [
+          { "titre": "Cloudflare : compte rendu de la panne du 18 novembre 2025", "url": "https://blog.cloudflare.com/18-november-2025-outage/" },
+          { "titre": "Pinggy : la panne Cloudflare du 18 novembre 2025", "url": "https://pinggy.io/blog/cloudflare_outage_november_18_2025/" }
+        ]
+      }
+    },
+    {
+      "slug": "coupure-cloud-act",
+      "titre": "Et si les acteurs soumis au Cloud Act coupaient l'accès ?",
+      "accroche": "Hypothèse : tous les fournisseurs soumis au Cloud Act américain cessent de servir les collectivités françaises (sanctions, décision politique ou rupture contractuelle).",
+      "scenario": "cloud_act",
+      "fournisseur": null,
+      "precedent": null
+    }
+  ]
+}

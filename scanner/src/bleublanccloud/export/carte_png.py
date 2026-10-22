@@ -175,7 +175,7 @@ def hachures(x: int, y: int) -> float:
 # --------------------------------------------------------------------------- #
 
 
-def _date(valeur: datetime | None) -> str:
+def date_en_francais(valeur: datetime | None) -> str:
     mois = (
         "janvier",
         "février",
@@ -225,7 +225,7 @@ def dessiner_carte(
         f"{nombre_organisations:,} organisation{'s' if nombre_organisations > 1 else ''}".replace(
             ",", "\u202f"
         )
-        + f" · dernier scan le {_date(dernier_scan)} · "
+        + f" · dernier scan le {date_en_francais(dernier_scan)} · "
         f"{_pourcentage(part_provisoire)} de notes provisoires",
         21,
         56,

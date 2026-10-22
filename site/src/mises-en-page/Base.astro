@@ -12,13 +12,18 @@ import { DATE_BUILD, IMAGE_PARTAGE, VERSION_SITE } from "../lib/version";
 interface Props {
   titre: string;
   description?: string;
+  /** Image de partage propre à la page (1200 × 630, servie par le site), sinon l'image du site. */
+  image?: { chemin: string; texte: string };
 }
-const { titre, description = SITE.description } = Astro.props;
+const { titre, description = SITE.description, image } = Astro.props;
 const titreComplet = titre === SITE.nom ? `${SITE.nom} — souveraineté numérique des services publics` : `${titre} — ${SITE.nom}`;
 const canonique = new URL(Astro.url.pathname, SITE.url).href;
 const cheminCourant = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : `${Astro.url.pathname}/`;
 const demonstration = meta().donnees_demonstration;
-const imagePartage = new URL(`${IMAGE_PARTAGE.chemin}?v=${IMAGE_PARTAGE.empreinte}`, SITE.url).href;
+const imagePartage = image
+  ? new URL(image.chemin, SITE.url).href
+  : new URL(`${IMAGE_PARTAGE.chemin}?v=${IMAGE_PARTAGE.empreinte}`, SITE.url).href;
+const texteImage = image?.texte ?? IMAGE_PARTAGE.texte;
 ---
 <!doctype html>
 <html lang="fr" data-theme="dark">
@@ -47,7 +52,7 @@ const imagePartage = new URL(`${IMAGE_PARTAGE.chemin}?v=${IMAGE_PARTAGE.empreint
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content={String(IMAGE_PARTAGE.largeur)} />
     <meta property="og:image:height" content={String(IMAGE_PARTAGE.hauteur)} />
-    <meta property="og:image:alt" content={IMAGE_PARTAGE.texte} />
+    <meta property="og:image:alt" content={texteImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={titreComplet} />
     <meta name="twitter:description" content={description} />

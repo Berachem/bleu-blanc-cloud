@@ -21,8 +21,19 @@ def test_chaque_fournisseur_a_une_source(referentiels: Referentiels) -> None:
 
 
 def test_les_faits_non_verifies_sont_signales(referentiels: Referentiels) -> None:
-    # Tant qu'aucune relecture humaine n'a eu lieu, tout reste « a_verifier ».
-    assert all(f.a_verifier for f in referentiels.fournisseurs.values())
+    # Un fournisseur ne sort de « a_verifier » qu'avec des sources recoupées et la date de la
+    # vérification ; la grande majorité du référentiel reste à vérifier.
+    verifies = [f for f in referentiels.fournisseurs.values() if not f.a_verifier]
+    assert len(verifies) < len(referentiels.fournisseurs) / 2
+    for fournisseur in verifies:
+        assert len(fournisseur.sources) >= 2, fournisseur.id
+        assert fournisseur.remarque and "Vérifié le" in fournisseur.remarque, fournisseur.id
+
+
+def test_fournisseurs_des_simulations_verifies(referentiels: Referentiels) -> None:
+    # Préréglages du simulateur « Et si… ? » du site
+    for identifiant in ("microsoft", "ovhcloud", "cloudflare"):
+        assert not referentiels.fournisseurs[identifiant].a_verifier, identifiant
 
 
 def test_liste_initiale_du_cahier_des_charges(referentiels: Referentiels) -> None:
