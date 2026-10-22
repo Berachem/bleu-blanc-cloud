@@ -375,6 +375,8 @@ class RapportIA(BaseModel):
 | `/methodologie` | Contenu de `docs/methodologie.md` + version |
 | `/alternatives` | Alternatives françaises et européennes par catégorie |
 | `/a-propos` | Qui, pourquoi, open source, limites, indépendance vis-à-vis de l'État |
+| `/simulateur` | Simulateur « Et si… ? » (panne d'un fournisseur vérifié ou coupure Cloud Act), préréglages `/simulateur/<slug>` pré-rendus ; totaux seulement, jamais de liste nominative ni d'information de vulnérabilité |
+| `/dossiers` | Dossiers pédagogiques (« Souveraineté ≠ sécurité », kit imprimable et PDF) ; chiffres injectés depuis les exports |
 | `/retrait` | Demande d'exclusion ou droit de réponse (adresse de contact) |
 | `/mentions-legales` | Éditeur et hébergeur (me demander les informations à afficher) |
 | `404` | Page d'erreur dans le thème |
@@ -458,6 +460,7 @@ bbcloud rapports generer [--max N] [--dry-run]
 bbcloud exporter --vers ../site/public/donnees
 bbcloud publier                                   # export + build + push Pages
 bbcloud stats [--json F] [--image F.png]          # chiffres clés + carte PNG 1080 × 1080
+bbcloud simulations exporter                      # simulateur : dépendances + images de partage
 ```
 
 ---

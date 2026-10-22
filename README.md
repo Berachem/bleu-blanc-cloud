@@ -35,6 +35,8 @@ Bleu Blanc Cloud rend cette dépendance **visible, mesurable et vérifiable**, o
 - **Score de 0 à 100 et note de A à E** selon une méthodologie publique et versionnée ; chaque point retiré est justifié par un constat et sa preuve.
 - **Rapports rédigés par Mistral** pour les décideurs : synthèse, risques et plan de migration limité aux alternatives du référentiel. L'IA ne calcule jamais le score ; chaque texte généré est signalé comme tel.
 - **Site 100 % statique** : carte de France par département, classements filtrables, fiche détaillée par organisation avec carte de situation zoomable, recherche instantanée, mode sombre, accessibilité (RGAA / WCAG 2.1 AA visés).
+- **Simulateur « Et si… ? »** : si un fournisseur tombe ou coupe l'accès (panne, ou coupure de tous les acteurs soumis au Cloud Act), combien de collectivités sont touchées et sur quels services. Totaux seulement, dépendances déjà publiques sur les fiches (aucune information de vulnérabilité), préréglages partageables avec image de partage générée par le serveur.
+- **Dossiers pédagogiques** : « Souveraineté ≠ sécurité », avec un kit « 5 questions à poser à votre prestataire » imprimable et en PDF.
 - **Analyses sur demande** : tout visiteur peut faire analyser son site via un ticket Codeberg, traité par le serveur sans aucun port entrant.
 - **Cohérent avec son sujet** : aucun cookie, aucun traceur, aucune ressource externe hormis le fond de plan de l'IGN (établissement public français) sur les cartes de situation, désactivable ; hébergement sur Codeberg Pages (Allemagne), zone DNS chez OVHcloud (France) ; le site obtient la note A sur son propre scan.
 
@@ -113,6 +115,7 @@ Pendant le développement, seuls `berachem.dev`, `example.org` et `example.com` 
 | `bbcloud campagne lancer [--limite N] [--dry-run]` | campagne de scan (confirmation demandée) |
 | `bbcloud scores recalculer [--dry-run]` | recalcul des scores après une mise à jour du référentiel, sans nouveau scan |
 | `bbcloud rapports generer [--max N] [--dry-run]` | rapports IA, avec estimation du coût |
+| `bbcloud simulations exporter` | dépendances par collectivité pour le simulateur et images de partage des préréglages (appelée par `publier`) |
 | `bbcloud stats [--json FICHIER] [--image FICHIER]` | chiffres clés de l'observatoire (part des notes provisoires pour chaque chiffre) et carte des départements en PNG 1080 × 1080 |
 | `bbcloud exporter --vers ../site/public/donnees` | fichiers JSON du site |
 | `bbcloud publier` | export, build et publication sur Codeberg Pages |
