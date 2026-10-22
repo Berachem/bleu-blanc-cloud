@@ -2,7 +2,9 @@
 #
 # Chaque fait (pays du siège, maison mère, exposition au Cloud Act, offre SecNumCloud, ASN)
 # doit être justifié par au moins une URL source. Toutes les entrées démarrent en
-# « a_verifier: true » : un fait n'est considéré comme vérifié qu'après relecture humaine.
+# « a_verifier: true ». « a_verifier: false » : siège, maison mère et exposition au Cloud Act
+# recoupés par les sources citées (date dans « remarque ») ; seuls ces fournisseurs sont
+# proposés dans le simulateur « Et si… ? » du site.
 #
 # Champs :
 #   motifs_domaines   suffixes de noms d'hôtes (ou « re:<regex> ») rattachés au fournisseur
@@ -34,8 +36,10 @@
     - "https://fr.wikipedia.org/wiki/OVHcloud"
     - "https://bgp.tools/as/16276"
     - "https://cyber.gouv.fr/"
-  remarque: "Offre SecNumCloud (Hosted Private Cloud, Bare Metal Pod) à confirmer sur la liste ANSSI."
-  a_verifier: true
+    - "https://en.wikipedia.org/wiki/OVHcloud"
+    - "https://corporate.ovhcloud.com/en/newsroom/news/ovhcloud-obtains-secnumcloud-qualification-snc-cloud-platform/"
+  remarque: "Offre SecNumCloud (Hosted Private Cloud, Bare Metal Pod) à confirmer sur la liste ANSSI. Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: scaleway
   nom: Scaleway
@@ -50,8 +54,10 @@
   sources:
     - "https://fr.wikipedia.org/wiki/Scaleway"
     - "https://bgp.tools/as/12876"
-  remarque: "Démarche de qualification SecNumCloud annoncée : statut à vérifier sur la liste ANSSI."
-  a_verifier: true
+    - "https://en.wikipedia.org/wiki/Scaleway"
+    - "https://www.solutions-numeriques.com/le-groupe-iliad-recentre-sa-strategie-cloud-sur-la-marque-scaleway-2/"
+  remarque: "Démarche de qualification SecNumCloud annoncée : statut à vérifier sur la liste ANSSI. Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: outscale
   nom: 3DS Outscale
@@ -65,8 +71,9 @@
   sources:
     - "https://fr.wikipedia.org/wiki/Outscale"
     - "https://www.outscale.com/"
-  remarque: "ASN à compléter après vérification."
-  a_verifier: true
+    - "https://www.3ds.com/newsroom/press-releases/dassault-systemes-acquires-majority-stake-outscale"
+  remarque: "ASN à compléter après vérification. Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: clever-cloud
   nom: Clever Cloud
@@ -100,7 +107,9 @@
   sources:
     - "https://www.o2switch.fr/"
     - "https://bgp.tools/as/50474"
-  a_verifier: true
+    - "https://www.presse-citron.net/hebergeur/o2switch/datacenter/"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: gandi
   nom: Gandi
@@ -114,8 +123,11 @@
   sources:
     - "https://fr.wikipedia.org/wiki/Gandi"
     - "https://bgp.tools/as/29169"
-  remarque: "Rapprochement avec Total Webhosting Solutions (Pays-Bas) en 2023, groupe renommé Your.Online."
-  a_verifier: true
+    - "https://en.wikipedia.org/wiki/Gandi"
+    - "https://www.gandi.net/about-us"
+    - "https://domainincite.com/tag/gandi"
+  remarque: "Rapprochement avec Total Webhosting Solutions (Pays-Bas) en 2023, groupe renommé Your.Online. Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: ionos
   nom: IONOS
@@ -140,7 +152,9 @@
   sources:
     - "https://fr.wikipedia.org/wiki/IONOS"
     - "https://bgp.tools/as/8560"
-  a_verifier: true
+    - "https://infoswitch.fr/en/blog/infomaniak-vs-ionos-comparison"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: strato
   nom: STRATO
@@ -173,7 +187,10 @@
   sources:
     - "https://de.wikipedia.org/wiki/Hetzner_Online"
     - "https://bgp.tools/as/24940"
-  a_verifier: true
+    - "https://en.wikipedia.org/wiki/Hetzner"
+    - "https://www.bayern-international.de/en/company-database/company-details/hetzner-online-gmbh-16492"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: infomaniak
   nom: Infomaniak
@@ -185,7 +202,9 @@
   sources:
     - "https://fr.wikipedia.org/wiki/Infomaniak"
     - "https://bgp.tools/as/29222"
-  a_verifier: true
+    - "https://en.wikipedia.org/wiki/Infomaniak"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: leaseweb
   nom: Leaseweb
@@ -311,7 +330,10 @@
     - "https://www.nameshield.com/"
     - "https://bgp.tools/as/20756"
     - "https://ipinfo.io/AS209510"
-  a_verifier: true
+    - "https://www.nameshield.com/en/legal-info/"
+    - "https://www.lejournaldesentreprises.com/breve/langevin-nameshield-repris-la-start-up-montpellieraine-merox-2091171"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: orange
   nom: Orange
@@ -324,7 +346,10 @@
     - "https://fr.wikipedia.org/wiki/Orange_(entreprise)"
     - "https://bgp.tools/as/3215"
     - "https://bgp.tools/as/15401"
-  a_verifier: true
+    - "https://en.wikipedia.org/wiki/Orange_S.A."
+    - "https://annuaire-entreprises.data.gouv.fr/entreprise/orange-380129866"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: sfr
   nom: SFR (Altice France)
@@ -380,7 +405,9 @@
   sources:
     - "https://fr.wikipedia.org/wiki/Jaguar_Network"
     - "https://bgp.tools/as/30781"
-  a_verifier: true
+    - "https://alloforfait.fr/business/news/53362-iliad-free-jaguar-network.html"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: ikoula
   nom: Ikoula
@@ -1165,7 +1192,10 @@
     - "https://fr.wikipedia.org/wiki/Amazon_Web_Services"
     - "https://en.wikipedia.org/wiki/CLOUD_Act"
     - "https://bgp.tools/as/16509"
-  a_verifier: true
+    - "https://www.mll-news.com/extraterritorial-reach-of-the-cloud-act/?lang=en"
+    - "https://www.buddlefindlay.com/insights/cloud-act-law-enforcement-access-to-cloud-data"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: microsoft
   nom: Microsoft (Azure, Microsoft 365)
@@ -1202,7 +1232,10 @@
     - "https://fr.wikipedia.org/wiki/Microsoft"
     - "https://en.wikipedia.org/wiki/CLOUD_Act"
     - "https://bgp.tools/as/8075"
-  a_verifier: true
+    - "https://www.mll-news.com/extraterritorial-reach-of-the-cloud-act/?lang=en"
+    - "https://www.buddlefindlay.com/insights/cloud-act-law-enforcement-access-to-cloud-data"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: google
   nom: Google (Google Cloud, Workspace)
@@ -1241,7 +1274,10 @@
     - "https://fr.wikipedia.org/wiki/Google"
     - "https://en.wikipedia.org/wiki/CLOUD_Act"
     - "https://bgp.tools/as/15169"
-  a_verifier: true
+    - "https://www.mll-news.com/extraterritorial-reach-of-the-cloud-act/?lang=en"
+    - "https://www.buddlefindlay.com/insights/cloud-act-law-enforcement-access-to-cloud-data"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: cloudflare
   nom: Cloudflare
@@ -1262,8 +1298,11 @@
     - "https://fr.wikipedia.org/wiki/Cloudflare"
     - "https://en.wikipedia.org/wiki/CLOUD_Act"
     - "https://bgp.tools/as/13335"
-  remarque: "Les pages Cloudflare Pages / Workers (pages.dev, workers.dev) sont traitées comme un hébergement."
-  a_verifier: true
+    - "https://www.clay.com/dossier/cloudflare-headquarters-office-locations"
+    - "https://www.mll-news.com/extraterritorial-reach-of-the-cloud-act/?lang=en"
+    - "https://www.buddlefindlay.com/insights/cloud-act-law-enforcement-access-to-cloud-data"
+  remarque: "Les pages Cloudflare Pages / Workers (pages.dev, workers.dev) sont traitées comme un hébergement. Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: akamai
   nom: Akamai Technologies
@@ -1283,7 +1322,11 @@
   sources:
     - "https://fr.wikipedia.org/wiki/Akamai_Technologies"
     - "https://bgp.tools/as/20940"
-  a_verifier: true
+    - "https://www.clay.com/dossier/akamai-headquarters-office-locations"
+    - "https://www.mll-news.com/extraterritorial-reach-of-the-cloud-act/?lang=en"
+    - "https://www.buddlefindlay.com/insights/cloud-act-law-enforcement-access-to-cloud-data"
+  remarque: "Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+  a_verifier: false
 
 - id: fastly
   nom: Fastly

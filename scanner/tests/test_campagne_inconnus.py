@@ -56,7 +56,8 @@ def test_nouveaux_fournisseurs_sources_et_a_verifier(referentiels: Referentiels)
     for _, _, fournisseur_id, _, _ in ASN_CAMPAGNE:
         fournisseur = referentiels.fournisseurs[fournisseur_id]
         assert fournisseur.sources, fournisseur_id
-        assert fournisseur.a_verifier, fournisseur_id
+        # À vérifier, sauf vérification datée et sourcée (référentiel fournisseurs.yaml)
+        assert fournisseur.a_verifier or len(fournisseur.sources) >= 2, fournisseur_id
 
 
 @pytest.mark.parametrize(

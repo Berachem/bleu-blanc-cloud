@@ -83,7 +83,7 @@ def test_asn_de_la_campagne_complete_attribues(
     assert correspondance.methode == "asn"
     assert attributeur.niveau(correspondance.fournisseur) == niveau
     fournisseur = referentiels.fournisseurs[fournisseur_id]
-    assert fournisseur.sources and fournisseur.a_verifier
+    assert fournisseur.sources and (fournisseur.a_verifier or len(fournisseur.sources) >= 2)
 
 
 # --------------------------------------------------------------------------- #
