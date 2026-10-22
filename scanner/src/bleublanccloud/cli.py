@@ -46,6 +46,8 @@ app_demandes = typer.Typer(
 app.add_typer(app_demandes, name="demandes")
 app_scores = typer.Typer(help="Scores : recalcul sans rescanner, couverture de l'observatoire.")
 app.add_typer(app_scores, name="scores")
+app_simulations = typer.Typer(help="Simulateur « Et si… ? » : dépendances et images de partage.")
+app.add_typer(app_simulations, name="simulations")
 
 console = Console()
 console_erreur = Console(stderr=True)
@@ -1026,6 +1028,63 @@ def stats(
         )
         carte.enregistrer(chemin)
         console.print(f"[green]✓[/] Carte des départements (1080 × 1080) : {chemin}")
+
+
+@app_simulations.command("exporter")
+def simulations_exporter(
+    vers: Annotated[
+        Path | None,
+        typer.Option(help="Fichier JSON (défaut : donnees/stats/simulations.json)."),
+    ] = None,
+    images: Annotated[
+        Path | None,
+        typer.Option(
+            help="Dossier des images de partage des préréglages "
+            "(défaut : site/public/partage/simulateur)."
+        ),
+    ] = None,
+) -> None:
+    """Dépendances de chaque collectivité (dernier scan noté) et images 1200 × 630 des
+    préréglages. Aucune information de vulnérabilité : uniquement les fournisseurs publics."""
+    from bleublanccloud.export.image_simulation import dessiner_partage
+    from bleublanccloud.export.site_statique import organisations_a_exporter
+    from bleublanccloud.simulation import (
+        agreger,
+        construire_export,
+        date_donnees,
+        ecrire_export,
+        fournisseurs_tombes,
+        lire_prereglages,
+    )
+
+    parametres = obtenir_parametres()
+    referentiels = referentiels_par_defaut()
+    with Base(parametres.base_sqlite) as base:
+        organisations, _ = organisations_a_exporter(base, referentiels)
+        noms_regions = {code: nom for code, (nom, _) in base.territoires("region").items()}
+    export = construire_export(organisations, referentiels, noms_regions)
+    chemin = vers or parametres.base_sqlite.parent / "stats" / "simulations.json"
+    ecrire_export(chemin, export)
+    console.print(
+        f"[green]✓[/] {export['meta']['nombre_collectivites']} collectivité(s), "
+        f"{len(export['fournisseurs'])} fournisseur(s) : {chemin}"
+    )
+    if not export["collectivites"]:
+        console.print("[yellow]Aucune collectivité notée : pas d'image de partage.[/]")
+        return
+    dossier_images = images or RACINE_PROJET / "site" / "public" / "partage" / "simulateur"
+    for prereglage in lire_prereglages():
+        tombes = fournisseurs_tombes(export, prereglage["scenario"], prereglage["fournisseur"])
+        resultat = agreger(export["collectivites"], tombes)
+        image = dessiner_partage(
+            prereglage, resultat, date_donnees(export), parametres.domaine_site
+        )
+        image.enregistrer(dossier_images / f"{prereglage['slug']}.png")
+        console.print(
+            f"  {prereglage['slug']} : {resultat['touchees']} collectivité(s) touchée(s), "
+            f"{resultat['sites_hors_ligne']} site(s) hors ligne"
+        )
+    console.print(f"[green]✓[/] Images de partage : {dossier_images}")
 
 
 @app.command()

@@ -28,6 +28,8 @@ scanner/src/bleublanccloud/referentiels/telechargements/*
 # Site
 site/node_modules/
 site/dist/
+# Images de partage du simulateur (régénérées à chaque publication)
+site/public/partage/simulateur/
 site/.astro/
 site/public/donnees/*
 !site/public/donnees/.gitkeep

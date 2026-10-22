@@ -271,6 +271,8 @@ def constat_hebergement(
 
     if correspondance.role == "cdn" and niveau in ("B", "D"):
         cle = "cdn"
+        # Le CDN reste identifié même si le constat est rattaché à l'origine (simulateur)
+        preuve["cdn"] = fournisseur.id
         origines = attributeur.par_en_tetes(en_tetes)
         if origines:
             origine = origines[0]

@@ -25,6 +25,8 @@ CLONE_PAGES="${CLONE_PAGES:-$RACINE/donnees/depot-pages}"
 
 echo "▶ Export des données"
 (cd "$RACINE/scanner" && uv run bbcloud exporter --vers "$RACINE/site/public/donnees")
+# Simulateur « Et si… ? » : dépendances (copie dans donnees/stats) et images de partage
+(cd "$RACINE/scanner" && uv run bbcloud simulations exporter)
 if [ "${EXIGER_DONNEES:-0}" = "1" ]; then
   # Organisations de l'observatoire + fiches d'analyses sur demande
   nombre=0
