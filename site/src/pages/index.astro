@@ -9,6 +9,8 @@ import Base from "../mises-en-page/Base.astro";
 import { departements, meta, observatoire, organisations } from "../lib/donnees";
 import { URL_DEMANDE_FORMULAIRE } from "../lib/demandes";
 import { date, nombre } from "../lib/format";
+import { DATE_BUILD } from "../lib/version";
+import contenuDossiers from "../contenu/dossiers.json";
 
 // Statistiques et derniers scans : observatoire seulement (hors analyses sur demande)
 const entrees = observatoire();
@@ -27,6 +29,9 @@ const repartition = ["A", "B", "C", "D", "E"].map((note) => ({
   nombre: entrees.filter((e) => e.note === note).length,
 }));
 const infos = meta();
+// Bandeau d'actualité : disparaît au premier build après sa date d'expiration
+const actualite = contenuDossiers.actualite;
+const actualiteVisible = DATE_BUILD < new Date(`${actualite.expire_le}T23:59:59Z`);
 const chiffres = [
   { valeur: total, suffixe: "", libelle: "organisations analysées", alerte: false },
   { valeur: Math.round(moyenne), suffixe: "/100", libelle: "score moyen", alerte: false },
@@ -35,6 +40,13 @@ const chiffres = [
 ];
 ---
 <Base titre="Bleu Blanc Cloud">
+  {
+    actualiteVisible && (
+      <p class="bandeau-actualite">
+        <a href={actualite.lien}>{actualite.texte} <span aria-hidden="true">→</span></a>
+      </p>
+    )
+  }
   <section class="accroche" aria-labelledby="titre-accueil">
     <div class="accroche__decor" aria-hidden="true"><EtoilesEurope rayonEtoile={8} /></div>
     <div class="conteneur">

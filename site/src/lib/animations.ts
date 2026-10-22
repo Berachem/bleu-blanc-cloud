@@ -82,7 +82,7 @@ function brancherMenu(): void {
     },
     { signal },
   );
-  matchMedia("(min-width: 1120px)").addEventListener(
+  matchMedia("(min-width: 1280px)").addEventListener(
     "change",
     (evenement) => {
       if (evenement.matches) basculer(false);

@@ -392,8 +392,8 @@ th {
   color: var(--texte-secondaire);
   text-decoration: none;
   font-weight: 700;
-  font-size: 0.95rem;
-  padding: 0.5rem 1rem;
+  font-size: 0.92rem;
+  padding: 0.5rem 0.72rem;
   border-radius: 999px;
   white-space: nowrap;
   transition: color 0.2s ease, background-color 0.2s ease;
@@ -518,8 +518,8 @@ th {
 
 /* Téléphones et tablettes : [logo] ………… [loupe] [thème] [☰], navigation masquée derrière le
    hamburger. Sans JavaScript, elle reste affichée en grille (aucun lien inaccessible).
-   Seuil : largeur nécessaire au menu complet, loupe comprise, sur une ligne (≈ 1 110 px). */
-@media (max-width: 1119px) {
+   Seuil : largeur nécessaire au menu complet (8 entrées), loupe comprise, sur une ligne (≈ 1 270 px). */
+@media (max-width: 1279px) {
   .entete .conteneur {
     min-height: 68px;
     gap: 0.5rem;
@@ -613,7 +613,7 @@ th {
    Les ancres (#rapport-ia, #cookies…) et les éléments qui prennent le focus s'arrêtent sous
    l'en-tête. Marge posée sur le contenu et non « scroll-padding » sur la page : sinon,
    Chromium fait défiler la page dès qu'un bouton de l'en-tête collant reçoit le focus. */
-@media (max-width: 1119px) {
+@media (max-width: 1279px) {
   main,
   main *,
   .pied * {
@@ -2634,7 +2634,7 @@ select:focus {
   scroll-margin-top: 1rem;
 }
 /* Sous l'en-tête collant des téléphones et tablettes */
-@media (max-width: 1119px) {
+@media (max-width: 1279px) {
   #rapport-ia {
     scroll-margin-top: 5.5rem;
   }
@@ -3063,7 +3063,51 @@ select:focus {
   }
 }
 
+/* Bandeau d'actualité (accueil) et lien vers le simulateur (fiche) */
+.bandeau-actualite {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--bordure);
+}
+.lien-simulateur {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+/* Dossiers */
+.tableau-dossier th[scope="row"] {
+  text-align: left;
+  white-space: normal;
+}
+.kit-questions li {
+  margin-bottom: 0.8rem;
+}
+.kit-questions p {
+  margin: 0.2rem 0 0;
+}
+.actions-dossier {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.js .kit-impression {
+  display: block;
+}
+.kit-impression {
+  display: none;
+}
+
 @media print {
+  .bandeau-demo,
+  .bandeau-actualite,
+  .fil-ariane,
+  .actions-dossier,
+  .kit-impression,
+  .js .kit-impression,
   .remonter,
   .entete,
   .pied,

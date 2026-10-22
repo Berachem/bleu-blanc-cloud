@@ -1,0 +1,44 @@
+---
+// Kit imprimable « 5 questions à poser à votre prestataire » (aucun chiffre) : sert aussi de
+// source au PDF versionné (npm run kit-pdf).
+import Base from "../../../../mises-en-page/Base.astro";
+import { SITE } from "../../../../config";
+import { BONUS_KIT, QUESTIONS_KIT } from "../../../../lib/kit";
+---
+<Base
+  titre="Kit : 5 questions à poser à votre prestataire"
+  description="Cinq questions simples pour vérifier la souveraineté et la sécurité de vos services numériques auprès de votre prestataire."
+>
+  <article class="conteneur prose kit">
+    <header class="entete-page">
+      <span class="surtitre">Kit · Souveraineté ≠ sécurité</span>
+      <h1>5 questions à poser à votre prestataire</h1>
+      <p class="chapeau">
+        Être hébergé en Europe protège de lois étrangères. Seules les mises à jour protègent des
+        failles. Ces questions couvrent les deux.
+      </p>
+    </header>
+    <ol class="kit-questions">
+      {
+        QUESTIONS_KIT.map((q) => (
+          <li>
+            <strong>{q.titre}</strong>
+            <p>{q.texte}</p>
+          </li>
+        ))
+      }
+    </ol>
+    <p><strong>Bonus :</strong> {BONUS_KIT}</p>
+    <p class="texte-secondaire petit">
+      {SITE.nom} — observatoire indépendant de la souveraineté numérique des collectivités,
+      sans lien avec l'État. {SITE.url.replace("https://", "")}/dossiers/souverainete-securite/
+    </p>
+    <p class="kit-impression"><button type="button" class="bouton" data-imprimer>Imprimer le kit</button></p>
+  </article>
+</Base>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    document.querySelector("[data-imprimer]")?.addEventListener("click", () => window.print());
+  });
+</script>

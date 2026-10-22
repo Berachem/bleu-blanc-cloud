@@ -1,0 +1,27 @@
+---
+import Base from "../../mises-en-page/Base.astro";
+import contenu from "../../contenu/dossiers.json";
+import { date } from "../../lib/format";
+---
+<Base titre="Dossiers" description="Dossiers pédagogiques de Bleu Blanc Cloud pour les élus et les agents : souveraineté numérique, sécurité, dépendances.">
+  <div class="conteneur">
+    <header class="entete-page">
+      <span class="surtitre">Dossiers</span>
+      <h1>Dossiers</h1>
+      <p class="chapeau">Des explications simples pour les élus et les agents, à partir des données de l'observatoire.</p>
+    </header>
+    <ul class="grille-prereglages">
+      {
+        contenu.dossiers.map((d) => (
+          <li>
+            <a class="carte carte-prereglage" href={`/dossiers/${d.slug}/`}>
+              <strong>{d.titre}</strong>
+              <span class="texte-secondaire petit">{d.resume}</span>
+              <span class="texte-secondaire petit">Publié le {date(d.publie_le)}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Base>

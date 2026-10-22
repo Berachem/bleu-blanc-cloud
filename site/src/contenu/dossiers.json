@@ -1,0 +1,16 @@
+{
+  "dossiers": [
+    {
+      "slug": "souverainete-securite",
+      "titre": "Souveraineté ≠ sécurité : pourquoi il faut les deux",
+      "resume": "Être hébergé en Europe protège de lois étrangères, pas des failles. Ce qu'il faut savoir, et un kit de 5 questions à poser à votre prestataire.",
+      "publie_le": "2026-10-22",
+      "mis_a_jour_le": "2026-10-22"
+    }
+  ],
+  "actualite": {
+    "texte": "Failles PHP d'octobre 2026 : souveraineté et sécurité, ce qu'il faut savoir",
+    "lien": "/dossiers/souverainete-securite/",
+    "expire_le": "2026-11-30"
+  }
+}

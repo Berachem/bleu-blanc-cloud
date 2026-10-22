@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { SITE } from "../config";
 import { meta, observatoire } from "../lib/donnees";
+import { prereglages } from "../lib/simulateur";
 
 // Plan du site pour les moteurs de recherche (protocole sitemaps.org), généré au build sans
 // dépendance. Seules les fiches de l'observatoire y figurent : les fiches d'analyses sur
@@ -9,6 +10,10 @@ const PAGES_FIXES: { chemin: string; campagne?: boolean }[] = [
   { chemin: "/", campagne: true },
   { chemin: "/carte/", campagne: true },
   { chemin: "/classements/", campagne: true },
+  { chemin: "/simulateur/", campagne: true },
+  { chemin: "/dossiers/" },
+  { chemin: "/dossiers/souverainete-securite/", campagne: true },
+  { chemin: "/dossiers/souverainete-securite/kit/" },
   { chemin: "/alternatives/" },
   { chemin: "/methodologie/" },
   { chemin: "/a-propos/" },
@@ -28,6 +33,7 @@ export const GET: APIRoute = () => {
   const { date_campagne } = meta();
   const lignes = [
     ...PAGES_FIXES.map(({ chemin, campagne }) => url(chemin, campagne ? date_campagne : undefined)),
+    ...prereglages().map((p) => url(`/simulateur/${p.slug}/`, date_campagne)),
     ...[...observatoire()]
       .sort((a, b) => a.slug.localeCompare(b.slug))
       .map((e) => url(`/organisation/${encodeURIComponent(e.slug)}/`, e.date_scan)),
