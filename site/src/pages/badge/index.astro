@@ -1,0 +1,78 @@
+---
+// Page d'explication du badge, avec un exemple et la liste des organisations qui peuvent
+// l'afficher (notées A, note non provisoire).
+import Base from "../../mises-en-page/Base.astro";
+import { HAUTEUR_BADGE, LARGEUR_BADGE, texteAlternatif } from "../../lib/badge";
+import { badgePropose, donneesBadge } from "../../lib/badge-donnees";
+import { observatoire } from "../../lib/donnees";
+
+const eligibles = observatoire()
+  .filter(badgePropose)
+  .sort((a, b) => b.score - a.score || a.nom.localeCompare(b.nom, "fr"));
+const exemple = eligibles[0];
+---
+<Base
+  titre="Badge « Note A »"
+  description="Les collectivités notées A en souveraineté numérique peuvent afficher le badge Bleu Blanc Cloud sur leur site."
+>
+  <div class="conteneur prose">
+    <header class="entete-page">
+      <span class="surtitre">Badge</span>
+      <h1>Affichez votre note A</h1>
+      <p class="chapeau">
+        Les organisations notées A s'appuient sur des fournisseurs européens pour leur site, leur
+        messagerie et leur DNS. Elles peuvent le faire savoir avec ce badge, relié à leur fiche.
+      </p>
+    </header>
+
+    {
+      exemple && (
+        <div class="badge-exemples">
+          <img src={`/badge/${exemple.slug}.svg`} width={LARGEUR_BADGE} height={HAUTEUR_BADGE} alt={texteAlternatif(donneesBadge(exemple))} />
+          <img src={`/badge/sombre/${exemple.slug}.svg`} width={LARGEUR_BADGE} height={HAUTEUR_BADGE} alt={texteAlternatif(donneesBadge(exemple))} />
+        </div>
+      )
+    }
+
+    <h2>Comment l'obtenir ?</h2>
+    <ol>
+      <li>Ouvrez la fiche de votre organisation (via la recherche ou les classements).</li>
+      <li>Si elle est notée A, l'encart « Affichez-le » donne le badge en version claire et sombre.</li>
+      <li>Copiez le code d'intégration, ou téléchargez le fichier SVG pour l'héberger vous-même.</li>
+    </ol>
+
+    <h2>Ce qu'il faut savoir</h2>
+    <ul>
+      <li>
+        Le badge intégré par le code <strong>affiche toujours la note actuelle</strong> : il
+        suit les analyses hebdomadaires. Le fichier téléchargé, lui, reste figé à sa date.
+      </li>
+      <li>
+        Il ne contient ni traceur, ni cookie, ni police externe. Hébergé chez vous, il n'appelle
+        aucun service extérieur.
+      </li>
+      <li>
+        Il reflète l'empreinte numérique <strong>externe</strong> (hébergement, messagerie, DNS,
+        services tiers), pas les outils internes ni la sécurité des sites.
+        <a href="/methodologie/">Lire la méthodologie</a>.
+      </li>
+      <li>Bleu Blanc Cloud est un projet indépendant : le badge n'est pas une certification officielle.</li>
+    </ul>
+
+    <h2>Organisations qui peuvent l'afficher</h2>
+    {
+      eligibles.length ? (
+        <ul class="liste-badges">
+          {eligibles.map((e) => (
+            <li>
+              <a href={`/organisation/${e.slug}/`}>{e.nom}</a>
+              <span class="texte-secondaire petit"> · {e.departement_nom ?? ""} · {e.score}/100</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>Aucune organisation n'est notée A pour le moment.</p>
+      )
+    }
+  </div>
+</Base>

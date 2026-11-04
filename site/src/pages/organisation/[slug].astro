@@ -4,11 +4,13 @@ import CarteSituation from "../../composants/CarteSituation.astro";
 import BarreScore from "../../composants/BarreScore.astro";
 import LogoMistral from "../../composants/LogoMistral.astro";
 import MentionIA from "../../composants/MentionIA.astro";
+import IntegrerBadge from "../../composants/IntegrerBadge.astro";
 import Niveau from "../../composants/Niveau.astro";
 import { SITE } from "../../config";
 import Base from "../../mises-en-page/Base.astro";
 import { index, organisation as lireOrganisation, simulations } from "../../lib/donnees";
 import { fournisseurPrincipal, fournisseursProposes } from "../../lib/simulation";
+import { badgePropose, donneesBadge } from "../../lib/badge-donnees";
 import {
   LIBELLES_CATEGORIES,
   LIBELLES_TYPES,
@@ -29,6 +31,9 @@ const org = lireOrganisation(slug as string);
 const score = org.score;
 // Lien « Et si un de vos fournisseurs tombait ? » (fournisseur principal vérifié)
 const donneesSimulation = simulations();
+// Badge « Note A » (note A non provisoire)
+const entreeIndex = index().find((e) => e.slug === org.slug);
+const badge = entreeIndex && badgePropose(entreeIndex) ? donneesBadge(entreeIndex) : null;
 const ligneSimulation = donneesSimulation.collectivites.find((l) => l.id === org.slug);
 const principal = ligneSimulation
   ? fournisseurPrincipal(ligneSimulation, new Set(fournisseursProposes(donneesSimulation).map((f) => f.id)))
@@ -366,6 +371,8 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
         </section>
       )
     }
+
+    {badge && <IntegrerBadge slug={org.slug} donnees={badge} />}
 
     <section class="section carte" aria-labelledby="titre-correction">
       <h2 id="titre-correction" style="margin-top: 0">Une erreur ? Un droit de réponse ?</h2>

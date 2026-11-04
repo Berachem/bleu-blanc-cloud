@@ -14,6 +14,7 @@ const PAGES_FIXES: { chemin: string; campagne?: boolean }[] = [
   { chemin: "/dossiers/" },
   { chemin: "/dossiers/souverainete-securite/", campagne: true },
   { chemin: "/dossiers/souverainete-securite/kit/" },
+  { chemin: "/badge/", campagne: true },
   { chemin: "/alternatives/" },
   { chemin: "/methodologie/" },
   { chemin: "/a-propos/" },

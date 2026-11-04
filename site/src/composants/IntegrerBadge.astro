@@ -1,0 +1,68 @@
+---
+// Encart des fiches notées A (non provisoire) : aperçu du badge, code à copier et SVG à
+// télécharger (version hébergée par la collectivité, sans aucun appel à notre site).
+import { SITE } from "../config";
+import { codeIntegration, HAUTEUR_BADGE, LARGEUR_BADGE, texteAlternatif, type ThemeBadge } from "../lib/badge";
+import type { DonneesBadge } from "../lib/badge";
+
+interface Props {
+  slug: string;
+  donnees: DonneesBadge;
+}
+const { slug, donnees } = Astro.props;
+const versions: { theme: ThemeBadge; libelle: string; chemin: string }[] = [
+  { theme: "clair", libelle: "Fond clair", chemin: `/badge/${slug}.svg` },
+  { theme: "sombre", libelle: "Fond sombre", chemin: `/badge/sombre/${slug}.svg` },
+];
+---
+<section class="section carte encart-badge" aria-labelledby="titre-badge" data-badge>
+  <h2 id="titre-badge">Votre organisation se distingue : affichez-le</h2>
+  <p>
+    {donnees.nom} obtient la note <strong>A</strong> : son empreinte numérique externe repose
+    sur des fournisseurs européens. Ce badge peut être affiché sur son site, avec un lien vers
+    cette fiche.
+  </p>
+  <div class="encart-badge__versions">
+    {
+      versions.map((v) => (
+        <figure class:list={["encart-badge__version", `encart-badge__version--${v.theme}`]}>
+          <img src={v.chemin} width={LARGEUR_BADGE} height={HAUTEUR_BADGE} alt={texteAlternatif(donnees)} loading="lazy" />
+          <figcaption>
+            <span>{v.libelle}</span>
+            <a href={v.chemin} download={`badge-bleu-blanc-cloud-${v.theme}.svg`}>Télécharger le SVG</a>
+          </figcaption>
+          <label class="visuellement-cache" for={`code-badge-${v.theme}`}>Code d'intégration, {v.libelle.toLowerCase()}</label>
+          <textarea id={`code-badge-${v.theme}`} readonly rows="3">{codeIntegration(SITE.url, slug, donnees, v.theme)}</textarea>
+          <button type="button" class="bouton bouton--secondaire" data-copier-badge>Copier le code</button>
+        </figure>
+      ))
+    }
+  </div>
+  <p class="texte-secondaire petit" data-etat-badge aria-live="polite"></p>
+  <p class="texte-secondaire petit">
+    Deux façons de l'intégrer : avec le code ci-dessus, le badge suit les analyses suivantes
+    (il affiche toujours la note actuelle) ; en téléchargeant le SVG et en l'hébergeant
+    vous-même, votre site n'appelle aucun service extérieur. <a href="/badge/">En savoir plus</a>
+  </p>
+</section>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const encart = document.querySelector<HTMLElement>("[data-badge]");
+    if (!encart) return;
+    const etat = encart.querySelector<HTMLElement>("[data-etat-badge]");
+    for (const bouton of encart.querySelectorAll<HTMLButtonElement>("[data-copier-badge]")) {
+      bouton.addEventListener("click", async () => {
+        const zone = bouton.parentElement?.querySelector("textarea");
+        if (!zone) return;
+        try {
+          await navigator.clipboard.writeText(zone.value);
+          if (etat) etat.textContent = "Code copié.";
+        } catch {
+          zone.select();
+          if (etat) etat.textContent = "Sélectionnez le code et copiez-le (Ctrl + C).";
+        }
+      });
+    }
+  });
+</script>

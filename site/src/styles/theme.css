@@ -3078,6 +3078,69 @@ select:focus {
   font-size: 0.95rem;
 }
 
+/* Badge « Note A » */
+.encart-badge__versions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: 1.25rem;
+  margin: 1rem 0;
+}
+.encart-badge__version {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 1rem;
+  border-radius: var(--rayon-petit);
+}
+.encart-badge__version--clair {
+  background: #f1f3fa;
+  color: #1b1f3b;
+}
+.encart-badge__version--sombre {
+  background: #121937;
+  color: #f2f4ff;
+}
+.encart-badge__version img {
+  max-width: 100%;
+  height: auto;
+}
+.encart-badge__version figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.encart-badge__version--clair a {
+  color: #002395;
+}
+.encart-badge__version--sombre a {
+  color: #a9beff;
+}
+.encart-badge__version textarea {
+  width: 100%;
+  font: 0.8rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgb(127 127 127 / 40%);
+  background: rgb(127 127 127 / 10%);
+  color: inherit;
+  resize: vertical;
+}
+.encart-badge__version .bouton {
+  justify-self: start;
+}
+.badge-exemples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.badge-exemples img {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Dossiers */
 .tableau-dossier th[scope="row"] {
   text-align: left;
