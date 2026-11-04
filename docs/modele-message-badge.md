@@ -8,27 +8,40 @@ main sur le serveur (`uv run --with openpyxl bbcloud prospection badge`, voir
 
 ---
 
-**Objet** : [Nom de la collectivité] obtient la note A en souveraineté numérique
+**Objet** : 🏅 [Commune] obtient la note A en souveraineté numérique
 
-Madame, Monsieur,
+Bonjour,
 
-Bleu Blanc Cloud (https://bleublanccloud.fr) est un observatoire indépendant et open source
-qui analyse, à partir d'informations publiques, la dépendance numérique des collectivités
-françaises vis-à-vis de fournisseurs extra-européens (hébergement du site, messagerie, DNS,
-services tiers).
+Je m'appelle Berachem Markria et je développe **Bleu Blanc Cloud** (https://bleublanccloud.fr),
+un observatoire indépendant et open source. Il mesure, commune par commune, si les services
+numériques visibles publiquement (hébergement du site, messagerie, DNS, services tiers) reposent
+sur des fournisseurs européens ou sur des acteurs soumis à des lois étrangères comme le Cloud Act
+américain.
 
-[Nom de la collectivité] fait partie des collectivités qui se distinguent : elle obtient la
-**note A**, car son empreinte numérique externe repose sur des fournisseurs européens. Le
-détail est consultable sur sa fiche : https://bleublanccloud.fr/organisation/[slug]/
+J'ai le plaisir de vous annoncer que **[Commune] obtient la note A** (score de [score]/100) : elle
+fait partie des collectivités qui ont fait des choix numériques européens. Bravo à vos équipes ! 👏
 
-Si vous souhaitez le faire savoir, un badge est disponible sur cette fiche (version claire et
-sombre), à intégrer sur votre site en copiant un code, ou à télécharger pour l'héberger
-vous-même. Il ne contient ni traceur ni cookie.
+Le détail est sur votre fiche : https://bleublanccloud.fr/organisation/[slug]/
 
-Le score ne porte que sur ce qui est visible publiquement, pas sur vos outils internes ni sur
-la sécurité de vos sites. Pour toute correction ou question : https://bleublanccloud.fr/retrait/
+Si vous souhaitez le faire savoir, un **badge** est à votre disposition sur cette page, en version
+claire ou sombre : il suffit de copier un petit code dans votre site, ou de télécharger l'image.
+Il ne contient ni cookie ni traceur, bien sûr.
 
-Bien cordialement,
+Deux précisions, par transparence :
+- Bleu Blanc Cloud est un projet personnel, sans lien avec l'État ni avec un fournisseur.
+- La note ne porte que sur ce qui est visible de l'extérieur : elle ne juge ni vos outils internes
+  ni la sécurité de vos sites.
+
+Une question ou une correction ? Il suffit de répondre à ce mail. Et si vous préférez ne plus
+recevoir de message de ma part, dites-le-moi simplement.
+
+Belle journée,
 
 Berachem Markria
-Bleu Blanc Cloud — projet personnel, sans lien avec l'État
+Bleu Blanc Cloud · https://bleublanccloud.fr
+
+---
+
+Version HTML : logo `https://bleublanccloud.fr/courriel/logo-bleu-blanc-cloud.png` (PNG, car
+Gmail et Outlook n'affichent pas le SVG ; image statique du site, sans paramètre de suivi).
+Champs à remplacer depuis le classeur : [Commune] (colonne Commune), [score] (Score), [slug] (Slug).

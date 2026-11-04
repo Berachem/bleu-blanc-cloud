@@ -55,8 +55,13 @@ COULEURS_STATUTS = {
     "Adresse introuvable": "F8CBAD",
 }
 # Colonnes saisies à la main, conservées d'une exécution à l'autre
-COLONNES_SUIVI = ("E-mail de contact", "Source de l'e-mail", "Date d'envoi", "Statut", "Notes")
+DATE_ENVOI = "Date mail envoyé"
+COLONNES_SUIVI = (DATE_ENVOI, "E-mail de contact", "Source de l'e-mail", "Statut", "Notes")
+# Anciens intitulés, relus pour ne pas perdre le suivi d'un classeur plus ancien
+ANCIENS_INTITULES = {"Date d'envoi": DATE_ENVOI}
+VERT_ENVOYE = "C6EFCE"
 ENTETES = (
+    DATE_ENVOI,
     "Commune",
     "Code dép.",
     "Département",
@@ -67,10 +72,10 @@ ENTETES = (
     "Fiche Bleu Blanc Cloud",
     "Badge clair (SVG)",
     "Badge sombre (SVG)",
-    *COLONNES_SUIVI,
+    *COLONNES_SUIVI[1:],
     "Slug",
 )
-LARGEURS = (30, 9, 24, 12, 8, 28, 30, 50, 48, 54, 34, 34, 13, 18, 40, 28)
+LARGEURS = (15, 30, 9, 24, 12, 8, 28, 30, 50, 48, 54, 34, 34, 18, 40, 28)
 SOURCE_ANNUAIRE = "Annuaire de l'administration"
 
 
@@ -223,7 +228,7 @@ def lire_suivi(chemin: Path) -> dict[str, dict[str, Any]]:
         return {}
     feuille = classeur["Communes A"]
     lignes = feuille.iter_rows(values_only=True)
-    entetes = list(next(lignes, ()))
+    entetes = [ANCIENS_INTITULES.get(str(e), e) for e in next(lignes, ())]
     if "Slug" not in entetes:
         return {}
     suivi: dict[str, dict[str, Any]] = {}
@@ -246,6 +251,7 @@ def _valeurs(ligne: LigneProspection, url_site: str) -> list[Any]:
         source = "Saisie manuelle"
     statut = suivi.get("Statut") or ("À contacter" if courriel else "Adresse introuvable")
     return [
+        suivi.get(DATE_ENVOI),
         e.nom,
         e.departement,
         e.departement_nom,
@@ -258,7 +264,6 @@ def _valeurs(ligne: LigneProspection, url_site: str) -> list[Any]:
         f"{url_site}/badge/sombre/{e.slug}.svg",
         courriel,
         source,
-        suivi.get("Date d'envoi"),
         statut,
         suivi.get("Notes"),
         e.slug,
@@ -270,7 +275,7 @@ def ecrire_classeur(
 ) -> None:
     """Classeur de suivi : feuille « Communes A » (filtres, statuts colorés) + mode d'emploi."""
     openpyxl = _openpyxl()
-    from openpyxl.formatting.rule import CellIsRule
+    from openpyxl.formatting.rule import CellIsRule, FormulaRule
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.worksheet.datavalidation import DataValidation
     from openpyxl.worksheet.table import Table, TableStyleInfo
@@ -299,8 +304,8 @@ def ecrire_classeur(
             False,
         ),
         (
-            "Message à envoyer : docs/modele-message-badge.md (remplacer [Nom de la collectivité] "
-            "et [slug]).",
+            "Message à envoyer : docs/modele-message-badge.md (remplacer [Commune], [score] et "
+            "[slug]). Saisir la date d'envoi en colonne A : elle passe en vert.",
             False,
         ),
         ("", False),
@@ -327,20 +332,33 @@ def ecrire_classeur(
         cellule.fill = PatternFill("solid", fgColor="002395")
         cellule.alignment = Alignment(vertical="center", wrap_text=True)
     feuille.row_dimensions[1].height = 30
+    numero = {intitule: rang + 1 for rang, intitule in enumerate(ENTETES)}
+    lettre = {intitule: feuille.cell(1, c).column_letter for intitule, c in numero.items()}
     lien = Font(color="0563C1", underline="single")
+    liens = ("Site", "Fiche Bleu Blanc Cloud", "Badge clair (SVG)", "Badge sombre (SVG)")
     for rang in range(2, dernier + 1):
-        feuille.cell(rang, 4).number_format = "# ##0"
-        feuille.cell(rang, 13).number_format = "DD/MM/YYYY"
-        for colonne in (7, 8, 9, 10):
-            cellule = feuille.cell(rang, colonne)
+        feuille.cell(rang, numero["Population"]).number_format = "# ##0"
+        feuille.cell(rang, numero[DATE_ENVOI]).number_format = "DD/MM/YYYY"
+        for intitule in liens:
+            cellule = feuille.cell(rang, numero[intitule])
             cellule.hyperlink = cellule.value
             cellule.font = lien
-    feuille.freeze_panes = "B2"
+    feuille.freeze_panes = "C2"  # date d'envoi et commune toujours visibles
     if dernier >= 2:
-        table = Table(displayName="CommunesA", ref=f"A1:P{dernier}")
+        table = Table(displayName="CommunesA", ref=f"A1:{lettre['Slug']}{dernier}")
         table.tableStyleInfo = TableStyleInfo(name="TableStyleLight9", showRowStripes=True)
         feuille.add_table(table)
-        zone = f"N2:N{dernier}"
+        # Date d'envoi en vert dès qu'elle est saisie
+        date_envoi = lettre[DATE_ENVOI]
+        feuille.conditional_formatting.add(
+            f"{date_envoi}2:{date_envoi}{dernier}",
+            FormulaRule(
+                formula=[f"LEN(${date_envoi}2)>0"],
+                fill=PatternFill("solid", fgColor=VERT_ENVOYE),
+                font=Font(bold=True, color="006100"),
+            ),
+        )
+        zone = f"{lettre['Statut']}2:{lettre['Statut']}{dernier}"
         validation = DataValidation(
             type="list", formula1=f'"{",".join(STATUTS)}"', allow_blank=True
         )
