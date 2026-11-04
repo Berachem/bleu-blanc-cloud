@@ -162,22 +162,43 @@ def test_classeur_relance_sans_perdre_le_suivi(tmp_path: Path) -> None:
 
     classeur = openpyxl.load_workbook(chemin)
     feuille = classeur["Communes A"]
-    feuille["K3"] = "mairie@sans.example"
+    feuille["L3"] = "mairie@sans.example"
     feuille["N3"] = "Envoyé"
     feuille["N2"] = "Badge intégré"
+    feuille["A3"] = datetime(2026, 11, 5)
     classeur.save(chemin)
     lignes = construire_lignes(communes, mairies, lire_suivi(chemin))
     ecrire_classeur(chemin, lignes, "https://bbc.example")
     suivi = lire_suivi(chemin)
     assert suivi["sans-81099"] == {
+        "Date mail envoyé": datetime(2026, 11, 5),
         "E-mail de contact": "mairie@sans.example",
         "Source de l'e-mail": "Saisie manuelle",
         "Statut": "Envoyé",
     }
     assert suivi["albi-81004"]["Statut"] == "Badge intégré"
     feuille = openpyxl.load_workbook(chemin)["Communes A"]
-    assert feuille["H2"].value == "https://bbc.example/organisation/albi-81004/"
-    assert feuille["I2"].value == "https://bbc.example/badge/albi-81004.svg"
+    assert feuille["I2"].value == "https://bbc.example/organisation/albi-81004/"
+    assert feuille["J2"].value == "https://bbc.example/badge/albi-81004.svg"
+    assert feuille["A1"].value == "Date mail envoyé"
+    # La date d'envoi passe en vert dès qu'elle est saisie
+    regles = [r for zone in feuille.conditional_formatting for r in zone.rules]
+    assert any(r.formula == ["LEN($A2)>0"] for r in regles)
+
+
+def test_ancien_classeur_date_d_envoi_reprise(tmp_path: Path) -> None:
+    openpyxl = pytest.importorskip("openpyxl")
+    chemin = tmp_path / "ancien.xlsx"
+    classeur = openpyxl.Workbook()
+    feuille = classeur.active
+    feuille.title = "Communes A"
+    feuille.append(["Commune", "Date d'envoi", "Statut", "Slug"])
+    feuille.append(["Albi", datetime(2026, 11, 4), "Envoyé", "albi-81004"])
+    classeur.save(chemin)
+    assert lire_suivi(chemin)["albi-81004"] == {
+        "Date mail envoyé": datetime(2026, 11, 4),
+        "Statut": "Envoyé",
+    }
 
 
 @respx.mock
