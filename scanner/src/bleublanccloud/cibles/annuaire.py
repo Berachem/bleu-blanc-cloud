@@ -1,7 +1,9 @@
 """Import depuis l'API « Annuaire de l'administration et des services publics » (DILA).
 
 Seuls les champs nécessaires sont demandés (nom, type, site web, code commune) : les adresses
-électroniques et numéros de téléphone de l'annuaire ne sont JAMAIS téléchargés ni publiés.
+électroniques et numéros de téléphone de l'annuaire ne sont JAMAIS téléchargés ni publiés par
+l'import. Seule exception : `bbcloud prospection badge` (prospection.py) relève l'adresse
+publique des mairies notées A dans un classeur privé, jamais stocké en base ni publié.
 
 Format réel d'un enregistrement (les champs `pivot` et `site_internet` sont des listes JSON
 sérialisées en texte) :
