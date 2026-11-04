@@ -117,6 +117,7 @@ Pendant le développement, seuls `berachem.dev`, `example.org` et `example.com` 
 | `bbcloud scores recalculer [--dry-run]` | recalcul des scores après une mise à jour du référentiel, sans nouveau scan |
 | `bbcloud rapports generer [--max N] [--dry-run]` | rapports IA, avec estimation du coût |
 | `bbcloud simulations exporter` | dépendances par collectivité pour le simulateur et images de partage des préréglages (appelée par `publier`) |
+| `bbcloud prospection badge [--vers FICHIER]` | classeur Excel **privé** des communes notées A (non provisoire) avec l'adresse de contact publique de leur mairie (Annuaire de l'administration), pour proposer le badge ; jamais commité ni publié (`uv run --with openpyxl …`) |
 | `bbcloud stats [--json FICHIER] [--image FICHIER]` | chiffres clés de l'observatoire (part des notes provisoires pour chaque chiffre) et carte des départements en PNG 1080 × 1080 |
 | `bbcloud exporter --vers ../site/public/donnees` | fichiers JSON du site |
 | `bbcloud publier` | export, build et publication sur Codeberg Pages |

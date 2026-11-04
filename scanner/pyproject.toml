@@ -83,7 +83,7 @@ module = ["bleublanccloud.analyse.*", "bleublanccloud.modeles"]
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["selectolax.*", "maxminddb.*", "fontTools.*"]
+module = ["selectolax.*", "maxminddb.*", "fontTools.*", "openpyxl.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

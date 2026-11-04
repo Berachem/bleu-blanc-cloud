@@ -1,8 +1,10 @@
 # Modèle de message : proposer le badge « Note A » à une collectivité
 
 À envoyer par l'auteur, à l'adresse de contact publique de la collectivité (service
-communication ou service numérique). Les adresses de l'annuaire ne sont ni stockées ni
-publiées par Bleu Blanc Cloud.
+communication ou service numérique). Les adresses de l'annuaire ne sont ni stockées dans la
+base ni publiées par Bleu Blanc Cloud : la liste d'envoi est un classeur privé, généré à la
+main sur le serveur (`uv run --with openpyxl bbcloud prospection badge`, voir
+`deploy/README.md`), à supprimer une fois la campagne terminée.
 
 ---
 

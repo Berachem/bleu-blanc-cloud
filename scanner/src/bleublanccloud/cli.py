@@ -48,6 +48,10 @@ app_scores = typer.Typer(help="Scores : recalcul sans rescanner, couverture de l
 app.add_typer(app_scores, name="scores")
 app_simulations = typer.Typer(help="Simulateur « Et si… ? » : dépendances et images de partage.")
 app.add_typer(app_simulations, name="simulations")
+app_prospection = typer.Typer(
+    help="Prospection privée (badge « Note A ») : fichiers locaux, jamais publiés."
+)
+app.add_typer(app_prospection, name="prospection")
 
 console = Console()
 console_erreur = Console(stderr=True)
@@ -1085,6 +1089,59 @@ def simulations_exporter(
             f"{resultat['sites_hors_ligne']} site(s) hors ligne"
         )
     console.print(f"[green]✓[/] Images de partage : {dossier_images}")
+
+
+@app_prospection.command("badge")
+def prospection_badge(
+    vers: Annotated[
+        Path | None,
+        typer.Option(help="Classeur Excel (défaut : donnees/prive/prospection-badge.xlsx)."),
+    ] = None,
+) -> None:
+    """Classeur PRIVÉ des communes notées A (non provisoire) avec l'adresse de contact publique
+    de leur mairie (Annuaire de l'administration). Relancer conserve le suivi déjà saisi.
+    Nécessite openpyxl : uv run --with openpyxl bbcloud prospection badge"""
+    from bleublanccloud.export.site_statique import entree_index, organisations_a_exporter
+    from bleublanccloud.prospection import (
+        communes_a_contacter,
+        construire_lignes,
+        ecrire_classeur,
+        lire_suivi,
+        telecharger_mairies,
+    )
+
+    parametres = obtenir_parametres()
+    chemin = vers or parametres.base_sqlite.parent / "prive" / "prospection-badge.xlsx"
+    with Base(parametres.base_sqlite) as base:
+        organisations, _ = organisations_a_exporter(base, referentiels_par_defaut())
+    communes = communes_a_contacter(entree_index(o) for o in organisations)
+    if not communes:
+        console.print("[yellow]Aucune commune notée A (non provisoire) dans la base.[/]")
+        raise typer.Exit(code=0)
+
+    async def telecharger() -> Any:
+        async with httpx.AsyncClient(
+            headers={"User-Agent": parametres.user_agent}, timeout=180, follow_redirects=True
+        ) as client:
+            return await telecharger_mairies(client)
+
+    try:
+        suivi = lire_suivi(chemin)
+        mairies = asyncio.run(telecharger())
+        lignes = construire_lignes(communes, mairies, suivi)
+        ecrire_classeur(chemin, lignes, f"https://{parametres.domaine_site}")
+    except RuntimeError as erreur:
+        console_erreur.print(f"[red]{erreur}[/]")
+        raise typer.Exit(code=1) from erreur
+    except httpx.HTTPError as erreur:
+        console_erreur.print(f"[red]Annuaire injoignable : {erreur}[/]")
+        raise typer.Exit(code=1) from erreur
+    trouvees = sum(1 for ligne in lignes if ligne.courriel)
+    console.print(
+        f"[green]✓[/] {len(lignes)} commune(s) notée(s) A, {trouvees} adresse(s) trouvée(s) "
+        f"dans l'annuaire, {len(suivi)} ligne(s) de suivi conservée(s) : {chemin}"
+    )
+    console.print("[yellow]Fichier privé : ne pas le committer ni le publier.[/]")
 
 
 @app.command()
