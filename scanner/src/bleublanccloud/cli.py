@@ -1144,6 +1144,199 @@ def prospection_badge(
     console.print("[yellow]Fichier privé : ne pas le committer ni le publier.[/]")
 
 
+def _chiffres_observatoire() -> tuple[int, int]:
+    """(notées A, analysées) : mêmes chiffres que la page /classements/ (hors analyses sur
+    demande), notes provisoires comprises."""
+    from bleublanccloud.export.site_statique import organisations_a_exporter
+
+    with Base(obtenir_parametres().base_sqlite) as base:
+        organisations, _ = organisations_a_exporter(base, referentiels_par_defaut())
+    observatoire = [o for o in organisations if o.type != "sur_demande"]
+    return sum(1 for o in observatoire if o.score.note == "A"), len(observatoire)
+
+
+@app_prospection.command("envoyer")
+def prospection_envoyer(
+    vers: Annotated[
+        Path | None,
+        typer.Option(help="Classeur Excel (défaut : donnees/prive/prospection-badge.xlsx)."),
+    ] = None,
+    simulation: Annotated[
+        bool,
+        typer.Option(
+            "--simulation",
+            help="N'envoie rien : écrit les prochains mails dans donnees/prive/apercus/.",
+        ),
+    ] = False,
+    test: Annotated[
+        str | None,
+        typer.Option(
+            "--test",
+            help="Envoie le prochain mail à CETTE adresse seulement (classeur inchangé).",
+        ),
+    ] = None,
+    maximum: Annotated[
+        int | None, typer.Option("--maximum", min=0, help="Plafond pour cette exécution.")
+    ] = None,
+    relances: Annotated[
+        bool, typer.Option("--relances/--sans-relances", help="Relance unique après le délai.")
+    ] = True,
+) -> None:
+    """Envoie les mails de la prospection badge au rythme prévu (timer bbcloud-prospection) :
+    statuts mis à jour depuis la boîte de réception (réponses, rebonds), puis quota du jour,
+    avec une pause de quelques minutes entre deux mails. Classeur enregistré après chaque mail.
+    Nécessite openpyxl : uv run --with openpyxl bbcloud prospection envoyer"""
+    import imaplib
+    from datetime import date, timedelta
+
+    from bleublanccloud.prospection_envoi import (
+        ClasseurInvalide,
+        Connexion,
+        Reglages,
+        apercus,
+        composer,
+        copier_dans_envoyes,
+        executer,
+        lire_boite,
+        lire_destinataires,
+        planifier,
+    )
+    from bleublanccloud.verrou import verrou_exclusif
+
+    parametres = obtenir_parametres()
+    chemin = vers or parametres.base_sqlite.parent / "prive" / "prospection-badge.xlsx"
+    if not chemin.exists():
+        console_erreur.print(
+            f"[red]Classeur introuvable : {chemin}[/]\n"
+            "Générez-le avec : uv run --with openpyxl bbcloud prospection badge"
+        )
+        raise typer.Exit(code=1)
+    if not parametres.courriel_adresse:
+        console_erreur.print("[red]COURRIEL_ADRESSE manquante dans .env.[/]")
+        raise typer.Exit(code=1)
+    nombre_a, nombre_analysees = _chiffres_observatoire()
+    if not nombre_analysees:
+        console_erreur.print("[red]Aucune organisation notée dans la base.[/]")
+        raise typer.Exit(code=1)
+    reglages = Reglages(
+        adresse=parametres.courriel_adresse,
+        nom=parametres.courriel_nom,
+        url_site=parametres.url_site,
+        nombre_a=nombre_a,
+        nombre_analysees=nombre_analysees,
+        quota_rodage=parametres.prospection_quota_rodage,
+        quota_croisiere=parametres.prospection_quota_croisiere,
+        seuil_rodage=parametres.prospection_seuil_rodage,
+        delai_relance_jours=parametres.prospection_delai_relance_jours,
+        pause_min_s=parametres.prospection_pause_min_s,
+        pause_max_s=max(parametres.prospection_pause_min_s, parametres.prospection_pause_max_s),
+    )
+    console.print(f"Chiffres du mail : {nombre_a} notées A sur {nombre_analysees} analysées.")
+
+    try:
+        if simulation:
+            dossier = chemin.parent / "apercus"
+            fichiers = apercus(chemin, reglages, dossier, nombre=maximum or 5)
+            for fichier in fichiers:
+                console.print(f"  {fichier.name}")
+            console.print(
+                f"[green]✓[/] {len(fichiers)} aperçu(s) dans {dossier} (rien n'a été envoyé)."
+            )
+            return
+
+        if not parametres.courriel_mot_de_passe:
+            console_erreur.print("[red]COURRIEL_MOT_DE_PASSE manquant dans .env.[/]")
+            raise typer.Exit(code=1)
+        connexion = Connexion(
+            smtp_hote=parametres.smtp_hote,
+            smtp_port=parametres.smtp_port,
+            imap_hote=parametres.imap_hote,
+            imap_port=parametres.imap_port,
+            identifiant=parametres.courriel_adresse,
+            mot_de_passe=parametres.courriel_mot_de_passe.get_secret_value(),
+        )
+
+        def envoyer(message: Any) -> None:
+            # Une connexion par mail : les pauses de plusieurs minutes la feraient expirer
+            with connexion.smtp() as serveur:
+                serveur.send_message(message)
+
+        if test:
+            from bleublanccloud.prospection import _openpyxl
+
+            feuille = _openpyxl().load_workbook(chemin)["Communes A"]
+            prochains = planifier(lire_destinataires(feuille), date.today(), reglages, True, 1)
+            if not prochains:
+                console.print("[yellow]Aucun mail à envoyer aujourd'hui.[/]")
+                return
+            destinataire, genre = prochains[0]
+            message = composer(destinataire, genre, reglages, a=test)
+            del message["Subject"]
+            message["Subject"] = f"[TEST] 🏅 {destinataire.commune} obtient la note A"
+            envoyer(message)
+            console.print(f"[green]✓[/] Test envoyé à {test} ({destinataire.commune}).")
+            return
+
+        with verrou_exclusif(chemin.with_suffix(".verrou")) as obtenu:
+            if not obtenu:
+                console.print("[yellow]Un envoi est déjà en cours : rien à faire.[/]")
+                return
+            feuille = _openpyxl_feuille(chemin)
+            dates = [d.date_envoi for d in lire_destinataires(feuille) if d.date_envoi]
+            recus = []
+            if dates:
+                try:
+                    with connexion.imap() as boite:
+                        recus = lire_boite(boite, min(dates) - timedelta(days=1))
+                except (OSError, imaplib.IMAP4.error) as erreur:  # boîte injoignable : on envoie
+                    console_erreur.print(f"[yellow]⚠ Boîte de réception illisible : {erreur}[/]")
+
+            def copier(message: Any) -> None:
+                with connexion.imap() as boite:
+                    copier_dans_envoyes(boite, message)
+
+            bilan = executer(
+                chemin,
+                reglages,
+                envoyer,
+                relances=relances,
+                maximum=maximum,
+                messages_recus=recus,
+                apres_envoi=copier,
+            )
+    except ClasseurInvalide as erreur:
+        console_erreur.print(f"[red]{erreur}[/]")
+        raise typer.Exit(code=1) from erreur
+    except RuntimeError as erreur:
+        console_erreur.print(f"[red]{erreur}[/]")
+        raise typer.Exit(code=1) from erreur
+
+    if bilan.reponses:
+        console.print(f"📬 {len(bilan.reponses)} réponse(s) reçue(s) : {', '.join(bilan.reponses)}")
+    if bilan.rebonds:
+        console.print(
+            f"↩ {len(bilan.rebonds)} adresse(s) introuvable(s) : {', '.join(bilan.rebonds)}"
+        )
+    premiers = sum(1 for _, genre in bilan.envoyes if genre == "premier")
+    console.print(
+        f"[green]✓[/] {premiers} premier(s) mail(s) et {len(bilan.envoyes) - premiers} "
+        f"relance(s) envoyé(s) (quota du jour : {bilan.quota})."
+    )
+    if bilan.erreurs:
+        console_erreur.print(
+            f"[red]✗ {len(bilan.erreurs)} échec(s) : "
+            + ", ".join(f"{slug} ({nature})" for slug, nature in bilan.erreurs)
+            + "[/]"
+        )
+        raise typer.Exit(code=1)
+
+
+def _openpyxl_feuille(chemin: Path) -> Any:
+    from bleublanccloud.prospection import _openpyxl
+
+    return _openpyxl().load_workbook(chemin, read_only=False)["Communes A"]
+
+
 @app.command()
 def publier() -> None:
     """Export des données, construction du site et publication sur Codeberg Pages."""

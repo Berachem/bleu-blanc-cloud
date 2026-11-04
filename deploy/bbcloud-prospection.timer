@@ -1,0 +1,14 @@
+[Unit]
+Description=Bleu Blanc Cloud — prospection badge, du mardi au jeudi à 9 h 05 (heure de Paris)
+
+[Timer]
+# Jamais rattrapé (Persistent=false) : un envoi manqué ne part pas en pleine nuit.
+# À activer à la main quand la campagne commence (voir deploy/README.md) :
+#   systemctl enable --now bbcloud-prospection.timer
+OnCalendar=Tue..Thu *-*-* 09:05:00 Europe/Paris
+RandomizedDelaySec=10min
+Persistent=false
+Unit=bbcloud-prospection.service
+
+[Install]
+WantedBy=timers.target
