@@ -56,7 +56,15 @@ COULEURS_STATUTS = {
 }
 # Colonnes saisies à la main, conservées d'une exécution à l'autre
 DATE_ENVOI = "Date mail envoyé"
-COLONNES_SUIVI = (DATE_ENVOI, "E-mail de contact", "Source de l'e-mail", "Statut", "Notes")
+DATE_RELANCE = "Date relance"
+COLONNES_SUIVI = (
+    DATE_ENVOI,
+    "E-mail de contact",
+    "Source de l'e-mail",
+    "Statut",
+    DATE_RELANCE,
+    "Notes",
+)
 # Anciens intitulés, relus pour ne pas perdre le suivi d'un classeur plus ancien
 ANCIENS_INTITULES = {"Date d'envoi": DATE_ENVOI}
 VERT_ENVOYE = "C6EFCE"
@@ -75,7 +83,7 @@ ENTETES = (
     *COLONNES_SUIVI[1:],
     "Slug",
 )
-LARGEURS = (15, 30, 9, 24, 12, 8, 28, 30, 50, 48, 54, 34, 34, 18, 40, 28)
+LARGEURS = (15, 30, 9, 24, 12, 8, 28, 30, 50, 48, 54, 34, 34, 18, 13, 40, 28)
 SOURCE_ANNUAIRE = "Annuaire de l'administration"
 
 
@@ -265,6 +273,7 @@ def _valeurs(ligne: LigneProspection, url_site: str) -> list[Any]:
         courriel,
         source,
         statut,
+        suivi.get(DATE_RELANCE),
         suivi.get("Notes"),
         e.slug,
     ]
@@ -339,6 +348,7 @@ def ecrire_classeur(
     for rang in range(2, dernier + 1):
         feuille.cell(rang, numero["Population"]).number_format = "# ##0"
         feuille.cell(rang, numero[DATE_ENVOI]).number_format = "DD/MM/YYYY"
+        feuille.cell(rang, numero[DATE_RELANCE]).number_format = "DD/MM/YYYY"
         for intitule in liens:
             cellule = feuille.cell(rang, numero[intitule])
             cellule.hyperlink = cellule.value

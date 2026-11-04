@@ -79,6 +79,22 @@ class Parametres(BaseSettings):
     demandes_limite_jour: int = Field(default=10, ge=0, le=1000)
     demandes_limite_compte: int = Field(default=1, ge=0, le=100)
 
+    # Prospection badge « Note A » : boîte d'envoi (OVH MX Plan) et rythme des envois.
+    # Le mot de passe reste dans .env, jamais commité ni journalisé.
+    courriel_adresse: str | None = None
+    courriel_nom: str = "Berachem Markria · Bleu Blanc Cloud"
+    courriel_mot_de_passe: SecretStr | None = None
+    smtp_hote: str = "ssl0.ovh.net"
+    smtp_port: int = Field(default=465, ge=1, le=65535)
+    imap_hote: str = "ssl0.ovh.net"
+    imap_port: int = Field(default=993, ge=1, le=65535)
+    prospection_quota_rodage: int = Field(default=10, ge=0, le=100)
+    prospection_quota_croisiere: int = Field(default=25, ge=0, le=100)
+    prospection_seuil_rodage: int = Field(default=50, ge=0)
+    prospection_delai_relance_jours: int = Field(default=14, ge=1)
+    prospection_pause_min_s: float = Field(default=180, ge=0)
+    prospection_pause_max_s: float = Field(default=360, ge=0)
+
     @field_validator("domaine_site")
     @classmethod
     def _valider_domaine_site(cls, valeur: str) -> str:

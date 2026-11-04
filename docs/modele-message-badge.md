@@ -44,6 +44,9 @@ Bleu Blanc Cloud · https://bleublanccloud.fr
 
 ---
 
+Envoi programmé : `bbcloud prospection envoyer` (modèles dans
+`scanner/src/bleublanccloud/courriels/`, relance unique incluse ; voir `deploy/README.md`).
+
 Version HTML : logo `https://bleublanccloud.fr/courriel/logo-bleu-blanc-cloud.png` (PNG, car
 Gmail et Outlook n'affichent pas le SVG ; image statique du site, sans paramètre de suivi).
 Champs à remplacer depuis le classeur : [Commune] (colonne Commune), [score] (Score), [slug] (Slug).

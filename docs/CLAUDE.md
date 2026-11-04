@@ -463,6 +463,7 @@ bbcloud publier                                   # export + build + push Pages
 bbcloud stats [--json F] [--image F.png]          # chiffres clés + carte PNG 1080 × 1080
 bbcloud simulations exporter                      # simulateur : dépendances + images de partage
 bbcloud prospection badge                         # classeur PRIVÉ communes A + contact mairie (jamais publié)
+bbcloud prospection envoyer [--simulation]        # envoi programmé des mails de prospection (timer manuel)
 ```
 
 ---
