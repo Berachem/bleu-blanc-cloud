@@ -4,7 +4,8 @@
 - index.json : liste légère ;
 - organisations/{slug}.json : détail complet ;
 - departements.json : agrégats par département ;
-- alternatives.json : référentiel des alternatives (page /alternatives).
+- alternatives.json : référentiel des alternatives (page /alternatives) ;
+- organisations.csv et departements.csv : données ouvertes (data.gouv.fr).
 
 Aucune donnée personnelle n'est exportée (ni e-mail, ni téléphone, ni nom de personne).
 """
@@ -285,6 +286,12 @@ def ecrire_export(
         dossier / "simulations.json",
         construire_export(observatoire, referentiels, noms_regions),
     )
+    # Données ouvertes (data.gouv.fr) : CSV de l'observatoire, jamais pour la démonstration
+    if not donnees_demonstration:
+        from bleublanccloud.configuration import obtenir_parametres
+        from bleublanccloud.export.donnees_ouvertes import ecrire_donnees_ouvertes
+
+        ecrire_donnees_ouvertes(dossier, observatoire, departements, obtenir_parametres().url_site)
     # La date de campagne ne dépend que de l'observatoire (les demandes arrivent chaque jour)
     dates = [o.date_scan for o in observatoire] or [o.date_scan for o in organisations]
     _ecrire(
