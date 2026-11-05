@@ -24,7 +24,7 @@ import re
 import smtplib
 import ssl
 import time
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from email.header import decode_header, make_header
@@ -35,7 +35,9 @@ from pathlib import Path
 from string import Template
 from typing import Any, Literal
 
+from bleublanccloud.analyse.score import VERSION_METHODO, note_depuis_score
 from bleublanccloud.prospection import DATE_ENVOI, DATE_RELANCE, _openpyxl
+from bleublanccloud.stockage.base import PointEnregistre
 
 DOSSIER_MODELES = Path(__file__).resolve().parent / "courriels"
 COLONNES_REQUISES = (
@@ -56,7 +58,10 @@ MOTIF_AUTOMATIQUE = re.compile(
     re.IGNORECASE,
 )
 MOIS_IMAP = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-TypeEnvoi = Literal["premier", "relance"]
+TypeEnvoi = Literal["premier", "felicitations", "relance"]
+ORDRE_ENVOIS: dict[str, int] = {"relance": 0, "felicitations": 1, "premier": 2}
+FENETRE_PASSAGE_A_JOURS = 90
+"""Passage en A plus ancien : le mail habituel est envoyé (« vient d'obtenir » serait faux)."""
 
 
 class ClasseurInvalide(RuntimeError):
@@ -84,6 +89,15 @@ class Reglages:
         return self.url_site.removeprefix("https://").removeprefix("http://").rstrip("/")
 
 
+@dataclass(frozen=True)
+class PassageA:
+    """La commune vient d'obtenir la note A : dernière note différente et sa date."""
+
+    note_avant: str
+    date_avant: date
+    date_passage: date
+
+
 @dataclass
 class Destinataire:
     rang: int
@@ -94,6 +108,7 @@ class Destinataire:
     statut: str
     date_envoi: date | None
     date_relance: date | None
+    passage_a: PassageA | None = None
 
 
 @dataclass(frozen=True)
@@ -148,7 +163,9 @@ def colonnes(feuille: Any) -> dict[str, int]:
     return numeros
 
 
-def lire_destinataires(feuille: Any) -> list[Destinataire]:
+def lire_destinataires(
+    feuille: Any, passages_a: Mapping[str, PassageA] | None = None
+) -> list[Destinataire]:
     numero = colonnes(feuille)
     destinataires: list[Destinataire] = []
     for rang in range(2, feuille.max_row + 1):
@@ -170,9 +187,38 @@ def lire_destinataires(feuille: Any) -> list[Destinataire]:
                 statut=str(valeur("Statut") or ""),
                 date_envoi=_en_date(valeur(DATE_ENVOI)),
                 date_relance=_en_date(valeur(DATE_RELANCE)),
+                passage_a=(passages_a or {}).get(str(slug)),
             )
         )
     return destinataires
+
+
+def detecter_passage_a(
+    points: Sequence[PointEnregistre],
+    jour: date,
+    fenetre_jours: int = FENETRE_PASSAGE_A_JOURS,
+) -> PassageA | None:
+    """La commune est-elle passée en A récemment ? Les analyses (recalculées avec les règles
+    actuelles) se terminent par une suite de notes A, précédée d'une autre note, et la
+    première de ces notes A date de moins de `fenetre_jours`."""
+    comparables = sorted(
+        (p for p in points if p.version_methodo == VERSION_METHODO), key=lambda p: p.debut
+    )
+    if not comparables or note_depuis_score(comparables[-1].score) != "A":
+        return None
+    rang = len(comparables) - 1
+    while rang > 0 and note_depuis_score(comparables[rang - 1].score) == "A":
+        rang -= 1
+    if rang == 0:
+        return None  # toujours notée A : pas de passage
+    avant, passage = comparables[rang - 1], comparables[rang]
+    if (jour - passage.debut.date()).days > fenetre_jours:
+        return None
+    return PassageA(
+        note_avant=note_depuis_score(avant.score),
+        date_avant=avant.debut.date(),
+        date_passage=passage.debut.date(),
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -199,7 +245,7 @@ def type_envoi(
     if not destinataire.courriel or not MOTIF_ADRESSE.match(destinataire.courriel):
         return None
     if destinataire.statut == "À contacter" and destinataire.date_envoi is None:
-        return "premier"
+        return "felicitations" if destinataire.passage_a else "premier"
     if (
         relances
         and destinataire.statut == "Envoyé"
@@ -214,9 +260,10 @@ def type_envoi(
 def planifier(
     destinataires: list[Destinataire], jour: date, reglages: Reglages, relances: bool, maximum: int
 ) -> list[tuple[Destinataire, TypeEnvoi]]:
-    """Relances d'abord (elles sont dues), puis premiers mails dans l'ordre du classeur."""
+    """Relances d'abord (elles sont dues), puis félicitations (tant que c'est d'actualité),
+    puis premiers mails dans l'ordre du classeur."""
     candidats = [(d, t) for d in destinataires if (t := type_envoi(d, jour, reglages, relances))]
-    candidats.sort(key=lambda c: (c[1] != "relance", c[0].rang))
+    candidats.sort(key=lambda c: (ORDRE_ENVOIS[c[1]], c[0].rang))
     return candidats[:maximum]
 
 
@@ -371,6 +418,17 @@ def _nombre(valeur: int) -> str:
     return f"{valeur:,}".replace(",", " ")
 
 
+MOIS = (
+    "janvier", "février", "mars", "avril", "mai", "juin",
+    "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+)  # fmt: skip
+
+
+def _date_longue(jour: date) -> str:
+    """« 5 juillet 2026 » (sans dépendre de la langue du serveur)."""
+    return f"{jour.day} {MOIS[jour.month - 1]} {jour.year}"
+
+
 def _modele(nom: str) -> Template:
     return Template((DOSSIER_MODELES / nom).read_text(encoding="utf-8"))
 
@@ -392,9 +450,17 @@ def composer(
         "url_site": reglages.url_site,
         "domaine_site": reglages.domaine_site,
         "date_envoi": f"{destinataire.date_envoi:%d/%m/%Y}" if destinataire.date_envoi else "",
+        "note_avant": destinataire.passage_a.note_avant if destinataire.passage_a else "",
+        "date_avant": _date_longue(destinataire.passage_a.date_avant)
+        if destinataire.passage_a
+        else "",
     }
     if genre == "premier":
         sujet = f"🏅 {destinataire.commune} obtient la note A en souveraineté numérique"
+    elif genre == "felicitations":
+        sujet = (
+            f"🎉 Bravo : {destinataire.commune} vient d'obtenir la note A en souveraineté numérique"
+        )
     else:
         sujet = f"Petit rappel : {destinataire.commune} obtient la note A en souveraineté numérique"
     echappees = {cle: html.escape(valeur) for cle, valeur in valeurs.items()}
@@ -432,6 +498,7 @@ def executer(
     messages_recus: list[MessageRecu] | None = None,
     apres_envoi: Callable[[EmailMessage], bool] | None = None,
     attendre: Callable[[float], None] = time.sleep,
+    passages_a: Mapping[str, PassageA] | None = None,
 ) -> Bilan:
     """Met à jour les statuts (réponses, rebonds), puis envoie le quota du jour.
 
@@ -442,7 +509,7 @@ def executer(
     classeur = _openpyxl().load_workbook(chemin)
     feuille = classeur["Communes A"]
     numero = colonnes(feuille)
-    destinataires = lire_destinataires(feuille)
+    destinataires = lire_destinataires(feuille, passages_a)
     bilan = Bilan()
 
     if messages_recus:
@@ -469,11 +536,15 @@ def executer(
                 classeur.save(chemin)
                 continue
             break  # serveur indisponible ou authentification refusée : on s'arrête là
-        if genre == "premier":
+        if genre in ("premier", "felicitations"):
             feuille.cell(d.rang, numero[DATE_ENVOI]).value = datetime.combine(
                 jour, datetime.min.time()
             )
             feuille.cell(d.rang, numero["Statut"]).value = "Envoyé"
+            if genre == "felicitations" and d.passage_a and "Notes" in numero:
+                cellule = feuille.cell(d.rang, numero["Notes"])
+                mention = f"Mail « nouvelle note A » ({d.passage_a.note_avant} → A)"
+                cellule.value = f"{cellule.value} · {mention}" if cellule.value else mention
         else:
             feuille.cell(d.rang, numero[DATE_RELANCE]).value = datetime.combine(
                 jour, datetime.min.time()
@@ -494,12 +565,18 @@ def executer(
 
 
 def apercus(
-    chemin: Path, reglages: Reglages, dossier: Path, *, jour: date | None = None, nombre: int = 5
+    chemin: Path,
+    reglages: Reglages,
+    dossier: Path,
+    *,
+    jour: date | None = None,
+    nombre: int = 5,
+    passages_a: Mapping[str, PassageA] | None = None,
 ) -> list[Path]:
     """Mode simulation : écrit les prochains mails (.eml et .html) sans rien envoyer ni modifier."""
     jour = jour or date.today()
     feuille = _openpyxl().load_workbook(chemin, read_only=False)["Communes A"]
-    destinataires = lire_destinataires(feuille)
+    destinataires = lire_destinataires(feuille, passages_a)
     limite = min(nombre, quota_du_jour(destinataires, reglages, jour))
     dossier.mkdir(parents=True, exist_ok=True)
     fichiers: list[Path] = []

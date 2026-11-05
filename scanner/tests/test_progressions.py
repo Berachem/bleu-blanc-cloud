@@ -6,7 +6,9 @@ import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+import httpx
 import pytest
+import respx
 from typer.testing import CliRunner
 
 from bleublanccloud.analyse.score import VERSION_METHODO, calculer_score
@@ -126,3 +128,37 @@ def test_cli_stats_sans_historique(base_historique: Path) -> None:
     resultat = CliRunner().invoke(app, ["stats", "--sans-image", "--jours", "90"])
     assert resultat.exit_code == 0, resultat.output
     assert "Pas encore assez d'historique" in resultat.output
+
+
+@respx.mock
+def test_simulation_mail_de_felicitations(
+    base_historique: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Bordeaux est passée en A il y a 2 jours : la simulation prépare les félicitations."""
+    openpyxl = pytest.importorskip("openpyxl")
+    from bleublanccloud.cibles.annuaire import URL_EXPORT
+    from bleublanccloud.configuration import obtenir_parametres
+
+    respx.get(URL_EXPORT).mock(return_value=httpx.Response(200, json=[]))
+    chemin = base_historique / "prospection.xlsx"
+    lanceur = CliRunner()
+    assert lanceur.invoke(app, ["prospection", "badge", "--vers", str(chemin)]).exit_code == 0
+    classeur = openpyxl.load_workbook(chemin)
+    feuille = classeur["Communes A"]
+    colonnes = {c.value: c.column_letter for c in feuille[1]}
+    for rang in range(2, feuille.max_row + 1):
+        slug = feuille[f"{colonnes['Slug']}{rang}"].value
+        feuille[f"{colonnes['E-mail de contact']}{rang}"] = f"contact@{slug}.example"
+        feuille[f"{colonnes['Statut']}{rang}"] = "À contacter"
+    classeur.save(chemin)
+
+    monkeypatch.setenv("COURRIEL_ADRESSE", "contact@bbc.example")
+    obtenir_parametres.cache_clear()
+    resultat = lanceur.invoke(
+        app, ["prospection", "envoyer", "--vers", str(chemin), "--simulation"]
+    )
+    assert resultat.exit_code == 0, resultat.output
+    apercus = sorted(p.name for p in (base_historique / "apercus").glob("*.eml"))
+    assert apercus == ["bordeaux-felicitations.eml", "merignac-premier.eml"]
+    texte = (base_historique / "apercus" / "bordeaux-felicitations.html").read_text()
+    assert "vient d'obtenir la note A" in texte

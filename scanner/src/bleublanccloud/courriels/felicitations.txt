@@ -1,0 +1,19 @@
+Bonjour,
+
+Je m'appelle Berachem Markria et je développe Bleu Blanc Cloud ($url_site), un observatoire indépendant et open source. Il mesure, commune par commune, si les services numériques visibles publiquement (hébergement du site, messagerie, DNS, services tiers) reposent sur des fournisseurs européens ou sur des acteurs soumis à des lois étrangères comme le Cloud Act américain.
+
+🎉 Bravo : $commune vient d'obtenir la note A, avec un score de $score/100 ! Lors de notre analyse du $date_avant, elle était notée $note_avant. Depuis, son empreinte numérique externe repose sur des fournisseurs européens : félicitations à vos équipes pour ce passage à un numérique européen ! 👏
+
+Le détail est sur votre fiche, avec la courbe de votre progression : $url_fiche
+
+Si vous souhaitez le faire savoir, un badge est à votre disposition sur cette fiche, en version claire ou sombre : il suffit de copier un petit code dans votre site, ou de télécharger l'image. Il ne contient ni cookie ni traceur, bien sûr.
+
+Deux précisions, par transparence :
+- Bleu Blanc Cloud est un projet personnel, sans lien avec l'État ni avec un fournisseur.
+- La note ne porte que sur ce qui est visible de l'extérieur : elle ne juge ni vos outils internes ni la sécurité de vos sites.
+
+Une question ou une correction ? Il suffit de répondre à ce mail. Et si vous préférez ne plus recevoir de message de ma part, dites-le-moi simplement.
+
+Belle journée,
+Berachem Markria
+Bleu Blanc Cloud · $url_site
