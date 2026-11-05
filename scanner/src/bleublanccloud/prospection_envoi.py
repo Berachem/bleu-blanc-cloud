@@ -114,6 +114,7 @@ class Bilan:
     envoyes: list[tuple[str, TypeEnvoi]] = field(default_factory=list)
     erreurs: list[tuple[str, str]] = field(default_factory=list)
     quota: int = 0
+    copies_ratees: int = 0
 
 
 # --------------------------------------------------------------------------- #
@@ -321,21 +322,39 @@ def lire_boite(imap: Any, depuis: date) -> list[MessageRecu]:
     return messages
 
 
-def copier_dans_envoyes(imap: Any, message: EmailMessage) -> bool:
-    """Copie le mail dans le dossier « Envoyés » (pour le voir dans Mail sur le Mac)."""
-    statut, dossiers = imap.list()
-    if statut != "OK":
-        return False
-    nom = None
-    for ligne in dossiers or []:
+# Noms usuels du dossier des messages envoyés (Apple Mail crée « Sent Messages », Roundcube
+# « Sent », Outlook « Sent Items »…), comparés au dernier niveau du chemin (« INBOX.Sent »)
+NOMS_ENVOYES = ("sent", "sent messages", "sent items", "envoyés", "éléments envoyés")
+
+
+def dossier_envoyes(lignes: Iterable[Any]) -> str | None:
+    """Dossier « Envoyés » d'après la réponse IMAP LIST : drapeau \\Sent, sinon nom usuel.
+
+    Le nom est rendu tel que le serveur l'a écrit (avec ses guillemets s'il en a), pour
+    l'ajout IMAP.
+    """
+    candidats: list[tuple[int, str]] = []
+    for ligne in lignes:
         texte = ligne.decode(errors="replace") if isinstance(ligne, bytes) else str(ligne)
-        trouve = re.search(r'\(([^)]*)\) "[^"]*" (.+)$', texte)
+        trouve = re.search(r'\(([^)]*)\) (?:"([^"]*)"|NIL) (.+)$', texte)
         if not trouve:
             continue
-        drapeaux, dossier = trouve.group(1), trouve.group(2).strip()
-        if "\\Sent" in drapeaux or dossier.strip('"').lower() in ("sent", "inbox.sent"):
-            nom = dossier
-            break
+        drapeaux, separateur, dossier = trouve.group(1), trouve.group(2), trouve.group(3).strip()
+        if "\\Sent" in drapeaux:
+            return dossier
+        nom = dossier.strip('"')
+        dernier = nom.rsplit(separateur, 1)[-1] if separateur else nom
+        if dernier.lower() in NOMS_ENVOYES:
+            candidats.append((NOMS_ENVOYES.index(dernier.lower()), dossier))
+    return min(candidats)[1] if candidats else None
+
+
+def copier_dans_envoyes(imap: Any, message: EmailMessage) -> bool:
+    """Copie le mail dans le dossier « Envoyés » (pour le voir dans Mail sur le Mac)."""
+    statut, lignes = imap.list()
+    if statut != "OK":
+        return False
+    nom = dossier_envoyes(lignes or [])
     if not nom:
         return False
     statut, _ = imap.append(nom, "\\Seen", imaplib.Time2Internaldate(time.time()), bytes(message))
@@ -411,7 +430,7 @@ def executer(
     relances: bool = True,
     maximum: int | None = None,
     messages_recus: list[MessageRecu] | None = None,
-    apres_envoi: Callable[[EmailMessage], None] | None = None,
+    apres_envoi: Callable[[EmailMessage], bool] | None = None,
     attendre: Callable[[float], None] = time.sleep,
 ) -> Bilan:
     """Met à jour les statuts (réponses, rebonds), puis envoie le quota du jour.
@@ -463,9 +482,12 @@ def executer(
         classeur.save(chemin)
         bilan.envoyes.append((d.slug, genre))
         if apres_envoi:
-            # La copie dans « Envoyés » est un confort, jamais bloquante
+            # La copie dans « Envoyés » est un confort : jamais bloquante, mais comptée
+            copie = False
             with contextlib.suppress(imaplib.IMAP4.error, OSError):
-                apres_envoi(message)
+                copie = apres_envoi(message)
+            if not copie:
+                bilan.copies_ratees += 1
         if position < len(plan) - 1:
             attendre(random.uniform(reglages.pause_min_s, reglages.pause_max_s))
     return bilan
