@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import smtplib
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from email.message import EmailMessage
 from pathlib import Path
 from typing import Any
@@ -21,17 +21,20 @@ from bleublanccloud.prospection_envoi import (
     ClasseurInvalide,
     Destinataire,
     MessageRecu,
+    PassageA,
     Reglages,
     analyser_boite,
     apercus,
     composer,
     copier_dans_envoyes,
+    detecter_passage_a,
     dossier_envoyes,
     executer,
     lire_boite,
     quota_du_jour,
     type_envoi,
 )
+from bleublanccloud.stockage.base import PointEnregistre
 from tests import test_statistiques
 
 openpyxl = pytest.importorskip("openpyxl")
@@ -476,3 +479,96 @@ def test_copie_ratee_comptee_sans_bloquer(tmp_path: Path) -> None:
     bilan = executer(chemin, REGLAGES, FauxSmtp(), jour=JOUR, apres_envoi=lambda _: False)
     assert bilan.envoyes == [("nantes-44109", "premier")]
     assert bilan.copies_ratees == 1
+
+
+# --------------------------------------------------------------------------- #
+# Félicitations : communes qui viennent d'obtenir la note A
+# --------------------------------------------------------------------------- #
+
+
+def releve(jours_avant: int, score: int, version: str | None = None) -> PointEnregistre:
+    from bleublanccloud.analyse.score import VERSION_METHODO
+
+    return PointEnregistre(
+        scan_id=jours_avant,
+        debut=datetime(2026, 11, 10, 3, tzinfo=UTC) - timedelta(days=jours_avant),
+        score=score,
+        note="A",
+        provisoire=False,
+        version_methodo=version or VERSION_METHODO,
+    )
+
+
+@pytest.mark.parametrize(
+    ("points", "attendu"),
+    [
+        # C puis A depuis 20 jours : passage récent
+        (
+            [releve(60, 62), releve(20, 90), releve(5, 100)],
+            PassageA("C", date(2026, 9, 11), date(2026, 10, 21)),
+        ),
+        # Toujours notée A : pas de passage
+        ([releve(60, 90), releve(5, 100)], None),
+        # Passage trop ancien (plus de 90 jours) : mail habituel
+        ([releve(200, 40), releve(120, 90), releve(5, 95)], None),
+        # Repassée sous A : pas de félicitations
+        ([releve(60, 90), releve(5, 70)], None),
+        # Une seule analyse
+        ([releve(5, 100)], None),
+        # Ancienne note d'une autre méthodologie : non comparable, ignorée
+        ([releve(60, 40, version="1.0"), releve(5, 100)], None),
+    ],
+)
+def test_detecter_passage_a(points: list[PointEnregistre], attendu: PassageA | None) -> None:
+    assert detecter_passage_a(points, JOUR) == attendu
+
+
+PASSAGE = PassageA("C", date(2026, 9, 11), date(2026, 10, 21))
+
+
+def test_mail_de_felicitations() -> None:
+    message = composer(destinataire(passage_a=PASSAGE), "felicitations", REGLAGES)
+    assert message["Subject"] == (
+        "🎉 Bravo : Nantes vient d'obtenir la note A en souveraineté numérique"
+    )
+    texte = message.get_body(preferencelist=("plain",)).get_content()
+    page = message.get_body(preferencelist=("html",)).get_content()
+    assert "Nantes vient d'obtenir la note A, avec un score de 100/100" in texte
+    assert "Lors de notre analyse du 11 septembre 2026, elle était notée C" in texte
+    assert "Voir la fiche et la progression" in page
+    assert "$" not in texte and "$" not in page
+
+
+def test_felicitations_prioritaires_et_notees(tmp_path: Path) -> None:
+    chemin = classeur(
+        tmp_path,
+        {
+            "nantes-44109": a_contacter("contact@nantes.example"),
+            "albi-81004": a_contacter("contact@albi.example"),
+            "sete-34301": {
+                **a_contacter("mairie@sete.example"),
+                "Statut": "Envoyé",
+                "Date mail envoyé": datetime(2026, 10, 1),
+            },
+        },
+    )
+    smtp = FauxSmtp()
+    bilan = executer(
+        chemin,
+        Reglages(**{**REGLAGES.__dict__, "quota_rodage": 3}),
+        smtp,
+        jour=JOUR,
+        attendre=lambda _: None,
+        passages_a={"albi-81004": PASSAGE},
+    )
+    # Relance due d'abord, puis félicitations (Albi), puis le mail habituel (Nantes)
+    assert bilan.envoyes == [
+        ("sete-34301", "relance"),
+        ("albi-81004", "felicitations"),
+        ("nantes-44109", "premier"),
+    ]
+    assert smtp.envoyes[1]["Subject"].startswith("🎉 Bravo : Albi")
+    suivi = lire_suivi(chemin)
+    assert suivi["albi-81004"]["Statut"] == "Envoyé"
+    assert suivi["albi-81004"]["Notes"] == "Mail « nouvelle note A » (C → A)"
+    assert suivi["albi-81004"]["Date mail envoyé"] == datetime(2026, 11, 10)

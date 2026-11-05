@@ -1266,6 +1266,7 @@ def prospection_envoyer(
         console_erreur.print("[red]COURRIEL_ADRESSE manquante dans .env.[/]")
         raise typer.Exit(code=1)
     nombre_a, nombre_analysees = _chiffres_observatoire()
+    passages_a = _passages_a(chemin)
     if not nombre_analysees:
         console_erreur.print("[red]Aucune organisation notée dans la base.[/]")
         raise typer.Exit(code=1)
@@ -1287,7 +1288,9 @@ def prospection_envoyer(
     try:
         if simulation:
             dossier = chemin.parent / "apercus"
-            fichiers = apercus(chemin, reglages, dossier, nombre=maximum or 5)
+            fichiers = apercus(
+                chemin, reglages, dossier, nombre=maximum or 5, passages_a=passages_a
+            )
             for fichier in fichiers:
                 console.print(f"  {fichier.name}")
             console.print(
@@ -1316,7 +1319,9 @@ def prospection_envoyer(
             from bleublanccloud.prospection import _openpyxl
 
             feuille = _openpyxl().load_workbook(chemin)["Communes A"]
-            prochains = planifier(lire_destinataires(feuille), date.today(), reglages, True, 1)
+            prochains = planifier(
+                lire_destinataires(feuille, passages_a), date.today(), reglages, True, 1
+            )
             if not prochains:
                 console.print("[yellow]Aucun mail à envoyer aujourd'hui.[/]")
                 return
@@ -1354,6 +1359,7 @@ def prospection_envoyer(
                 maximum=maximum,
                 messages_recus=recus,
                 apres_envoi=copier,
+                passages_a=passages_a,
             )
     except ClasseurInvalide as erreur:
         console_erreur.print(f"[red]{erreur}[/]")
@@ -1373,10 +1379,11 @@ def prospection_envoyer(
         console.print(
             f"↩ {len(bilan.rebonds)} adresse(s) introuvable(s) : {', '.join(bilan.rebonds)}"
         )
-    premiers = sum(1 for _, genre in bilan.envoyes if genre == "premier")
+    genres = [genre for _, genre in bilan.envoyes]
     console.print(
-        f"[green]✓[/] {premiers} premier(s) mail(s) et {len(bilan.envoyes) - premiers} "
-        f"relance(s) envoyé(s) (quota du jour : {bilan.quota})."
+        f"[green]✓[/] {genres.count('premier')} premier(s) mail(s), "
+        f"{genres.count('felicitations')} félicitation(s) (nouvelle note A) et "
+        f"{genres.count('relance')} relance(s) envoyé(s) (quota du jour : {bilan.quota})."
     )
     if bilan.erreurs:
         console_erreur.print(
@@ -1385,6 +1392,33 @@ def prospection_envoyer(
             + "[/]"
         )
         raise typer.Exit(code=1)
+
+
+def _passages_a(chemin: Path) -> dict[str, Any]:
+    """Communes du classeur passées en A récemment (historique de la base) : elles reçoivent
+    le mail « Bravo, vous venez d'obtenir la note A » à la place du mail habituel."""
+    from datetime import date
+
+    from bleublanccloud.prospection_envoi import (
+        ClasseurInvalide,
+        detecter_passage_a,
+        lire_destinataires,
+    )
+
+    try:
+        destinataires = lire_destinataires(_openpyxl_feuille(chemin))
+    except ClasseurInvalide:
+        return {}  # classeur trop ancien : l'erreur détaillée est affichée plus loin
+    passages: dict[str, Any] = {}
+    with Base(obtenir_parametres().base_sqlite) as base:
+        for destinataire in destinataires:
+            enregistree = base.organisation_par_slug(destinataire.slug)
+            if enregistree is None:
+                continue
+            passage = detecter_passage_a(base.historique_scores(enregistree.id), date.today())
+            if passage:
+                passages[destinataire.slug] = passage
+    return passages
 
 
 def _openpyxl_feuille(chemin: Path) -> Any:

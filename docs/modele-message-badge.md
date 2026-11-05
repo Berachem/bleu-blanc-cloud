@@ -45,6 +45,9 @@ Bleu Blanc Cloud · https://bleublanccloud.fr
 
 Envoi programmé : `bbcloud prospection envoyer` (modèles dans
 `scanner/src/bleublanccloud/courriels/`, relance unique incluse ; voir `deploy/README.md`).
+Une commune passée en A depuis moins de 90 jours (historique des scores) reçoit à la place le
+mail de félicitations (`felicitations.txt` / `.html`) : « Bravo : [Commune] vient d'obtenir la
+note A… Lors de notre analyse du [date], elle était notée [note]. »
 
 Version HTML : logo `https://bleublanccloud.fr/courriel/logo-bleu-blanc-cloud.png` (PNG, car
 Gmail et Outlook n'affichent pas le SVG ; image statique du site, sans paramètre de suivi).
