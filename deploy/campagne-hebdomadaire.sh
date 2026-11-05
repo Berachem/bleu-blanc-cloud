@@ -33,9 +33,11 @@ echo "▶ Campagne de scan"
 uv run bbcloud campagne lancer --oui
 
 # Les organisations dont le scan a échoué cette semaine gardent leur scan précédent :
-# il est réattribué avec les référentiels du jour, comme les nouveaux scans.
+# il est réattribué avec les référentiels du jour, comme les nouveaux scans. Tout
+# l'historique l'est aussi (plages IP mises à jour) : la courbe d'évolution des fiches ne
+# compare que des scores calculés avec les mêmes règles.
 echo "▶ Recalcul des scores des scans plus anciens (référentiels à jour, aucun scan)"
-uv run bbcloud scores recalculer
+uv run bbcloud scores recalculer --tous
 
 echo "▶ Rapports IA (seuls les constats modifiés entraînent un appel)"
 if grep -qE '^MISTRAL_API_KEY=.+' "$RACINE/.env" 2>/dev/null; then

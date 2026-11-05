@@ -78,6 +78,10 @@ export interface OrganisationExport {
   rapport_ia: RapportIAExport | null;
   alternatives: AlternativeExport[];
   /**
+   * Évolution du score, de la plus ancienne analyse à la plus récente (un point par jour, le dernier est l'analyse affichée). Vide ou un seul point : pas d'évolution.
+   */
+  historique: PointHistorique[];
+  /**
    * Contour simplifié de la commune (coordonnées GeoJSON MultiPolygon, WGS 84) pour la carte de situation. Source : geo.api.gouv.fr / IGN, licence Etalab 2.0.
    */
   contour: number[][][][] | null;
@@ -275,6 +279,20 @@ export interface AlternativeExport {
   types_service: string[];
   description_courte: string;
   a_verifier: boolean;
+}
+/**
+ * Une analyse passée de l'organisation (la dernière de chaque jour), pour la courbe
+ * d'évolution. Toutes les analyses sont recalculées avec la méthodologie et les
+ * référentiels actuels : un écart reflète un changement chez l'organisation.
+ *
+ * This interface was referenced by `DonneesSite`'s JSON-Schema
+ * via the `definition` "PointHistorique".
+ */
+export interface PointHistorique {
+  date: string;
+  score: number;
+  note: "A" | "B" | "C" | "D" | "E";
+  provisoire: boolean;
 }
 /**
  * Élément de departements.json (agrégats).

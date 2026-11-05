@@ -36,6 +36,7 @@ Bleu Blanc Cloud rend cette dépendance **visible, mesurable et vérifiable**, o
 - **Rapports rédigés par Mistral** pour les décideurs : synthèse, risques et plan de migration limité aux alternatives du référentiel. L'IA ne calcule jamais le score ; chaque texte généré est signalé comme tel.
 - **Site 100 % statique** : carte de France par département, classements filtrables, fiche détaillée par organisation avec carte de situation zoomable, recherche instantanée, mode sombre, accessibilité (RGAA / WCAG 2.1 AA visés).
 - **Simulateur « Et si… ? »** : si un fournisseur tombe ou coupe l'accès (panne, ou coupure de tous les acteurs soumis au Cloud Act), combien de collectivités sont touchées et sur quels services. Totaux seulement, dépendances déjà publiques sur les fiches (aucune information de vulnérabilité), préréglages partageables avec image de partage générée par le serveur.
+- **Évolution du score** : à partir de deux analyses, chaque fiche affiche la courbe de son score (analyses passées recalculées avec les règles actuelles, pour comparer ce qui est comparable).
 - **Badge « Note A »** : les organisations notées A peuvent afficher un badge SVG (clair ou sombre) relié à leur fiche, intégré par code ou hébergé chez elles, sans traceur.
 - **Dossiers pédagogiques** : « Souveraineté ≠ sécurité », avec un kit « 5 questions à poser à votre prestataire » imprimable et en PDF.
 - **Analyses sur demande** : tout visiteur peut faire analyser son site via un ticket Codeberg, traité par le serveur sans aucun port entrant.

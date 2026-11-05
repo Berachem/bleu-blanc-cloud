@@ -436,3 +436,79 @@ def test_campagne_ignore_les_fiches_sur_demande(base: Base) -> None:
     )  # fmt: skip
     cibles, _ = preparer_cibles(base.organisations(), lambda _: False)
     assert [c.domaine for c in cibles] == ["exempleville.fr"]
+
+
+# --------------------------------------------------------------------------- #
+# Historique des scores (courbe d'évolution des fiches)
+# --------------------------------------------------------------------------- #
+
+
+def _scan_a(base: Base, org_id: int, jour: int, heure: int = 3, score: int | None = None) -> int:
+    res = resultat(jour=jour)
+    res.debut = res.fin = datetime(2026, 9, jour, heure, tzinfo=UTC)
+    calcule = calculer_score(res.constats)
+    if score is not None:
+        calcule = calcule.model_copy(update={"score_global": score})
+    return base.enregistrer_scan(org_id, res, calcule, VERSION_METHODO)
+
+
+def test_historique_scores_points(base: Base) -> None:
+    org_id = base.enregistrer_organisation(organisation())
+    premier = _scan_a(base, org_id, 1, score=40)
+    _scan_a(base, org_id, 8)
+    points = base.historique_scores(org_id)
+    assert points[0].scan_id == premier
+    assert points[0].score == 40
+    assert points[0].debut == datetime(2026, 9, 1, 3, tzinfo=UTC)
+    assert points[0].version_methodo == VERSION_METHODO
+    assert points[0].provisoire is False
+
+
+def test_export_historique_un_point_par_jour(
+    base: Base, referentiels: Referentiels, tmp_path: Path
+) -> None:
+    org_id = base.enregistrer_organisation(organisation())
+    _scan_a(base, org_id, 1, score=40)
+    _scan_a(base, org_id, 8, heure=3, score=45)
+    _scan_a(base, org_id, 8, heure=9, score=52)  # même jour : seul le dernier compte
+    # Score d'une ancienne méthodologie : écarté (non comparable)
+    ancien = resultat(jour=3)
+    score_ancien = calculer_score(ancien.constats).model_copy(update={"version_methodo": "1.0"})
+    base.enregistrer_scan(org_id, ancien, score_ancien, "1.0")
+    _scan_a(base, org_id, 15)
+
+    exporter(base, referentiels, tmp_path)
+    detail = OrganisationExport.model_validate_json(
+        (tmp_path / "organisations" / "exempleville-99999.json").read_text()
+    )
+    assert [p.date.day for p in detail.historique] == [1, 8, 15]
+    assert [p.score for p in detail.historique][:2] == [40, 52]
+    assert detail.historique[0].note == "D"  # note recalculée depuis le score (40)
+    dernier = detail.historique[-1]
+    assert (dernier.score, dernier.note) == (detail.score.score_global, detail.score.note)
+
+
+def test_export_historique_une_seule_analyse(
+    base: Base, referentiels: Referentiels, tmp_path: Path
+) -> None:
+    org_id = base.enregistrer_organisation(organisation())
+    _scan_a(base, org_id, 1)
+    exporter(base, referentiels, tmp_path)
+    detail = OrganisationExport.model_validate_json(
+        (tmp_path / "organisations" / "exempleville-99999.json").read_text()
+    )
+    assert len(detail.historique) == 1
+
+
+def test_recalcul_de_tout_l_historique_bilan_limite_aux_scores_publies(
+    base: Base, referentiels: Referentiels
+) -> None:
+    from bleublanccloud.recalcul import recalculer_scores
+
+    org_id = base.enregistrer_organisation(organisation())
+    _scan_a(base, org_id, 1, score=99)  # score enregistré périmé : sera recalculé
+    _scan_a(base, org_id, 8, score=99)
+    bilan = recalculer_scores(base, referentiels, appliquer=True, tous=True)
+    assert bilan.scans_modifies == 2  # tout l'historique est remis à jour…
+    assert len(bilan.changements) == 1  # …mais le bilan ne cite que le score publié
+    assert all(p.score != 99 for p in base.historique_scores(org_id))

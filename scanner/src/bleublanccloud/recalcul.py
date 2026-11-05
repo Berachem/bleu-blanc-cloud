@@ -78,6 +78,9 @@ def recalculer_scores(
     attributeur = Attributeur(referentiels.fournisseurs, referentiels.transitaires.values())
     bilan = BilanRecalcul(appliquer=appliquer)
     derniers = {s.id for s in _scans_observatoire(base, referentiels)}
+    # Scores publiés (dernier scan de chaque organisation) : seuls comptés dans le bilan,
+    # même quand tout l'historique est recalculé
+    publies = {s.id for s in base.scans_notes()} if tous else None
     avant: list[Score] = []
     apres: list[Score] = []
     for scan in base.scans_notes(tous=tous):
@@ -104,7 +107,7 @@ def recalculer_scores(
             continue
         bilan.scans_modifies += 1
         bilan.constats_modifies += modifies
-        if modifies or score_modifie:
+        if (modifies or score_modifie) and (publies is None or scan.id in publies):
             bilan.changements.append(
                 Changement(
                     scan_id=scan.id,

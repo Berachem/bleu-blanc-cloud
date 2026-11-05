@@ -770,6 +770,14 @@
           "title": "Alternatives",
           "type": "array"
         },
+        "historique": {
+          "description": "Évolution du score, de la plus ancienne analyse à la plus récente (un point par jour, le dernier est l'analyse affichée). Vide ou un seul point : pas d'évolution.",
+          "items": {
+            "$ref": "#/$defs/PointHistorique"
+          },
+          "title": "Historique",
+          "type": "array"
+        },
         "contour": {
           "anyOf": [
             {
@@ -815,9 +823,51 @@
         "fournisseurs",
         "rapport_ia",
         "alternatives",
+        "historique",
         "contour"
       ],
       "title": "OrganisationExport",
+      "type": "object"
+    },
+    "PointHistorique": {
+      "additionalProperties": false,
+      "description": "Une analyse passée de l'organisation (la dernière de chaque jour), pour la courbe\nd'évolution. Toutes les analyses sont recalculées avec la méthodologie et les\nréférentiels actuels : un écart reflète un changement chez l'organisation.",
+      "properties": {
+        "date": {
+          "format": "date-time",
+          "title": "Date",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Score",
+          "type": "integer"
+        },
+        "note": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ],
+          "title": "Note",
+          "type": "string"
+        },
+        "provisoire": {
+          "default": false,
+          "title": "Provisoire",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "date",
+        "score",
+        "note",
+        "provisoire"
+      ],
+      "title": "PointHistorique",
       "type": "object"
     },
     "RapportIA": {

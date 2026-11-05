@@ -108,8 +108,10 @@ principal() {
   # Référentiels ou méthodologie modifiés : constats réattribués et scores recalculés en base
   if ! git diff --quiet "$ancien" "$nouveau" -- \
     scanner/src/bleublanccloud/referentiels/ scanner/src/bleublanccloud/analyse/; then
+    # Tout l'historique : la courbe d'évolution des fiches compare des scores calculés avec
+    # les mêmes règles (un écart reflète un changement chez l'organisation, pas chez nous)
     info "▶ Référentiels ou calcul du score modifiés : recalcul des scores (aucun scan)"
-    (cd "$RACINE/scanner" && uv run bbcloud scores recalculer)
+    (cd "$RACINE/scanner" && uv run bbcloud scores recalculer --tous)
   fi
 
   # Contours des communes (carte de situation) : seuls les manquants sont demandés à
