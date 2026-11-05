@@ -19,9 +19,8 @@ sur des fournisseurs européens ou sur des acteurs soumis à des lois étrangèr
 américain.
 
 🎉 J'ai le plaisir de vous annoncer que **[Commune] obtient la note A** (score de [score]/100) !
-Sur les [nombre_analysees] collectivités analysées en France, seules **[nombre_A] atteignent ce
-niveau** : [Commune] fait partie de ces collectivités exemplaires qui ont fait le choix d'un
-numérique européen. Bravo à vos équipes ! 👏
+[Commune] fait partie des collectivités exemplaires qui ont fait le choix d'un numérique
+européen. Bravo à vos équipes ! 👏
 
 Le détail est sur votre fiche : https://bleublanccloud.fr/organisation/[slug]/
 
@@ -50,6 +49,3 @@ Envoi programmé : `bbcloud prospection envoyer` (modèles dans
 Version HTML : logo `https://bleublanccloud.fr/courriel/logo-bleu-blanc-cloud.png` (PNG, car
 Gmail et Outlook n'affichent pas le SVG ; image statique du site, sans paramètre de suivi).
 Champs à remplacer depuis le classeur : [Commune] (colonne Commune), [score] (Score), [slug] (Slug).
-[nombre_A] et [nombre_analysees] : chiffres du jour de l'envoi (page /classements/ ou
-`bbcloud stats`), notes provisoires comprises, pour rester cohérent avec le site. Au
-4 novembre 2026 : 486 notées A sur 1 162 collectivités analysées.

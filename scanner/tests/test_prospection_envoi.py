@@ -127,8 +127,8 @@ def test_mail_complet_texte_et_html() -> None:
     assert "Ne%20plus%20recevoir" in message["List-Unsubscribe"]
     texte = message.get_body(preferencelist=("plain",)).get_content()
     page = message.get_body(preferencelist=("html",)).get_content()
-    assert "seules 486 atteignent ce niveau" in texte
-    assert "1 162 collectivités analysées" in texte
+    assert "fait partie des collectivités exemplaires" in texte
+    assert "486" not in texte and "486" not in page  # aucun chiffre de classement
     assert "https://bbc.example/organisation/nantes-44109/" in texte
     assert "🎉" in texte
     assert "Saint-Gély-du-Fesc &amp; Cie" in page  # échappé dans le HTML
