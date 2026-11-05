@@ -1291,9 +1291,9 @@ def prospection_envoyer(
                 except (OSError, imaplib.IMAP4.error) as erreur:  # boîte injoignable : on envoie
                     console_erreur.print(f"[yellow]⚠ Boîte de réception illisible : {erreur}[/]")
 
-            def copier(message: Any) -> None:
+            def copier(message: Any) -> bool:
                 with connexion.imap() as boite:
-                    copier_dans_envoyes(boite, message)
+                    return copier_dans_envoyes(boite, message)
 
             bilan = executer(
                 chemin,
@@ -1313,6 +1313,11 @@ def prospection_envoyer(
 
     if bilan.reponses:
         console.print(f"📬 {len(bilan.reponses)} réponse(s) reçue(s) : {', '.join(bilan.reponses)}")
+    if bilan.copies_ratees:
+        console_erreur.print(
+            f"[yellow]⚠ {bilan.copies_ratees} mail(s) envoyé(s) mais non copié(s) dans « Envoyés » "
+            "(dossier introuvable dans la boîte) : les envois restent valables.[/]"
+        )
     if bilan.rebonds:
         console.print(
             f"↩ {len(bilan.rebonds)} adresse(s) introuvable(s) : {', '.join(bilan.rebonds)}"

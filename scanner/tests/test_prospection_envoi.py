@@ -26,6 +26,7 @@ from bleublanccloud.prospection_envoi import (
     apercus,
     composer,
     copier_dans_envoyes,
+    dossier_envoyes,
     executer,
     lire_boite,
     quota_du_jour,
@@ -446,3 +447,32 @@ def test_commande_simulation_puis_sans_mot_de_passe(
     sans_mot_de_passe = lanceur.invoke(app, ["prospection", "envoyer", "--vers", str(chemin)])
     assert sans_mot_de_passe.exit_code == 1
     assert "COURRIEL_MOT_DE_PASSE" in sans_mot_de_passe.output
+
+
+@pytest.mark.parametrize(
+    ("lignes", "attendu"),
+    [
+        # Réponse réelle de la boîte OVH (dossier créé par Apple Mail, sans drapeau \\Sent)
+        (
+            [b'(\\HasChildren) "." INBOX', b'(\\HasNoChildren) "." "INBOX.Sent Messages"'],
+            '"INBOX.Sent Messages"',
+        ),
+        ([b'(\\HasNoChildren) "/" Sent'], "Sent"),
+        ([b'(\\HasNoChildren) "." "INBOX.Envoy\xc3\xa9s"'], '"INBOX.Envoyés"'),
+        # Le drapeau \\Sent l'emporte sur les noms usuels
+        (
+            [b'(\\HasNoChildren) "." INBOX.Sent', b'(\\Sent) "." "INBOX.Mes envois"'],
+            '"INBOX.Mes envois"',
+        ),
+        ([b'(\\HasNoChildren) "." INBOX', b'(\\HasNoChildren) "." INBOX.Brouillons'], None),
+    ],
+)
+def test_dossier_envoyes(lignes: list[bytes], attendu: str | None) -> None:
+    assert dossier_envoyes(lignes) == attendu
+
+
+def test_copie_ratee_comptee_sans_bloquer(tmp_path: Path) -> None:
+    chemin = classeur(tmp_path, {"nantes-44109": a_contacter("contact@nantes.example")})
+    bilan = executer(chemin, REGLAGES, FauxSmtp(), jour=JOUR, apres_envoi=lambda _: False)
+    assert bilan.envoyes == [("nantes-44109", "premier")]
+    assert bilan.copies_ratees == 1
