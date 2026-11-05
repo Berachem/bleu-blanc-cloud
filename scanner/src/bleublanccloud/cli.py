@@ -26,7 +26,7 @@ from bleublanccloud.stockage.base import Base
 
 if TYPE_CHECKING:
     from bleublanccloud.analyse.couverture import CouvertureObservatoire
-    from bleublanccloud.statistiques import Compte, Statistiques
+    from bleublanccloud.statistiques import Compte, Progressions, Statistiques
 
 app = typer.Typer(
     help="Bleu Blanc Cloud — observatoire de la souveraineté numérique.",
@@ -871,6 +871,50 @@ def _score(valeur: float | None) -> str:
     return "—" if valeur is None else f"{valeur:.1f}".replace(".", ",")
 
 
+def afficher_progressions(progressions: Progressions, lignes: int = 10) -> None:
+    """Évolution des scores sur la période (historique, notes provisoires écartées)."""
+    console.print()
+    console.print(
+        f"[bold]Évolution sur les {progressions.jours} derniers jours[/] "
+        f"(depuis le {progressions.debut:%d/%m/%Y})"
+    )
+    ecartees = (
+        f"écartées : {progressions.trop_recentes} analysée(s) depuis moins de "
+        f"{progressions.jours} jours, {progressions.provisoires} note(s) provisoire(s)"
+    )
+    if not progressions.comparees:
+        console.print(f"  Pas encore assez d'historique pour comparer ({ecartees}).")
+        return
+    hausses, baisses, nouvelles = (
+        progressions.en_hausse,
+        progressions.en_baisse,
+        progressions.nouvelles_a,
+    )
+    communes = sum(1 for p in hausses if p.type == "commune")
+    console.print(
+        f"  [green]▲ {len(hausses)} en progression[/] (dont {communes} commune(s), "
+        f"{len(nouvelles)} nouvellement notée(s) A) · [red]▼ {len(baisses)} en recul[/] · "
+        f"= {progressions.stables} stable(s), sur {len(progressions.comparees)} comparée(s)"
+    )
+    console.print(f"  [dim]({ecartees})[/]")
+    for titre, liste in (("Plus fortes progressions", hausses), ("Plus forts reculs", baisses)):
+        if not liste:
+            continue
+        tableau = Table(title=titre, expand=True)
+        tableau.add_column("Organisation")
+        tableau.add_column("Avant", justify="right")
+        tableau.add_column("Aujourd'hui", justify="right")
+        tableau.add_column("Écart", justify="right")
+        for p in liste[:lignes]:
+            tableau.add_row(
+                p.nom,
+                f"{p.score_avant} {p.note_avant}",
+                f"{p.score_apres} {p.note_apres}",
+                f"{p.variation:+d}",
+            )
+        console.print(tableau)
+
+
 def afficher_statistiques(stats: Statistiques) -> None:
     from bleublanccloud.analyse.score import LIBELLES
 
@@ -994,6 +1038,10 @@ def stats(
         Path | None,
         typer.Option("--json", help="Écrit aussi les chiffres dans ce fichier JSON."),
     ] = None,
+    jours: Annotated[
+        int,
+        typer.Option("--jours", min=1, help="Période des progressions (en jours, défaut : 30)."),
+    ] = 30,
 ) -> None:
     """Chiffres clés de l'observatoire et carte de France par département (PNG 1080 × 1080).
 
@@ -1001,20 +1049,23 @@ def stats(
     chaque chiffre indique sa part de notes provisoires.
     """
     from bleublanccloud.export.carte_png import DonneeDepartement, dessiner_carte
-    from bleublanccloud.statistiques import statistiques_observatoire
+    from bleublanccloud.statistiques import progressions_observatoire, statistiques_observatoire
 
     parametres = obtenir_parametres()
     with Base(parametres.base_sqlite) as base:
         resultat = statistiques_observatoire(base, referentiels_par_defaut())
+        progressions = progressions_observatoire(base, jours)
     if resultat.ensemble.compte.nombre == 0:
         console.print("[yellow]Aucun scan noté dans l'observatoire.[/]")
         raise typer.Exit(code=1)
     afficher_statistiques(resultat)
+    afficher_progressions(progressions)
 
     if fichier_json is not None:
         fichier_json.parent.mkdir(parents=True, exist_ok=True)
+        donnees = {**resultat.en_dict(), "progressions": progressions.en_dict()}
         fichier_json.write_text(
-            json.dumps(resultat.en_dict(), ensure_ascii=False, indent=2) + "\n",
+            json.dumps(donnees, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
         console.print(f"[green]✓[/] Chiffres écrits dans {fichier_json}")

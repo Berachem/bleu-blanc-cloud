@@ -10,15 +10,15 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Final, Literal
 
 from bleublanccloud.analyse.attribution import niveau_juridiction
-from bleublanccloud.analyse.score import POINTS_NIVEAUX, note_depuis_score
+from bleublanccloud.analyse.score import POINTS_NIVEAUX, VERSION_METHODO, note_depuis_score
 from bleublanccloud.export.site_statique import score_a_jour
 from bleublanccloud.modeles import CategorieScore, Constat, Note, Organisation, Score
 from bleublanccloud.referentiels import Referentiels
-from bleublanccloud.stockage.base import Base
+from bleublanccloud.stockage.base import Base, PointEnregistre
 
 NOTES: Final[tuple[Note, ...]] = ("A", "B", "C", "D", "E")
 CATEGORIES_NIVEAUX: Final[tuple[CategorieScore, ...]] = ("messagerie", "hebergement", "dns")
@@ -58,6 +58,7 @@ class EntreeStatistique:
     score: Score
     constats: Sequence[Constat]
     date_scan: datetime
+    organisation_id: int | None = None
 
 
 @dataclass
@@ -336,6 +337,7 @@ def entrees_observatoire(base: Base) -> list[EntreeStatistique]:
                 score=score_a_jour(scan),
                 constats=scan.resultat.constats,
                 date_scan=scan.resultat.debut,
+                organisation_id=scan.organisation_id,
             )
         )
     return entrees
@@ -347,4 +349,150 @@ def statistiques_observatoire(base: Base, referentiels: Referentiels) -> Statist
     noms_departements = {code: nom for code, (nom, _) in base.territoires("departement").items()}
     return calculer_statistiques(
         entrees_observatoire(base), referentiels, noms_regions, noms_departements
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Progressions sur une période (historique des scores)
+# --------------------------------------------------------------------------- #
+
+PERIODE_PROGRESSIONS_JOURS: Final = 30
+RANG_NOTES: Final[dict[str, int]] = {note: rang for rang, note in enumerate(reversed(NOTES))}
+
+
+@dataclass(frozen=True)
+class Progression:
+    """Score d'une organisation au début de la période et aujourd'hui."""
+
+    nom: str
+    slug: str
+    type: str
+    population: int | None
+    score_avant: int
+    note_avant: str
+    date_avant: datetime
+    score_apres: int
+    note_apres: str
+    date_apres: datetime
+
+    @property
+    def variation(self) -> int:
+        return self.score_apres - self.score_avant
+
+    @property
+    def note_gagnee(self) -> bool:
+        return RANG_NOTES[self.note_apres] > RANG_NOTES[self.note_avant]
+
+    @property
+    def note_perdue(self) -> bool:
+        return RANG_NOTES[self.note_apres] < RANG_NOTES[self.note_avant]
+
+
+@dataclass
+class Progressions:
+    """Évolution des scores sur une période : seules les organisations analysées avant le
+    début de la période sont comparées, et jamais une note provisoire (trop fragile)."""
+
+    jours: int
+    debut: datetime
+    fin: datetime
+    comparees: list[Progression] = field(default_factory=list)
+    trop_recentes: int = 0
+    provisoires: int = 0
+
+    @property
+    def en_hausse(self) -> list[Progression]:
+        return sorted((p for p in self.comparees if p.variation > 0), key=lambda p: -p.variation)
+
+    @property
+    def en_baisse(self) -> list[Progression]:
+        return sorted((p for p in self.comparees if p.variation < 0), key=lambda p: p.variation)
+
+    @property
+    def stables(self) -> int:
+        return sum(1 for p in self.comparees if p.variation == 0)
+
+    @property
+    def nouvelles_a(self) -> list[Progression]:
+        return [p for p in self.en_hausse if p.note_apres == "A" and p.note_avant != "A"]
+
+    def en_dict(self) -> dict[str, Any]:
+        def ligne(p: Progression) -> dict[str, Any]:
+            return {
+                **{k: v for k, v in asdict(p).items() if not k.startswith("date_")},
+                "date_avant": p.date_avant.isoformat(),
+                "date_apres": p.date_apres.isoformat(),
+                "variation": p.variation,
+            }
+
+        return {
+            "jours": self.jours,
+            "debut": self.debut.isoformat(),
+            "fin": self.fin.isoformat(),
+            "comparees": len(self.comparees),
+            "en_hausse": len(self.en_hausse),
+            "en_baisse": len(self.en_baisse),
+            "stables": self.stables,
+            "notes_gagnees": sum(1 for p in self.comparees if p.note_gagnee),
+            "notes_perdues": sum(1 for p in self.comparees if p.note_perdue),
+            "nouvelles_notees_a": [ligne(p) for p in self.nouvelles_a],
+            "plus_fortes_hausses": [ligne(p) for p in self.en_hausse[:20]],
+            "plus_fortes_baisses": [ligne(p) for p in self.en_baisse[:20]],
+            "ecartees_trop_recentes": self.trop_recentes,
+            "ecartees_provisoires": self.provisoires,
+        }
+
+
+def calculer_progressions(
+    entrees: Iterable[tuple[EntreeStatistique, Sequence[PointEnregistre]]],
+    jours: int = PERIODE_PROGRESSIONS_JOURS,
+    fin: datetime | None = None,
+) -> Progressions:
+    """Compare le score actuel de chaque organisation à son dernier score enregistré au
+    début de la période (même méthodologie : l'historique est recalculé avec les règles
+    actuelles, « scores recalculer --tous »)."""
+    fin = fin or datetime.now(UTC)
+    debut = fin - timedelta(days=jours)
+    resultat = Progressions(jours=jours, debut=debut, fin=fin)
+    for entree, points in entrees:
+        reference = None
+        for point in points:
+            if point.debut <= debut and point.version_methodo == VERSION_METHODO:
+                reference = point  # points triés : on garde le plus récent avant le début
+        if reference is None:
+            resultat.trop_recentes += 1
+            continue
+        if reference.provisoire or entree.score.provisoire:
+            resultat.provisoires += 1
+            continue
+        organisation = entree.organisation
+        resultat.comparees.append(
+            Progression(
+                nom=organisation.nom,
+                slug=organisation.slug,
+                type=organisation.type,
+                population=organisation.population,
+                score_avant=reference.score,
+                note_avant=note_depuis_score(reference.score),
+                date_avant=reference.debut,
+                score_apres=entree.score.score_global,
+                note_apres=entree.score.note,
+                date_apres=entree.date_scan,
+            )
+        )
+    return resultat
+
+
+def progressions_observatoire(
+    base: Base, jours: int = PERIODE_PROGRESSIONS_JOURS, fin: datetime | None = None
+) -> Progressions:
+    """Progressions des organisations de l'observatoire sur les `jours` derniers jours."""
+    return calculer_progressions(
+        (
+            (entree, base.historique_scores(entree.organisation_id))
+            for entree in entrees_observatoire(base)
+            if entree.organisation_id is not None
+        ),
+        jours,
+        fin,
     )

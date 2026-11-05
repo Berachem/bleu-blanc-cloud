@@ -120,7 +120,7 @@ Pendant le développement, seuls `berachem.dev`, `example.org` et `example.com` 
 | `bbcloud simulations exporter` | dépendances par collectivité pour le simulateur et images de partage des préréglages (appelée par `publier`) |
 | `bbcloud prospection badge [--vers FICHIER]` | classeur Excel **privé** des communes notées A (non provisoire) avec l'adresse de contact publique de leur mairie (Annuaire de l'administration), pour proposer le badge ; jamais commité ni publié (`uv run --with openpyxl …`) |
 | `bbcloud prospection envoyer [--simulation] [--test ADRESSE]` | envoi programmé des mails de la prospection badge (timer `bbcloud-prospection`, activation manuelle) : quota quotidien, pause entre deux mails, relance unique, réponses et rebonds relevés dans la boîte |
-| `bbcloud stats [--json FICHIER] [--image FICHIER]` | chiffres clés de l'observatoire (part des notes provisoires pour chaque chiffre) et carte des départements en PNG 1080 × 1080 |
+| `bbcloud stats [--json FICHIER] [--image FICHIER] [--jours N]` | chiffres clés de l'observatoire (part des notes provisoires pour chaque chiffre), carte des départements en PNG 1080 × 1080, et progressions des N derniers jours (30 par défaut : collectivités en hausse, en recul, nouvellement notées A) |
 | `bbcloud exporter --vers ../site/public/donnees` | fichiers JSON du site |
 | `bbcloud publier` | export, build et publication sur Codeberg Pages |
 | `bbcloud demandes traiter` | analyses sur demande (tickets Codeberg) |
