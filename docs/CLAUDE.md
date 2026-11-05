@@ -460,7 +460,7 @@ bbcloud campagne lancer [--limite N] [--dry-run]
 bbcloud rapports generer [--max N] [--dry-run]
 bbcloud exporter --vers ../site/public/donnees
 bbcloud publier                                   # export + build + push Pages
-bbcloud stats [--json F] [--image F.png]          # chiffres clés + carte PNG 1080 × 1080
+bbcloud stats [--json F] [--image F.png] [--jours N] # chiffres clés + carte PNG + progressions sur N jours
 bbcloud simulations exporter                      # simulateur : dépendances + images de partage
 bbcloud prospection badge                         # classeur PRIVÉ communes A + contact mairie (jamais publié)
 bbcloud prospection envoyer [--simulation]        # envoi programmé des mails de prospection (timer manuel)
