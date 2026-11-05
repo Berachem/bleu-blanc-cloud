@@ -3258,3 +3258,9 @@ select:focus {
   font-size: 0.95rem;
   border-radius: 8px;
 }
+
+.boutons-a-propos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

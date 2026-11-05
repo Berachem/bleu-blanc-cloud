@@ -23,6 +23,9 @@ export const SITE = {
     "Observatoire indépendant et open source de la souveraineté numérique des organisations publiques françaises.",
   depot: "https://github.com/Berachem/bleu-blanc-cloud",
   miroir: "https://codeberg.org/berachem/bleu-blanc-cloud",
+  // Jeu de données publié sur data.gouv.fr (CSV mis à jour à chaque campagne)
+  donneesOuvertes:
+    "https://www.data.gouv.fr/datasets/souverainete-numerique-des-collectivites-francaises-bleu-blanc-cloud",
   auteur: "Berachem Markria",
   siteAuteur: "https://berachem.dev",
   // Adresse de contact pour les demandes de retrait, corrections et droits de réponse.
