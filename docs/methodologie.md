@@ -120,6 +120,10 @@ Les solutions françaises, européennes ou auto-hébergées (Matomo auto-héberg
 
 Chaque point retiré est rattaché à un **constat** et à sa **preuve** (enregistrement DNS, URL d'une ressource, en-tête HTTP…), affichés sur la page de l'organisation.
 
+### Évolution dans le temps
+
+Chaque analyse est conservée. À partir de deux analyses, la page de l'organisation affiche l'**évolution de son score** : une courbe (un point par jour d'analyse), une phrase de synthèse et le tableau des analyses. Pour que la courbe compare ce qui est comparable, **toutes les analyses passées sont recalculées** avec la méthodologie et les référentiels actuels à chaque mise à jour : quand un fournisseur est mieux identifié, toutes les analyses en profitent. Un écart sur la courbe reflète donc un changement de l'empreinte de l'organisation (hébergeur, messagerie, services tiers…), et non une évolution de nos règles. Les preuves brutes de chaque analyse ne sont jamais modifiées.
+
 ## 7. Rapports rédigés par l'IA
 
 Pour chaque organisation, un rapport lisible par un décideur et un plan de migration sont rédigés par une IA (**Mistral**, entreprise française) **à partir des seuls constats techniques publics**.

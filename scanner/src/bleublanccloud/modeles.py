@@ -418,6 +418,17 @@ class RapportIAExport(ModeleStrict):
     genere_le: datetime
 
 
+class PointHistorique(ModeleStrict):
+    """Une analyse passée de l'organisation (la dernière de chaque jour), pour la courbe
+    d'évolution. Toutes les analyses sont recalculées avec la méthodologie et les
+    référentiels actuels : un écart reflète un changement chez l'organisation."""
+
+    date: datetime
+    score: int = Field(ge=0, le=100)
+    note: Note
+    provisoire: bool = False
+
+
 class OrganisationExport(ModeleStrict):
     """organisations/{slug}.json"""
 
@@ -439,6 +450,13 @@ class OrganisationExport(ModeleStrict):
     fournisseurs: dict[str, FournisseurExport]
     rapport_ia: RapportIAExport | None = None
     alternatives: list[AlternativeExport] = Field(default_factory=list)
+    historique: list[PointHistorique] = Field(
+        default_factory=list,
+        description=(
+            "Évolution du score, de la plus ancienne analyse à la plus récente (un point par "
+            "jour, le dernier est l'analyse affichée). Vide ou un seul point : pas d'évolution."
+        ),
+    )
     contour: list[list[list[list[float]]]] | None = Field(
         default=None,
         description=(

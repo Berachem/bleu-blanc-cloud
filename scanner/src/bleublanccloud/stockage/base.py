@@ -65,6 +65,18 @@ class ScanEnregistre:
 
 
 @dataclass(frozen=True)
+class PointEnregistre:
+    """Score d'un scan passé, sans ses constats (courbe d'évolution)."""
+
+    scan_id: int
+    debut: datetime
+    score: int
+    note: str
+    provisoire: bool
+    version_methodo: str
+
+
+@dataclass(frozen=True)
 class RapportEnregistre:
     contenu: RapportIA
     modele: str
@@ -444,17 +456,30 @@ class Base:
                 (scan_id, score.score_global, score.note, score.model_dump_json()),
             )
 
-    def historique_scores(self, organisation_id: int) -> list[tuple[str, int, str]]:
-        """(date, score, note) de tous les scans notés d'une organisation (phase 8)."""
+    def historique_scores(self, organisation_id: int) -> list[PointEnregistre]:
+        """Tous les scans notés d'une organisation, du plus ancien au plus récent."""
         lignes = self.connexion.execute(
             """
-            SELECT s.debut, sc.score_global, sc.note FROM scans s
+            SELECT s.id, s.debut, sc.score_global, sc.note, sc.detail_json FROM scans s
             JOIN scores sc ON sc.scan_id = s.id
-            WHERE s.organisation_id = ? ORDER BY s.debut
+            WHERE s.organisation_id = ? ORDER BY s.debut, s.id
             """,
             (organisation_id,),
         )
-        return [(r["debut"], int(r["score_global"]), r["note"]) for r in lignes]
+        points: list[PointEnregistre] = []
+        for r in lignes:
+            detail = json.loads(r["detail_json"] or "{}")
+            points.append(
+                PointEnregistre(
+                    scan_id=int(r["id"]),
+                    debut=datetime.fromisoformat(r["debut"]),
+                    score=int(r["score_global"]),
+                    note=r["note"],
+                    provisoire=bool(detail.get("provisoire", False)),
+                    version_methodo=str(detail.get("version_methodo", "")),
+                )
+            )
+        return points
 
     def statistiques_inconnus(
         self, limite: int = 30, asn_transit: Collection[int] = ()

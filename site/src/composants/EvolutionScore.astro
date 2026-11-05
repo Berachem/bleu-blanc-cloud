@@ -1,0 +1,95 @@
+---
+// Évolution du score d'une organisation : courbe SVG dessinée au build (aucune bibliothèque,
+// aucun script), résumé en une phrase et tableau des analyses pour les lecteurs d'écran.
+// Affichée seulement à partir de deux analyses.
+import { dateEvolution, geometrieCourbe, resumerEvolution, type PointEvolution } from "../lib/evolution";
+
+interface Props {
+  points: PointEvolution[] | undefined;
+}
+const { points } = Astro.props;
+const resume = resumerEvolution(points);
+const courbe = points ? geometrieCourbe(points) : null;
+const recents = courbe ? [...courbe.points].reverse() : [];
+---
+{
+  resume && courbe && (
+    <section class="section apparition evolution" aria-labelledby="titre-evolution">
+      <h2 id="titre-evolution">Évolution du score</h2>
+      <p class={`evolution__resume evolution__resume--${resume.sens}`}>{resume.texte}</p>
+      <figure class="carte evolution__figure">
+        <svg
+          viewBox={`0 0 ${courbe.largeur} ${courbe.hauteur}`}
+          role="img"
+          aria-labelledby="titre-evolution evolution-description"
+          class="evolution__courbe"
+        >
+          <desc id="evolution-description">
+            {`${resume.analyses} analyses. ${resume.texte}`}
+          </desc>
+          {courbe.bandes.map((b) => (
+            <g>
+              <rect
+                class={`evolution__bande evolution__bande--${b.note}`}
+                x={courbe.zone.gauche}
+                y={b.y}
+                width={courbe.zone.droite - courbe.zone.gauche}
+                height={b.hauteur}
+              />
+              <text class="evolution__note" x={courbe.zone.gauche - 8} y={b.y + b.hauteur / 2 + 4} text-anchor="end">
+                {b.note}
+              </text>
+            </g>
+          ))}
+          {courbe.graduations.map((g) => (
+            <text class="evolution__mois" x={g.x} y={courbe.hauteur - 8} text-anchor="middle">
+              {g.libelle}
+            </text>
+          ))}
+          <path class="evolution__ligne" d={courbe.chemin} />
+          {courbe.points.map((p, i) => (
+            <circle
+              class={`evolution__point evolution__point--${p.note}`}
+              cx={p.x}
+              cy={p.y}
+              r={i === courbe.points.length - 1 ? 6 : 4}
+            >
+              <title>{`${dateEvolution(p.date)} : ${p.score}/100 (note ${p.note}${p.provisoire ? ", provisoire" : ""})`}</title>
+            </circle>
+          ))}
+        </svg>
+        <figcaption class="texte-secondaire petit">
+          Toutes les analyses sont recalculées avec la méthodologie et les référentiels actuels :
+          un écart reflète un changement de l'empreinte de l'organisation, pas de nos règles.
+        </figcaption>
+      </figure>
+      <details class="evolution__details">
+        <summary>Détail des {resume.analyses} analyses</summary>
+        <div class="tableau-defilant">
+          <table>
+            <caption class="visuellement-cache">Score à chaque analyse, de la plus récente à la plus ancienne</caption>
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Score</th>
+                <th scope="col">Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recents.map((p) => (
+                <tr>
+                  <td>{dateEvolution(p.date)}</td>
+                  <td>{p.score}/100</td>
+                  <td>
+                    <span class={`badge note-${p.note}`}>{p.note}</span>
+                    {p.provisoire && <span class="texte-secondaire petit"> provisoire</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+  )
+}

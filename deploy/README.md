@@ -345,7 +345,7 @@ systemctl start bbcloud-campagne.service        # exécution immédiate
 journalctl -u bbcloud-campagne -f               # journaux
 ```
 
-`deploy/campagne-hebdomadaire.sh` enchaîne : `uv sync`, `referentiels maj`, `cibles importer` (et contours des nouvelles communes), `campagne lancer --oui`, `scores recalculer`, `rapports generer --oui` (si une clé Mistral est présente ; le cache évite tout appel inutile), `publier`. Une campagne complète (environ 1 000 organisations, 1 requête par seconde et par domaine, 10 scans en parallèle) dure de 30 à 60 minutes.
+`deploy/campagne-hebdomadaire.sh` enchaîne : `uv sync`, `referentiels maj`, `cibles importer` (et contours des nouvelles communes), `campagne lancer --oui`, `scores recalculer --tous` (tout l'historique, pour la courbe d'évolution des fiches), `rapports generer --oui` (si une clé Mistral est présente ; le cache évite tout appel inutile), `publier`. Une campagne complète (environ 1 000 organisations, 1 requête par seconde et par domaine, 10 scans en parallèle) dure de 30 à 60 minutes.
 
 ### 7.2 Mise à jour automatique du code
 
@@ -471,7 +471,7 @@ Le code se modifie uniquement dans le dépôt GitHub : le conteneur récupère c
 |---|---|
 | Retrait d'une organisation | ajouter le domaine à `scanner/src/bleublanccloud/referentiels/retraits.yaml` et committer ; le domaine n'est plus analysé et sa fiche disparaît à la publication suivante |
 | Ajout d'un hébergeur non identifié | compléter `fournisseurs.yaml` (avec sources) à partir de `bbcloud referentiels inconnus` ; les réseaux de transit se déclarent dans `transitaires.yaml`, jamais comme fournisseurs |
-| Application d'un référentiel mis à jour sans nouveau scan | automatique via `bbcloud-maj-auto` ; à la main : `uv run bbcloud scores recalculer --dry-run`, puis sans `--dry-run`, puis `uv run bbcloud publier`. Les rapports IA des fiches modifiées sont retirés jusqu'au prochain `rapports generer` |
+| Application d'un référentiel mis à jour sans nouveau scan | automatique via `bbcloud-maj-auto` ; à la main : `uv run bbcloud scores recalculer --tous --dry-run`, puis sans `--dry-run`, puis `uv run bbcloud publier`. Les rapports IA des fiches modifiées sont retirés jusqu'au prochain `rapports generer` |
 | Poids encore inconnu de l'observatoire | `uv run bbcloud scores couverture` |
 | Simulateur « Et si… ? » | automatique dans `publier.sh` (`bbcloud simulations exporter`) : `donnees/stats/simulations.json` et images de partage des préréglages dans `site/public/partage/simulateur/`. Préréglages et précédents (avec sources) : `site/src/contenu/simulateur.json`. Seuls les fournisseurs `a_verifier: false` sont proposés |
 | Bandeau d'actualité de l'accueil | `site/src/contenu/dossiers.json` (`actualite.expire_le`) : il disparaît au premier build après cette date |

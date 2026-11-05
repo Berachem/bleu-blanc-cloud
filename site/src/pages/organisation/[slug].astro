@@ -5,6 +5,7 @@ import BarreScore from "../../composants/BarreScore.astro";
 import LogoMistral from "../../composants/LogoMistral.astro";
 import MentionIA from "../../composants/MentionIA.astro";
 import IntegrerBadge from "../../composants/IntegrerBadge.astro";
+import EvolutionScore from "../../composants/EvolutionScore.astro";
 import Niveau from "../../composants/Niveau.astro";
 import { SITE } from "../../config";
 import Base from "../../mises-en-page/Base.astro";
@@ -227,6 +228,8 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
         }
       </section>
     </div>
+
+    <EvolutionScore points={org.historique} />
 
     <section class="section apparition" aria-labelledby="titre-constats">
       <h2 id="titre-constats">Constats et preuves</h2>

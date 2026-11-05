@@ -38,12 +38,18 @@ from bleublanccloud.modeles import (
     MetaExport,
     Organisation,
     OrganisationExport,
+    PointHistorique,
     RapportIAExport,
     Score,
 )
 from bleublanccloud.referentiels import Referentiels
 from bleublanccloud.scan import normaliser_cible
-from bleublanccloud.stockage.base import Base, RapportEnregistre, ScanEnregistre
+from bleublanccloud.stockage.base import (
+    Base,
+    PointEnregistre,
+    RapportEnregistre,
+    ScanEnregistre,
+)
 
 
 @dataclass
@@ -101,6 +107,37 @@ def score_a_jour(scan: ScanEnregistre) -> Score:
         return scan.score
 
 
+def construire_historique(
+    points: Iterable[PointEnregistre], scan: ScanEnregistre, score: Score
+) -> list[PointHistorique]:
+    """Courbe d'évolution : un point par jour (le dernier scan du jour), le scan affiché en
+    dernier avec son score à jour.
+
+    Les scores d'une autre version de la méthodologie sont écartés : ils ne sont pas
+    comparables (« bbcloud scores recalculer --tous » les remet à jour).
+    """
+    par_jour: dict[str, PointHistorique] = {}
+    for point in points:
+        if point.scan_id == scan.id or point.version_methodo != VERSION_METHODO:
+            continue
+        if point.debut > scan.resultat.debut:
+            continue  # scan plus récent que celui affiché (cas limite) : ignoré
+        par_jour[point.debut.astimezone(UTC).date().isoformat()] = PointHistorique(
+            date=point.debut,
+            score=point.score,
+            note=note_depuis_score(point.score),
+            provisoire=point.provisoire,
+        )
+    actuel = PointHistorique(
+        date=scan.resultat.debut,
+        score=score.score_global,
+        note=score.note,
+        provisoire=score.provisoire,
+    )
+    par_jour[actuel.date.astimezone(UTC).date().isoformat()] = actuel
+    return [par_jour[jour] for jour in sorted(par_jour)]
+
+
 def construire_organisation(
     organisation: Organisation,
     scan: ScanEnregistre,
@@ -109,6 +146,7 @@ def construire_organisation(
     noms_departements: dict[str, str],
     noms_regions: dict[str, str],
     contour: list[list[list[list[float]]]] | None = None,
+    historique: Iterable[PointEnregistre] = (),
 ) -> OrganisationExport:
     score = score_a_jour(scan)
     resultat = scan.resultat
@@ -146,6 +184,7 @@ def construire_organisation(
         # Carte de situation : contour de la commune seulement (jamais pour une fiche sur
         # demande, qui n'a pas de territoire)
         contour=contour if organisation.type == "commune" else None,
+        historique=construire_historique(historique, scan, score),
     )
 
 
@@ -292,6 +331,7 @@ def organisations_a_exporter(
                 noms_departements,
                 noms_regions,
                 contour,
+                historique=base.historique_scores(enregistree.id),
             )
         )
     return organisations, ignorees

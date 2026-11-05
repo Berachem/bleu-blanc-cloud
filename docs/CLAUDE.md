@@ -445,7 +445,7 @@ rapports_ia(id, scan_id, empreinte_constats, modele, version_invite, contenu_jso
 retraits(domaine, date_demande, motif)
 ```
 - Migrations SQL numérotées dans `stockage/migrations/`.
-- L'historique des scans est conservé (évolution dans le temps en phase 8).
+- L'historique des scans est conservé : courbe d'évolution sur chaque fiche (champ `historique` de l'export), toutes les analyses étant recalculées avec les règles actuelles (`bbcloud scores recalculer --tous`, lancé par la campagne et la mise à jour automatique).
 
 ---
 

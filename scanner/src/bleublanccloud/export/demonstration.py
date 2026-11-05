@@ -25,7 +25,7 @@ from bleublanccloud.modeles import (
     TypeOrganisation,
 )
 from bleublanccloud.referentiels import Referentiels
-from bleublanccloud.stockage.base import RapportEnregistre, ScanEnregistre
+from bleublanccloud.stockage.base import PointEnregistre, RapportEnregistre, ScanEnregistre
 
 DATE_DEMO = datetime(2026, 9, 27, 3, 0, tzinfo=UTC)
 
@@ -394,6 +394,31 @@ def profils(referentiels: Referentiels) -> list[ProfilDemo]:
     ]  # fmt: skip
 
 
+# Évolutions fictives (jours avant la campagne de démonstration, score), pour illustrer la
+# courbe des fiches : une commune qui progresse, une qui recule, une stable.
+HISTORIQUES_DEMO: dict[str, list[tuple[int, int]]] = {
+    "exempleville-demo": [(84, 62), (63, 62), (42, 74), (21, 88), (7, 100)],
+    "echantillon-la-foret-demo": [(56, 81), (35, 81), (14, 68)],
+    "maquette-les-bains-demo": [(70, 100), (42, 100), (14, 100)],
+}
+
+
+def historique_demo(slug: str, date: datetime) -> list[PointEnregistre]:
+    from bleublanccloud.analyse.score import VERSION_METHODO, note_depuis_score
+
+    return [
+        PointEnregistre(
+            scan_id=-(rang + 1),
+            debut=date - timedelta(days=jours),
+            score=score,
+            note=note_depuis_score(score),
+            provisoire=False,
+            version_methodo=VERSION_METHODO,
+        )
+        for rang, (jours, score) in enumerate(HISTORIQUES_DEMO.get(slug, []))
+    ]
+
+
 def slug_demo(profil: ProfilDemo) -> str:
     base = profil.domaine.removesuffix(".example")
     return f"{base}-demo"
@@ -454,6 +479,7 @@ def generer_demonstration(referentiels: Referentiels) -> list[OrganisationExport
                     if profil.type == "commune" and profil.departement
                     else None
                 ),
+                historique=historique_demo(slug_demo(profil), date),
             )
         )
     return organisations
