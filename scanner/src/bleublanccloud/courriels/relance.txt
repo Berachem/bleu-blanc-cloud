@@ -2,7 +2,7 @@ Bonjour,
 
 Je me permets de revenir vers vous, au cas où mon message du $date_envoi serait passé inaperçu.
 
-$commune obtient la note A en souveraineté numérique ($score/100), ce qui la place parmi les $nombre_a collectivités les mieux notées sur les $nombre_analysees analysées en France. 🎉
+$commune obtient la note A en souveraineté numérique ($score/100) : elle fait partie des collectivités exemplaires qui ont fait le choix d'un numérique européen. 🎉
 
 La fiche et le badge à intégrer (sans cookie ni traceur) sont ici : $url_fiche
 
