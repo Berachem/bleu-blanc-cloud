@@ -27,6 +27,12 @@ echo "▶ Export des données"
 (cd "$RACINE/scanner" && uv run bbcloud exporter --vers "$RACINE/site/public/donnees")
 # Simulateur « Et si… ? » : dépendances (copie dans donnees/stats) et images de partage
 (cd "$RACINE/scanner" && uv run bbcloud simulations exporter)
+# Carte des départements (PNG 1080 × 1080), publiée avec les données ouvertes : data.gouv.fr
+# pointe vers https://<domaine>/donnees/carte-departements.png. Un échec ne bloque pas la
+# publication (la carte précédente reste en ligne).
+(cd "$RACINE/scanner" && uv run bbcloud stats \
+  --image "$RACINE/site/public/donnees/carte-departements.png" >/dev/null) \
+  || echo "⚠ Carte des départements non régénérée : publication sans nouvelle carte"
 if [ "${EXIGER_DONNEES:-0}" = "1" ]; then
   # Organisations de l'observatoire + fiches d'analyses sur demande
   nombre=0

@@ -9,6 +9,7 @@ habitants, départements, régions) : les analyses sur demande en sont exclues.
 |---|---|
 | Collectivités | https://bleublanccloud.fr/donnees/organisations.csv |
 | Départements | https://bleublanccloud.fr/donnees/departements.csv |
+| Carte des départements (PNG 1080 × 1080) | https://bleublanccloud.fr/donnees/carte-departements.png |
 | Détail complet (constats, preuves) | https://bleublanccloud.fr/donnees/organisations/<slug>.json |
 
 Format : UTF-8, séparateur virgule, une ligne d'en-tête ; listes séparées par « | » ; dates
@@ -141,4 +142,5 @@ Description du jeu de données :
 | Collectivités (dernière campagne) | https://bleublanccloud.fr/donnees/organisations.csv | csv | Fichier principal | Une ligne par collectivité : score, note, détail par catégorie, fournisseurs identifiés. Colonnes décrites dans la documentation. |
 | Moyennes par département | https://bleublanccloud.fr/donnees/departements.csv | csv | Fichier principal | Score moyen, note moyenne et répartition des notes par département. |
 | Description des colonnes | https://github.com/Berachem/bleu-blanc-cloud/blob/main/docs/donnees-ouvertes.md | html | Documentation | Signification de chaque colonne, format et limites. |
+| Carte des départements | https://bleublanccloud.fr/donnees/carte-departements.png | png | Autre | Carte de France de la note moyenne par département (part des notes provisoires indiquée), régénérée à chaque campagne hebdomadaire, prête à réutiliser dans un article ou une présentation. |
 | Méthodologie | https://bleublanccloud.fr/methodologie/ | html | Documentation | Calcul du score, niveaux de juridiction, pondération, historique des versions. |
