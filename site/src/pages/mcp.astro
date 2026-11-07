@@ -4,6 +4,8 @@ import Base from "../mises-en-page/Base.astro";
 import { SITE } from "../config";
 
 const source = `git+${SITE.miroir}#subdirectory=mcp`;
+// Mode en ligne (HTTP), hébergé chez alwaysdata (France)
+const URL_EN_LIGNE = "https://bleublancloud.alwaysdata.net/mcp";
 const configuration = JSON.stringify(
   {
     mcpServers: {
@@ -33,8 +35,8 @@ const OUTILS: [string, string][] = [
       <span class="surtitre">Pour les assistants IA</span>
       <h1>Demandez à votre IA la note de votre commune</h1>
       <p class="chapeau">
-        Le serveur MCP de Bleu Blanc Cloud permet à un assistant IA compatible (Claude Desktop,
-        Claude Code, Cursor…) de répondre à vos questions à partir des données de l'observatoire,
+        Le serveur MCP de Bleu Blanc Cloud permet à un assistant IA compatible (Le Chat,
+        claude.ai, Claude Desktop, Cursor…) de répondre à vos questions à partir des données de l'observatoire,
         avec à chaque fois le lien vers la fiche et ses preuves.
       </p>
     </header>
@@ -47,7 +49,22 @@ const OUTILS: [string, string][] = [
       <li>« Quelles alternatives européennes à Google Analytics pour une mairie ? »</li>
     </ul>
 
-    <h2>Installation</h2>
+    <h2>En ligne, sans rien installer</h2>
+    <p>
+      Dans <strong>Le Chat</strong> (Mistral) ou sur <strong>claude.ai</strong>, ajoutez un
+      connecteur MCP personnalisé avec cette adresse, sans authentification :
+    </p>
+    <pre><code>{URL_EN_LIGNE}</code></pre>
+    <ul>
+      <li>Le Chat : Connecteurs → Ajouter un connecteur → MCP personnalisé.</li>
+      <li>claude.ai : Paramètres → Connecteurs → Ajouter un connecteur personnalisé.</li>
+    </ul>
+    <p class="texte-secondaire petit">
+      Hébergé en France chez alwaysdata (hébergeur indépendant), en lecture seule, avec une
+      limite de requêtes pour éviter les abus.
+    </p>
+
+    <h2>En local, sur votre ordinateur</h2>
     <p>
       Prérequis : <a href="https://docs.astral.sh/uv/">uv</a>. Le serveur tourne sur votre
       ordinateur et lit les fichiers publics de ce site : rien à héberger, rien à payer.
