@@ -94,6 +94,13 @@ def test_protocole_mcp_en_http(client: TestClient) -> None:
     assert contenu["nombre_collectivites"] == 14
 
 
+def test_racine_accepte_aussi_le_protocole_mcp(client: TestClient) -> None:
+    # Adresse saisie sans « /mcp » dans le client (cas vu avec Le Chat)
+    init = client.post("/", json=INITIALISATION, headers=ENTETES)
+    assert init.status_code == 200, init.text
+    assert init.json()["result"]["serverInfo"]["name"] == "Bleu Blanc Cloud"
+
+
 def test_hote_non_autorise_refuse(client: TestClient) -> None:
     reponse = client.post(
         "/mcp", json=INITIALISATION, headers={**ENTETES, "host": "pirate.example"}

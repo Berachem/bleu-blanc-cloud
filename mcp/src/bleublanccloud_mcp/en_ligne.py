@@ -137,19 +137,23 @@ async def _repondre_json(envoyer: Envoyer, statut: int, corps: dict[str, Any]) -
 
 
 def proteger(application: ApplicationAsgi, limiteur: LimiteurRequetes) -> ApplicationAsgi:
-    """Accueil informatif sur « / », icônes, et limite de requêtes sur le reste."""
+    """Accueil informatif sur « / » (qui accepte aussi MCP), icônes, limite de requêtes."""
 
     async def protegee(portee: Portee, recevoir: Recevoir, envoyer: Envoyer) -> None:
         if portee["type"] != "http":
             await application(portee, recevoir, envoyer)
             return
         lecture = portee["method"] in ("GET", "HEAD")
+        accepte = _entete(portee, b"accept")
+        if portee["path"] == "/" and (not lecture or "text/event-stream" in accepte):
+            # Adresse saisie sans « /mcp » : la racine sert aussi le protocole MCP
+            portee = {**portee, "path": CHEMIN_MCP, "raw_path": CHEMIN_MCP.encode()}
         if lecture and portee["path"] in ICONES:
             fichier, type_mime = ICONES[portee["path"]]
             corps = (DOSSIER_STATIQUE / fichier).read_bytes()
             await _repondre(envoyer, 200, type_mime, corps, cache=True)
             return
-        if lecture and portee["path"] == "/" and "text/html" in _entete(portee, b"accept"):
+        if lecture and portee["path"] == "/" and "text/html" in accepte:
             await _repondre(envoyer, 200, "text/html; charset=utf-8", _accueil_html())
             return
         if portee["path"] == "/" and lecture:
