@@ -199,6 +199,8 @@ bleu-blanc-cloud/
 │   ├── images/                      # captures du README
 │   └── adr/                         # décisions d'architecture (ADR)
 │
+├── mcp/                         # serveur MCP (lecture seule des données publiées, stdio)
+│
 └── deploy/
     ├── bbcloud-campagne.service
     ├── bbcloud-campagne.timer
