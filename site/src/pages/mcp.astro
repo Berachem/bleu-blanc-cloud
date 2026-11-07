@@ -1,0 +1,106 @@
+---
+// Page du serveur MCP : interroger l'observatoire depuis un assistant IA (lecture seule).
+import Base from "../mises-en-page/Base.astro";
+import { SITE } from "../config";
+
+const source = `git+${SITE.miroir}#subdirectory=mcp`;
+const configuration = JSON.stringify(
+  {
+    mcpServers: {
+      "bleu-blanc-cloud": { command: "uvx", args: ["--from", source, "bleublanccloud-mcp"] },
+    },
+  },
+  null,
+  2,
+);
+const claudeCode = `claude mcp add bleu-blanc-cloud -- uvx --from "${source}" bleublanccloud-mcp`;
+const OUTILS: [string, string][] = [
+  ["rechercher_collectivite", "trouve une collectivité par nom, code INSEE, domaine ou département"],
+  ["fiche_collectivite", "score, note, catégories, fournisseurs et juridictions, évolution, pistes"],
+  ["classement", "classement filtré par département, type et note"],
+  ["comparer", "compare de 2 à 6 collectivités"],
+  ["statistiques", "chiffres clés, France entière ou par département"],
+  ["collectivites_par_fournisseur", "collectivités qui utilisent un fournisseur (ex. messagerie Microsoft)"],
+  ["alternatives", "pistes françaises et européennes du référentiel"],
+];
+---
+<Base
+  titre="Serveur MCP"
+  description="Interrogez l'observatoire Bleu Blanc Cloud depuis votre assistant IA (Claude, Le Chat, Cursor…) grâce à un serveur MCP en lecture seule."
+>
+  <div class="conteneur prose">
+    <header class="entete-page">
+      <span class="surtitre">Pour les assistants IA</span>
+      <h1>Demandez à votre IA la note de votre commune</h1>
+      <p class="chapeau">
+        Le serveur MCP de Bleu Blanc Cloud permet à un assistant IA compatible (Claude Desktop,
+        Claude Code, Cursor…) de répondre à vos questions à partir des données de l'observatoire,
+        avec à chaque fois le lien vers la fiche et ses preuves.
+      </p>
+    </header>
+
+    <h2>Exemples de questions</h2>
+    <ul>
+      <li>« Quelle est la note de Lyon en souveraineté numérique, et pourquoi ? »</li>
+      <li>« Quelles communes de Gironde ont leur messagerie chez Microsoft ? »</li>
+      <li>« Compare Nantes, Rennes et Brest. »</li>
+      <li>« Quelles alternatives européennes à Google Analytics pour une mairie ? »</li>
+    </ul>
+
+    <h2>Installation</h2>
+    <p>
+      Prérequis : <a href="https://docs.astral.sh/uv/">uv</a>. Le serveur tourne sur votre
+      ordinateur et lit les fichiers publics de ce site : rien à héberger, rien à payer.
+    </p>
+    <h3>Claude Desktop, Cursor et autres clients</h3>
+    <p>
+      Ajoutez ce bloc à la configuration MCP du client (Claude Desktop : Réglages → Développeur
+      → Modifier la configuration ; Cursor : <code>~/.cursor/mcp.json</code>), puis redémarrez-le.
+    </p>
+    <pre><code>{configuration}</code></pre>
+    <h3>Claude Code</h3>
+    <pre><code>{claudeCode}</code></pre>
+
+    <h2>Ce que l'assistant peut faire</h2>
+    <div class="tableau-defilant">
+      <table>
+        <caption class="visuellement-cache">Outils du serveur MCP</caption>
+        <thead>
+          <tr><th scope="col">Outil</th><th scope="col">Rôle</th></tr>
+        </thead>
+        <tbody>
+          {OUTILS.map(([nom, role]) => (
+            <tr><td><code>{nom}</code></td><td>{role}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p>
+      La <a href="/methodologie/">méthodologie</a> est aussi fournie à l'assistant, pour qu'il
+      explique le calcul du score sans l'inventer.
+    </p>
+
+    <h2>Garanties et limites</h2>
+    <ul>
+      <li>
+        <strong>Lecture seule</strong> : le serveur ne lance aucune analyse ; il lit les données
+        déjà publiées (mises en cache une heure), sous
+        <a href="/mentions-legales/#licences">Licence Ouverte 2.0</a>.
+      </li>
+      <li>
+        <strong>Données factuelles</strong> : les réponses s'appuient uniquement sur
+        l'observatoire ; l'assistant reçoit la consigne de citer la fiche et de rappeler que le
+        score est indicatif (empreinte externe uniquement, pas les outils internes).
+      </li>
+      <li>
+        <strong>Vos questions</strong> sont traitées par l'assistant IA que vous choisissez,
+        selon ses propres conditions : Bleu Blanc Cloud ne reçoit rien d'autre que les
+        téléchargements des fichiers publics.
+      </li>
+      <li>
+        Le code est open source : <a href={`${SITE.miroir}/src/branch/main/mcp`}>dossier
+        <code>mcp/</code></a> du dépôt.
+      </li>
+    </ul>
+  </div>
+</Base>

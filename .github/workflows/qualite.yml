@@ -29,6 +29,26 @@ jobs:
       - name: Tests (sans réseau)
         run: uv run pytest --cov --cov-report=term-missing
 
+  mcp:
+    name: Serveur MCP (Python)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mcp
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Installation
+        run: uv sync --locked
+      - name: Lint (ruff)
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Typage (mypy strict)
+        run: uv run mypy
+      - name: Tests (sans réseau, données de démonstration du site)
+        run: uv run pytest
+
   site:
     name: Site (Astro)
     runs-on: ubuntu-latest

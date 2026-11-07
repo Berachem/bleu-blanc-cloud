@@ -18,6 +18,7 @@ const PAGES_FIXES: { chemin: string; campagne?: boolean }[] = [
   { chemin: "/alternatives/" },
   { chemin: "/methodologie/" },
   { chemin: "/a-propos/" },
+  { chemin: "/mcp/" },
   { chemin: "/retrait/" },
   { chemin: "/mentions-legales/" },
 ];
