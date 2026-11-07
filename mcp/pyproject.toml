@@ -9,10 +9,12 @@ authors = [{ name = "Berachem Markria" }]
 dependencies = [
     "mcp>=2.3,<3",
     "httpx>=0.27",
+    "uvicorn>=0.30",
 ]
 
 [project.scripts]
 bleublanccloud-mcp = "bleublanccloud_mcp.serveur:principal"
+bleublanccloud-mcp-http = "bleublanccloud_mcp.en_ligne:principal"
 
 [dependency-groups]
 dev = [
