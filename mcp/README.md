@@ -37,7 +37,7 @@ Prérequis : [uv](https://docs.astral.sh/uv/). Configuration à ajouter dans vot
 ### En ligne (Le Chat, claude.ai)
 
 Sans rien installer : ajoutez un **connecteur MCP personnalisé** avec l'adresse
-`https://mcp.bleublanccloud.fr/mcp` (sans authentification).
+`https://bleublancloud.alwaysdata.net/mcp` (sans authentification).
 
 - **Le Chat (Mistral)** : Connecteurs → Ajouter un connecteur → MCP personnalisé.
 - **claude.ai** : Paramètres → Connecteurs → Ajouter un connecteur personnalisé.
@@ -88,10 +88,10 @@ variable d'environnement `MCP_HOTES_AUTORISES=<adresses du site, séparées par 
 (par défaut `mcp.bleublanccloud.fr,bleublancloud.alwaysdata.net`). La plateforme fournit le
 port (`PORT`) ; le serveur écoute en IPv6 (`::`).
 
-Domaine personnalisé `mcp.bleublanccloud.fr` : dans alwaysdata (Web → Sites → modifier le
-site), ajouter l'adresse `mcp.bleublanccloud.fr` ; dans la zone DNS OVHcloud, ajouter un
-enregistrement `CNAME` de `mcp` vers `bleublancloud.alwaysdata.net.` ; alwaysdata délivre
-ensuite le certificat TLS automatiquement.
+Domaine personnalisé `mcp.bleublanccloud.fr` (abonnement alwaysdata payant requis, l'offre
+gratuite ne l'autorise pas) : ajouter l'adresse au site dans alwaysdata (Web → Sites), puis un
+enregistrement `CNAME` de `mcp` vers `bleublancloud.alwaysdata.net.` dans la zone DNS
+OVHcloud ; alwaysdata délivre ensuite le certificat TLS automatiquement.
 
 Icône : le serveur annonce le logo Bleu Blanc Cloud (`icons` de MCP) et sert lui-même
 `/favicon.ico`, `/favicon.svg` et `/icone.png`, pour que les clients qui affichent l'icône
