@@ -49,6 +49,36 @@ def test_accueil_informatif(client: TestClient) -> None:
     assert reponse.json()["point_d_acces"] == "/mcp"
 
 
+def test_accueil_html_pour_un_navigateur(client: TestClient) -> None:
+    reponse = client.get("/", headers={"host": HOTE, "accept": "text/html"})
+    assert reponse.status_code == 200
+    assert reponse.headers["content-type"].startswith("text/html")
+    assert 'rel="icon" href="/favicon.svg"' in reponse.text
+
+
+@pytest.mark.parametrize(
+    ("chemin", "type_mime"),
+    [
+        ("/favicon.ico", "image/x-icon"),
+        ("/favicon.svg", "image/svg+xml"),
+        ("/icone.png", "image/png"),
+        ("/apple-touch-icon.png", "image/png"),
+    ],
+)
+def test_icones_bleu_blanc_cloud(client: TestClient, chemin: str, type_mime: str) -> None:
+    reponse = client.get(chemin, headers={"host": HOTE})
+    assert reponse.status_code == 200
+    assert reponse.headers["content-type"] == type_mime
+    assert reponse.content
+
+
+def test_identite_du_serveur(client: TestClient) -> None:
+    init = client.post("/mcp", json=INITIALISATION, headers=ENTETES).json()["result"]
+    infos = init["serverInfo"]
+    assert infos["title"] == "Bleu Blanc Cloud"
+    assert {i["mimeType"] for i in infos["icons"]} == {"image/svg+xml", "image/png"}
+
+
 def test_protocole_mcp_en_http(client: TestClient) -> None:
     init = client.post("/mcp", json=INITIALISATION, headers=ENTETES)
     assert init.status_code == 200, init.text

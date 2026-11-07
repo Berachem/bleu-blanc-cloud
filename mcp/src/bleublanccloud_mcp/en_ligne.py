@@ -11,6 +11,9 @@ Protections :
 - limite de requêtes par adresse IP (MCP_REQUETES_PAR_MINUTE, 60 par défaut) et globale
   (10 fois plus), réponse 429 au-delà ;
 - mode sans état (« stateless ») : aucune session conservée en mémoire.
+
+Les icônes (favicon) sont servies par le serveur lui-même : les clients qui affichent l'icône
+du domaine du connecteur montrent ainsi le logo Bleu Blanc Cloud, et non celui de l'hébergeur.
 """
 
 from __future__ import annotations
@@ -20,6 +23,8 @@ import os
 import time
 from collections import deque
 from collections.abc import Awaitable, Callable, MutableMapping
+from html import escape
+from pathlib import Path
 from typing import Any
 
 from mcp.server.transport_security import TransportSecuritySettings
@@ -32,8 +37,17 @@ Recevoir = Callable[[], Awaitable[MutableMapping[str, Any]]]
 Envoyer = Callable[[MutableMapping[str, Any]], Awaitable[None]]
 ApplicationAsgi = Callable[[Portee, Recevoir, Envoyer], Awaitable[None]]
 
-HOTES_PAR_DEFAUT = "bleublancloud.alwaysdata.net"
+HOTES_PAR_DEFAUT = "mcp.bleublanccloud.fr,bleublancloud.alwaysdata.net"
 CHEMIN_MCP = "/mcp"
+DOCUMENTATION = "https://bleublanccloud.fr/mcp/"
+DOSSIER_STATIQUE = Path(__file__).parent / "statique"
+# Chemin demandé → (fichier, type MIME)
+ICONES: dict[str, tuple[str, str]] = {
+    "/favicon.ico": ("favicon.ico", "image/x-icon"),
+    "/favicon.svg": ("favicon.svg", "image/svg+xml"),
+    "/icone.png": ("icone.png", "image/png"),
+    "/apple-touch-icon.png": ("icone.png", "image/png"),
+}
 
 
 class LimiteurRequetes:
@@ -75,6 +89,44 @@ def adresse_client(portee: Portee) -> str:
     return str(client[0]) if client else "inconnue"
 
 
+def _entete(portee: Portee, nom: bytes) -> str:
+    for cle, valeur in portee.get("headers", []):
+        if cle == nom:
+            return str(valeur.decode("latin-1"))
+    return ""
+
+
+async def _repondre(
+    envoyer: Envoyer, statut: int, type_mime: str, corps: bytes, cache: bool = False
+) -> None:
+    entetes = [(b"content-type", type_mime.encode())]
+    if cache:
+        entetes.append((b"cache-control", b"public, max-age=86400"))
+    await envoyer({"type": "http.response.start", "status": statut, "headers": entetes})
+    await envoyer({"type": "http.response.body", "body": corps})
+
+
+def _accueil_html() -> bytes:
+    """Page lisible pour un navigateur (et icône déclarée pour les robots qui la cherchent)."""
+    titre = escape("Serveur MCP Bleu Blanc Cloud")
+    return f"""<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{titre}</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>body{{font-family:system-ui,sans-serif;max-width:38rem;margin:3rem auto;padding:0 1rem;
+color:#1B1F3B;background:#F5F7FB;line-height:1.5}}img{{width:4rem}}code{{background:#fff;
+padding:.1rem .3rem}}</style></head>
+<body><img src="/favicon.svg" alt=""><h1>{titre}</h1>
+<p>Serveur MCP en lecture seule de l'observatoire de la souveraineté numérique des
+collectivités françaises. Ajoutez l'adresse <code>{CHEMIN_MCP}</code> de ce site comme
+connecteur MCP dans votre assistant IA (Le Chat, claude.ai…).</p>
+<p><a href="{DOCUMENTATION}">Mode d'emploi sur bleublanccloud.fr</a> · version {__version__}</p>
+</body></html>""".encode()
+
+
 async def _repondre_json(envoyer: Envoyer, statut: int, corps: dict[str, Any]) -> None:
     donnees = json.dumps(corps, ensure_ascii=False).encode("utf-8")
     entetes = [(b"content-type", b"application/json; charset=utf-8")]
@@ -85,13 +137,22 @@ async def _repondre_json(envoyer: Envoyer, statut: int, corps: dict[str, Any]) -
 
 
 def proteger(application: ApplicationAsgi, limiteur: LimiteurRequetes) -> ApplicationAsgi:
-    """Page d'accueil informative sur « / » et limite de requêtes sur le reste."""
+    """Accueil informatif sur « / », icônes, et limite de requêtes sur le reste."""
 
     async def protegee(portee: Portee, recevoir: Recevoir, envoyer: Envoyer) -> None:
         if portee["type"] != "http":
             await application(portee, recevoir, envoyer)
             return
-        if portee["path"] == "/" and portee["method"] in ("GET", "HEAD"):
+        lecture = portee["method"] in ("GET", "HEAD")
+        if lecture and portee["path"] in ICONES:
+            fichier, type_mime = ICONES[portee["path"]]
+            corps = (DOSSIER_STATIQUE / fichier).read_bytes()
+            await _repondre(envoyer, 200, type_mime, corps, cache=True)
+            return
+        if lecture and portee["path"] == "/" and "text/html" in _entete(portee, b"accept"):
+            await _repondre(envoyer, 200, "text/html; charset=utf-8", _accueil_html())
+            return
+        if portee["path"] == "/" and lecture:
             await _repondre_json(
                 envoyer,
                 200,
@@ -99,7 +160,7 @@ def proteger(application: ApplicationAsgi, limiteur: LimiteurRequetes) -> Applic
                     "service": "Serveur MCP Bleu Blanc Cloud (lecture seule)",
                     "version": __version__,
                     "point_d_acces": CHEMIN_MCP,
-                    "documentation": "https://bleublanccloud.fr/mcp/",
+                    "documentation": DOCUMENTATION,
                 },
             )
             return

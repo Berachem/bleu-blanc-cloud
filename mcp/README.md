@@ -84,8 +84,19 @@ python3 -m venv ~/mcp-env
 
 Site (Web → Sites) : type **Programme utilisateur**, commande
 `/home/<compte>/mcp-env/bin/bleublanccloud-mcp-http`, répertoire de travail `/home/<compte>`,
-variable d'environnement `MCP_HOTES_AUTORISES=<adresse du site>`. La plateforme fournit le
+variable d'environnement `MCP_HOTES_AUTORISES=<adresses du site, séparées par des virgules>`
+(par défaut `mcp.bleublanccloud.fr,bleublancloud.alwaysdata.net`). La plateforme fournit le
 port (`PORT`) ; le serveur écoute en IPv6 (`::`).
+
+Domaine personnalisé `mcp.bleublanccloud.fr` (abonnement alwaysdata payant requis, l'offre
+gratuite ne l'autorise pas) : ajouter l'adresse au site dans alwaysdata (Web → Sites), puis un
+enregistrement `CNAME` de `mcp` vers `bleublancloud.alwaysdata.net.` dans la zone DNS
+OVHcloud ; alwaysdata délivre ensuite le certificat TLS automatiquement.
+
+Icône : le serveur annonce le logo Bleu Blanc Cloud (`icons` de MCP) et sert lui-même
+`/favicon.ico`, `/favicon.svg` et `/icone.png`, pour que les clients qui affichent l'icône
+du domaine ne montrent pas celle de l'hébergeur. En navigateur, `/` affiche une page
+d'information.
 
 Mise à jour :
 

@@ -1,6 +1,6 @@
 [project]
 name = "bleublanccloud-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "Serveur MCP (lecture seule) de l'observatoire Bleu Blanc Cloud : souveraineté numérique des collectivités françaises."
 readme = "README.md"
 license = "EUPL-1.2"
