@@ -12,7 +12,7 @@ from typing import Annotated, Any, Literal
 
 import httpx
 from mcp.server.mcpserver import MCPServer
-from mcp.types import ToolAnnotations
+from mcp.types import Icon, ToolAnnotations
 from pydantic import Field
 
 from bleublanccloud_mcp import __version__, outils
@@ -36,11 +36,21 @@ Règles de réponse :
   outils existent.
 """
 
+# Icône affichée par les clients (Le Chat, claude.ai…) à côté du connecteur
+ICONES = [
+    Icon(src="https://bleublanccloud.fr/favicon.svg", mime_type="image/svg+xml", sizes=["any"]),
+    Icon(src="https://bleublanccloud.fr/icone.png", mime_type="image/png", sizes=["512x512"]),
+]
+
 LECTURE_SEULE = ToolAnnotations(read_only_hint=True, idempotent_hint=True, open_world_hint=True)
 
 serveur: MCPServer = MCPServer(
     name="Bleu Blanc Cloud",
+    title="Bleu Blanc Cloud",
+    description="Souveraineté numérique des collectivités françaises : notes, fournisseurs et "
+    "pistes européennes (lecture seule, données ouvertes).",
     instructions=INSTRUCTIONS,
+    icons=ICONES,
     website_url="https://bleublanccloud.fr/mcp/",
     version=__version__,
 )
