@@ -54,6 +54,20 @@
   sources: ["https://www.clever-cloud.com/"]
   a_verifier: true
 
+- id: scalingo
+  nom: Scalingo
+  pays: FR
+  url: "https://scalingo.com/fr/"
+  categorie: hebergement
+  types_service: [hebergement_web, cloud]
+  description_courte: "Plateforme française d'hébergement d'applications (PaaS) et de bases de données managées, hébergée en France ; certifications ISO 27001 et HDS."
+  sources:
+    - "https://scalingo.com/fr/"
+    - "https://scalingo.com/fr/datacenters"
+    - "https://doc.scalingo.com/security/overview/compliance"
+    - "https://scalingo.com/data-processing-agreement"
+  a_verifier: true
+
 - id: alwaysdata
   nom: alwaysdata
   pays: FR
