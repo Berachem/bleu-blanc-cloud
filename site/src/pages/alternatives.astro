@@ -45,9 +45,6 @@ const groupes = ORDRE.map((categorie) => ({
                     ` · ${alternative.types_service.map((t) => LIBELLES_TYPES_SERVICE[t] ?? t).join(", ")}`}
                 </p>
                 <p>{alternative.description_courte}</p>
-                {alternative.a_verifier && (
-                  <p class="texte-secondaire petit">Informations en cours de vérification.</p>
-                )}
               </li>
             ))}
           </ul>
