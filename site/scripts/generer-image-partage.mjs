@@ -1,6 +1,6 @@
 // Génère l'image de partage (Open Graph / Twitter) : public/partage.png, 1200 × 630.
 // Rendu par Chromium (playwright-core, déjà en dépendance de développement) à partir d'un
-// gabarit HTML aux couleurs du site : police Luciole auto-hébergée, logo et motif maison.
+// gabarit HTML aux couleurs du site (fond blanc) : police Luciole auto-hébergée, logo et motif maison.
 // L'image est versionnée : le serveur n'a pas besoin de Chromium. À relancer seulement si
 // le design change : npm run image-partage
 import { existsSync, readFileSync } from "node:fs";
@@ -34,7 +34,7 @@ const logo = `
     <rect x="22" y="-3" width="20" height="49" fill="#ffffff"/>
     <rect x="42" y="-3" width="26" height="49" fill="#ED2939"/>
   </g>
-  <path d="${NUAGE}" fill="none" stroke="#f2f4ff" stroke-width="2" stroke-linejoin="round"/>
+  <path d="${NUAGE}" fill="none" stroke="#1b1f3b" stroke-width="2" stroke-linejoin="round"/>
 </svg>`;
 
 // Motif des 12 étoiles en cercle (même dessin que src/composants/EtoilesEurope.astro),
@@ -66,31 +66,32 @@ const html = `<!doctype html>
 html, body { margin: 0; }
 body {
   position: relative; width: ${LARGEUR}px; height: ${HAUTEUR}px; overflow: hidden;
-  font-family: Luciole, sans-serif; color: #f2f4ff;
+  font-family: Luciole, sans-serif; color: #1b1f3b;
   background:
-    radial-gradient(900px 560px at -10% 0%, rgb(0 35 149 / 70%), transparent 62%),
-    radial-gradient(760px 520px at 112% 100%, rgb(237 41 57 / 38%), transparent 62%),
-    #0a0f24;
+    radial-gradient(900px 560px at -10% 0%, rgb(0 35 149 / 8%), transparent 62%),
+    radial-gradient(760px 520px at 112% 100%, rgb(237 41 57 / 8%), transparent 62%),
+    #ffffff;
 }
 .bande { position: absolute; inset: 0 0 auto; height: 12px;
-  background: linear-gradient(90deg, #002395 33.33%, #ffffff 33.33% 66.66%, #ed2939 66.66%); }
+  background: linear-gradient(90deg, #002395 33.33%, #ffffff 33.33% 66.66%, #ed2939 66.66%);
+  box-shadow: 0 1px 0 #e3e7f3; }
 .etoiles { position: absolute; right: -160px; top: 50%; width: 520px; height: 520px;
-  transform: translateY(-56%); opacity: 0.38; }
+  transform: translateY(-56%); opacity: 0.6; }
 .contenu { position: relative; display: flex; flex-direction: column; height: 100%;
   padding: 62px 72px 56px; }
 .marque { display: flex; align-items: center; gap: 22px; font-size: 40px; font-weight: 700;
   letter-spacing: -0.01em; }
 .surtitre { margin-top: 38px; font-size: 21px; font-weight: 700; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #b0b8dc; }
+  text-transform: uppercase; color: #002395; }
 h1 { margin: 16px 0 0; max-width: 820px; font-size: 70px; line-height: 1.02;
   letter-spacing: -0.04em; font-weight: 700; }
-.degrade { background: linear-gradient(100deg, #7c9bff 0%, #f2f4ff 45%, #f2f4ff 55%, #ff7a86 100%);
+.degrade { background: linear-gradient(100deg, #002395 0%, #3a6bd6 45%, #c41e3a 75%, #ed2939 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent; }
 .bas { margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
 .notes { display: flex; gap: 12px; }
 .note { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 14px;
-  font-size: 30px; font-weight: 700; box-shadow: 0 10px 24px -12px rgb(0 0 0 / 70%); }
-.url { font-size: 26px; font-weight: 700; color: #b0b8dc; letter-spacing: -0.01em; }
+  font-size: 30px; font-weight: 700; box-shadow: 0 10px 24px -12px rgb(27 31 59 / 45%); }
+.url { font-size: 26px; font-weight: 700; color: #4a5070; letter-spacing: -0.01em; }
 </style></head>
 <body>
   <div class="bande"></div>
