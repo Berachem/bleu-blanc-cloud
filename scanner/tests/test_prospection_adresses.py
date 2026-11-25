@@ -156,9 +156,10 @@ async def test_completer_le_classeur(tmp_path: Path) -> None:
         return "communication@nantes-44109.example" if domaine.startswith("nantes") else None
 
     cherchees, trouvees = await completer_classeur(chemin, chercher, jour=date(2026, 11, 24))
-    # Sète (contact nominatif), Lyon (déjà contactée) et Dijon (déjà cherchée) sont ignorées
-    assert visites == ["nantes-44109.example", "albi-81004.example"]
-    assert (cherchees, trouvees) == (2, 1)
+    # Lyon, contactée via l'accueil et pas encore relancée, est cherchée (relance redirigée) ;
+    # Sète (contact nominatif) et Dijon (déjà cherchée) sont ignorées
+    assert visites == ["nantes-44109.example", "albi-81004.example", "lyon-69123.example"]
+    assert (cherchees, trouvees) == (3, 1)
     from bleublanccloud.prospection import lire_suivi
 
     suivi = lire_suivi(chemin)

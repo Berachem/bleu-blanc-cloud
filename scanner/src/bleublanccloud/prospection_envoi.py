@@ -64,8 +64,8 @@ MOTIF_AUTOMATIQUE = re.compile(
     re.IGNORECASE,
 )
 MOIS_IMAP = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-TypeEnvoi = Literal["premier", "felicitations", "relance"]
-ORDRE_ENVOIS: dict[str, int] = {"relance": 0, "felicitations": 1, "premier": 2}
+TypeEnvoi = Literal["premier", "felicitations", "relance", "redirection"]
+ORDRE_ENVOIS: dict[str, int] = {"relance": 0, "redirection": 0, "felicitations": 1, "premier": 2}
 FENETRE_PASSAGE_A_JOURS = 90
 """Passage en A plus ancien : le mail habituel est envoyé (« vient d'obtenir » serait faux)."""
 
@@ -139,11 +139,28 @@ class Destinataire:
         return None
 
     @property
+    def adresse_contactee(self) -> str | None:
+        """Adresse du premier mail : celle notée à l'envoi ; pour un mail parti avant que
+        l'adresse ne soit notée, l'adresse générique (seule utilisée à l'époque)."""
+        if self.date_envoi:
+            return self.adresse_utilisee or self.courriel
+        return self.adresse_envoi
+
+    @property
     def ciblee(self) -> bool:
         """Le mail part (ou est parti) vers une personne ou un service, et non vers l'accueil
         de la mairie."""
-        adresse = (self.adresse_utilisee or self.adresse_envoi or "").lower()
+        adresse = (self.adresse_contactee or "").lower()
         return bool(adresse) and adresse in (a.lower() for a in self._ciblees())
+
+    @property
+    def redirection_possible(self) -> str | None:
+        """Premier mail parti à l'accueil, et une personne ou un service connu depuis :
+        l'adresse vers laquelle rediriger la relance."""
+        if self.ciblee:
+            return None
+        contactee = (self.adresse_contactee or "").lower()
+        return next((a for a in self._ciblees() if a.lower() != contactee), None)
 
 
 @dataclass(frozen=True)
@@ -289,21 +306,25 @@ def type_envoi(
     """Premier mail, relance unique, ou rien.
 
     La relance n'est envoyée qu'à une personne ou un service : relancer l'accueil d'une mairie
-    ne fait qu'ouvrir un nouveau dossier dans son outil de suivi des demandes.
+    ne fait qu'ouvrir un nouveau dossier dans son outil de suivi des demandes. Si le premier
+    mail est parti à l'accueil et qu'une personne ou un service est connu depuis, la relance
+    lui est envoyée (« redirection »), une seule fois.
     """
     if not destinataire.adresse_envoi:
         return None
     if destinataire.statut == "À contacter" and destinataire.date_envoi is None:
         return "felicitations" if destinataire.passage_a else "premier"
-    if (
+    relance_due = (
         relances
-        and destinataire.ciblee
         and destinataire.statut == "Envoyé"
         and destinataire.date_envoi is not None
         and destinataire.date_relance is None
         and jour - destinataire.date_envoi >= timedelta(days=reglages.delai_relance_jours)
-    ):
+    )
+    if relance_due and destinataire.ciblee:
         return "relance"
+    if relance_due and destinataire.redirection_possible:
+        return "redirection"
     return None
 
 
@@ -503,6 +524,8 @@ def sujet_du_mail(destinataire: Destinataire, genre: TypeEnvoi) -> str:
         return f"{destinataire.commune} vient d'obtenir la note A en souveraineté numérique"
     if genre == "relance":
         return f"Rappel : {destinataire.commune} obtient la note A en souveraineté numérique"
+    if genre == "redirection":
+        return f"{destinataire.commune} obtient la note A en souveraineté numérique"
     return f"{destinataire.commune} obtient la note A en souveraineté numérique"
 
 
@@ -527,12 +550,17 @@ def composer(
         "date_avant": _date_longue(destinataire.passage_a.date_avant)
         if destinataire.passage_a
         else "",
-        "demande": DEMANDE_NOMINATIVE if destinataire.ciblee else DEMANDE_GENERIQUE,
+        "demande": DEMANDE_NOMINATIVE
+        if destinataire.ciblee or genre == "redirection"
+        else DEMANDE_GENERIQUE,
     }
     message = EmailMessage()
     message["Subject"] = sujet_du_mail(destinataire, genre)
     message["From"] = email.utils.formataddr((reglages.nom, reglages.adresse))
-    message["To"] = a or destinataire.adresse_envoi or ""
+    destinataire_mail = (
+        destinataire.redirection_possible if genre == "redirection" else destinataire.adresse_envoi
+    )
+    message["To"] = a or destinataire_mail or ""
     message["Reply-To"] = reglages.adresse
     message["Date"] = email.utils.formatdate(localtime=True)
     message["Message-ID"] = email.utils.make_msgid(domain=_domaine(reglages.adresse))
@@ -613,6 +641,10 @@ def executer(
                 jour, datetime.min.time()
             )
             feuille.cell(d.rang, numero["Statut"]).value = "Relancé"
+            if genre == "redirection" and "Notes" in numero:
+                cellule = feuille.cell(d.rang, numero["Notes"])
+                mention = f"Relance redirigée vers {message['To']} (premier mail à l'accueil)"
+                cellule.value = f"{cellule.value} · {mention}" if cellule.value else mention
         classeur.save(chemin)
         bilan.envoyes.append((d.slug, genre))
         if apres_envoi:

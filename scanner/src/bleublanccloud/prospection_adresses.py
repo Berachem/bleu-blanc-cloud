@@ -183,9 +183,11 @@ async def completer_classeur(
     jour: date | None = None,
     limite: int = 100,
 ) -> tuple[int, int]:
-    """Cherche une adresse fonctionnelle pour les communes encore à contacter, sans contact
-    nominatif ni recherche antérieure. Le classeur est enregistré après chaque commune.
-    Renvoie (communes cherchées, adresses trouvées)."""
+    """Cherche une adresse fonctionnelle pour les communes sans contact nominatif ni
+    recherche antérieure : encore à contacter, ou contactées via l'accueil et pas encore
+    relancées (la relance sera alors envoyée au service trouvé). Le classeur est enregistré
+    après chaque commune. Renvoie (communes cherchées, adresses trouvées)."""
+    from bleublanccloud.prospection import DATE_RELANCE
     from bleublanccloud.prospection_envoi import ClasseurInvalide, colonnes
 
     jour = jour or date.today()
@@ -206,8 +208,9 @@ async def completer_classeur(
         def valeur(intitule: str, rang: int = rang) -> str:
             return str(feuille.cell(rang, numero[intitule]).value or "").strip()
 
+        a_relancer = valeur("Statut") == "Envoyé" and not valeur(DATE_RELANCE)
         if (
-            valeur("Statut") != "À contacter"
+            (valeur("Statut") != "À contacter" and not a_relancer)
             or valeur(CONTACT_NOMINATIF)
             or valeur(ADRESSE_FONCTIONNELLE)
             or not valeur("Domaine")
