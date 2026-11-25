@@ -56,6 +56,9 @@ communication@, numerique@, dsi@… ; jamais une adresse de personne), sinon à 
 de la mairie ; l'adresse effectivement utilisée est notée (colonne « Adresse
 utilisée »). La relance unique, 14 jours après, n'est envoyée qu'à un contact nominatif ou une adresse
 fonctionnelle : relancer l'accueil d'une mairie ne ferait qu'ouvrir un nouveau dossier.
+Si le premier mail est parti à l'accueil et qu'une adresse de service a été trouvée depuis, la
+relance lui est envoyée avec un texte adapté (`redirection.txt` : « Je vous écris directement,
+car mon message du [date] est parti à l'accueil de la mairie… »), une seule fois.
 Une commune passée en A depuis moins de 90 jours (historique des scores) reçoit à la place le
 mail de félicitations (`felicitations.txt`) : « Bravo : [Commune] vient d'obtenir la note A…
 Lors de notre analyse du [date], elle était notée [note]. »

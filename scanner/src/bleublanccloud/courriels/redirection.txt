@@ -1,0 +1,15 @@
+Bonjour,
+
+Je m'appelle Berachem Markria et je développe Bleu Blanc Cloud, un observatoire indépendant et open source qui mesure si les services numériques visibles des collectivités (site, messagerie, DNS, services tiers) reposent sur des fournisseurs européens.
+
+Je vous écris directement, car mon message du $date_envoi est parti à l'accueil de la mairie et votre service me semble le plus concerné : $commune obtient la note A, avec un score de $score/100. Bravo à vos équipes pour ce choix d'un numérique européen.
+
+Le détail est sur votre fiche : $url_fiche
+
+$demande
+
+C'est mon seul message à votre service : sans réponse de votre part, je ne vous écrirai plus à ce sujet. Bleu Blanc Cloud est un projet personnel, sans lien avec l'État ni avec un fournisseur, et la note ne porte que sur ce qui est visible de l'extérieur.
+
+Belle journée,
+Berachem Markria
+Bleu Blanc Cloud · $domaine_site

@@ -204,13 +204,32 @@ def test_quota_rodage_puis_croisiere_moins_les_envois_du_jour() -> None:
             },
             "relance",
         ),
-        # Contact nominatif ajouté après un premier mail parti à l'accueil : pas de relance
+        # Contact connu après un premier mail parti à l'accueil : relance redirigée
         (
             {
                 "statut": "Envoyé",
                 "date_envoi": date(2026, 10, 27),
                 "contact_nominatif": "dsi@nantes.example",
                 "adresse_utilisee": "contact@mairie-nantes.example",
+            },
+            "redirection",
+        ),
+        # Mail parti avant que l'adresse ne soit notée : c'était l'adresse générique
+        (
+            {
+                "statut": "Envoyé",
+                "date_envoi": date(2026, 10, 27),
+                "adresse_fonctionnelle": "communication@mairie-nantes.example",
+            },
+            "redirection",
+        ),
+        # Redirection déjà faite (date de relance) : plus rien
+        (
+            {
+                "statut": "Relancé",
+                "date_envoi": date(2026, 10, 1),
+                "date_relance": date(2026, 10, 20),
+                "adresse_fonctionnelle": "communication@mairie-nantes.example",
             },
             None,
         ),
@@ -625,3 +644,44 @@ def test_felicitations_prioritaires_et_notees(tmp_path: Path) -> None:
     assert suivi["albi-81004"]["Statut"] == "Envoyé"
     assert suivi["albi-81004"]["Notes"] == "Mail « nouvelle note A » (C → A)"
     assert suivi["albi-81004"]["Date mail envoyé"] == datetime(2026, 11, 10)
+
+
+def test_relance_redirigee_vers_le_service() -> None:
+    d = destinataire(
+        statut="Envoyé",
+        date_envoi=date(2026, 11, 5),
+        adresse_fonctionnelle="communication@mairie-nantes.example",
+    )
+    message = composer(d, "redirection", REGLAGES)
+    assert message["To"] == "communication@mairie-nantes.example"
+    assert message["Subject"] == "Nantes obtient la note A en souveraineté numérique"
+    texte = message.get_content()
+    assert "mon message du 05/11/2026 est parti à l'accueil de la mairie" in texte
+    assert "un « oui » en réponse suffit" in texte
+    assert "seul message à votre service" in texte
+    assert "$" not in texte and "486" not in texte
+
+
+def test_execution_d_une_redirection(tmp_path: Path) -> None:
+    chemin = classeur(
+        tmp_path,
+        {
+            "nantes-44109": {
+                **a_contacter("contact@nantes.example"),
+                "Adresse fonctionnelle": "communication@nantes.example",
+                "Statut": "Envoyé",
+                "Date mail envoyé": datetime(2026, 10, 20),
+            },
+        },
+    )
+    smtp = FauxSmtp()
+    bilan = executer(chemin, REGLAGES, smtp, jour=JOUR, attendre=lambda _: None)
+    assert bilan.envoyes == [("nantes-44109", "redirection")]
+    assert smtp.envoyes[0]["To"] == "communication@nantes.example"
+    suivi = lire_suivi(chemin)
+    assert suivi["nantes-44109"]["Statut"] == "Relancé"
+    assert suivi["nantes-44109"]["Date relance"] == datetime(2026, 11, 10)
+    assert "Relance redirigée vers communication@nantes.example" in suivi["nantes-44109"]["Notes"]
+    # Une seule fois : plus rien ensuite
+    plus_tard = executer(chemin, REGLAGES, smtp, jour=date(2026, 12, 15), attendre=lambda _: None)
+    assert plus_tard.envoyes == []
