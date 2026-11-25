@@ -59,6 +59,9 @@ DATE_ENVOI = "Date mail envoyé"
 DATE_RELANCE = "Date relance"
 # Adresse d'une personne (DSI, élu au numérique, communication), saisie à la main : prioritaire
 CONTACT_NOMINATIF = "Contact nominatif"
+# Adresse de service (communication@, numerique@…) trouvée sur le site officiel par
+# « bbcloud prospection adresses » ; « aucune (date) » si la recherche n'a rien donné
+ADRESSE_FONCTIONNELLE = "Adresse fonctionnelle"
 # Adresse à laquelle le premier mail est effectivement parti (renseignée par l'envoi)
 ADRESSE_UTILISEE = "Adresse utilisée"
 COLONNES_SUIVI = (
@@ -66,6 +69,7 @@ COLONNES_SUIVI = (
     "E-mail de contact",
     "Source de l'e-mail",
     CONTACT_NOMINATIF,
+    ADRESSE_FONCTIONNELLE,
     "Statut",
     DATE_RELANCE,
     ADRESSE_UTILISEE,
@@ -89,7 +93,7 @@ ENTETES = (
     *COLONNES_SUIVI[1:],
     "Slug",
 )
-LARGEURS = (15, 30, 9, 24, 12, 8, 28, 30, 50, 48, 54, 34, 34, 34, 18, 13, 34, 40, 28)
+LARGEURS = (15, 30, 9, 24, 12, 8, 28, 30, 50, 48, 54, 34, 34, 34, 34, 18, 13, 34, 40, 28)
 SOURCE_ANNUAIRE = "Annuaire de l'administration"
 
 
@@ -279,6 +283,7 @@ def _valeurs(ligne: LigneProspection, url_site: str) -> list[Any]:
         courriel,
         source,
         suivi.get(CONTACT_NOMINATIF),
+        suivi.get(ADRESSE_FONCTIONNELLE),
         statut,
         suivi.get(DATE_RELANCE),
         suivi.get(ADRESSE_UTILISEE),
@@ -323,7 +328,9 @@ def ecrire_classeur(
         (
             f"« {CONTACT_NOMINATIF} » : adresse d'une personne (DSI, élu au numérique, "
             "communication), à saisir à la main. L'envoi automatique l'utilise en priorité, "
-            "et les relances ne partent que vers ces contacts nominatifs.",
+            f"puis l'« {ADRESSE_FONCTIONNELLE} » (adresse de service trouvée sur le site "
+            "officiel), puis l'adresse générique. Les relances ne partent que vers les deux "
+            "premières.",
             False,
         ),
         (

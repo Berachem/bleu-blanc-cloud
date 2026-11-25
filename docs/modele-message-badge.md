@@ -50,10 +50,12 @@ sans emoji, image ni lien de suivi, avec une seule demande claire.
 
 Envoi programmé : `bbcloud prospection envoyer` (modèles dans
 `scanner/src/bleublanccloud/courriels/`, voir `deploy/README.md`). Le mail part en priorité au
-**contact nominatif** saisi à la main dans le classeur (colonne « Contact nominatif »), sinon à
-l'adresse générique de la mairie ; l'adresse effectivement utilisée est notée (colonne « Adresse
-utilisée »). La relance unique, 14 jours après, n'est envoyée qu'aux contacts nominatifs : relancer
-l'accueil d'une mairie ne ferait qu'ouvrir un nouveau dossier.
+**contact nominatif** saisi à la main dans le classeur (colonne « Contact nominatif »), puis à
+l'**adresse fonctionnelle** trouvée sur le site officiel (`bbcloud prospection adresses` :
+communication@, numerique@, dsi@… ; jamais une adresse de personne), sinon à l'adresse générique
+de la mairie ; l'adresse effectivement utilisée est notée (colonne « Adresse
+utilisée »). La relance unique, 14 jours après, n'est envoyée qu'à un contact nominatif ou une adresse
+fonctionnelle : relancer l'accueil d'une mairie ne ferait qu'ouvrir un nouveau dossier.
 Une commune passée en A depuis moins de 90 jours (historique des scores) reçoit à la place le
 mail de félicitations (`felicitations.txt`) : « Bravo : [Commune] vient d'obtenir la note A…
 Lors de notre analyse du [date], elle était notée [note]. »

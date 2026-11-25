@@ -1195,6 +1195,49 @@ def prospection_badge(
     console.print("[yellow]Fichier privé : ne pas le committer ni le publier.[/]")
 
 
+@app_prospection.command("adresses")
+def prospection_adresses(
+    vers: Annotated[
+        Path | None,
+        typer.Option(help="Classeur Excel (défaut : donnees/prive/prospection-badge.xlsx)."),
+    ] = None,
+    limite: Annotated[int, typer.Option(help="Nombre maximal de sites visités.")] = 100,
+) -> None:
+    """Cherche sur le site officiel de chaque commune encore à contacter une adresse de
+    SERVICE (communication@, numerique@, dsi@…), jamais une adresse de personne. Analyse
+    passive et polie (robots.txt, 1 requête par seconde, 5 pages par site). Résultat écrit
+    dans le classeur PRIVÉ. Nécessite openpyxl : uv run --with openpyxl …"""
+    from bleublanccloud.prospection_adresses import chercher_adresse, completer_classeur
+    from bleublanccloud.prospection_envoi import ClasseurInvalide
+    from bleublanccloud.sondes.http import ClientWebPoli
+
+    parametres = obtenir_parametres()
+    chemin = vers or parametres.base_sqlite.parent / "prive" / "prospection-badge.xlsx"
+    if not chemin.exists():
+        console_erreur.print(f"[red]Classeur introuvable : {chemin}[/]")
+        raise typer.Exit(code=1)
+
+    async def executer() -> tuple[int, int]:
+        client = ClientWebPoli(parametres, referentiels_par_defaut())
+        try:
+            return await completer_classeur(
+                chemin, lambda domaine: chercher_adresse(domaine, client), limite=limite
+            )
+        finally:
+            await client.fermer()
+
+    try:
+        cherchees, trouvees = asyncio.run(executer())
+    except ClasseurInvalide as erreur:
+        console_erreur.print(f"[red]{erreur}[/]")
+        raise typer.Exit(code=1) from erreur
+    console.print(
+        f"[green]✓[/] {cherchees} site(s) visité(s), {trouvees} adresse(s) fonctionnelle(s) "
+        f"trouvée(s) : {chemin}"
+    )
+    console.print("[yellow]Fichier privé : ne pas le committer ni le publier.[/]")
+
+
 def _chiffres_observatoire() -> tuple[int, int]:
     """(notées A, analysées) : mêmes chiffres que la page /classements/ (hors analyses sur
     demande), notes provisoires comprises."""

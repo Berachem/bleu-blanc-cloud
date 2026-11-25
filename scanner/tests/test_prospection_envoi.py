@@ -485,8 +485,9 @@ def test_commande_simulation_puis_sans_mot_de_passe(
     assert lanceur.invoke(app, ["prospection", "badge", "--vers", str(chemin)]).exit_code == 0
     classeur_xlsx = openpyxl.load_workbook(chemin)
     feuille = classeur_xlsx["Communes A"]
-    feuille["L2"] = "contact@bordeaux.example"
-    feuille["O2"] = "À contacter"
+    lettre = {c.value: c.column_letter for c in feuille[1]}
+    feuille[f"{lettre['E-mail de contact']}2"] = "contact@bordeaux.example"
+    feuille[f"{lettre['Statut']}2"] = "À contacter"
     classeur_xlsx.save(chemin)
 
     sans_adresse = lanceur.invoke(app, ["prospection", "envoyer", "--vers", str(chemin)])
