@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import contextlib
 import email.utils
-import html
 import imaplib
 import random
 import re
@@ -36,7 +35,13 @@ from string import Template
 from typing import Any, Literal
 
 from bleublanccloud.analyse.score import VERSION_METHODO, note_depuis_score
-from bleublanccloud.prospection import DATE_ENVOI, DATE_RELANCE, _openpyxl
+from bleublanccloud.prospection import (
+    ADRESSE_UTILISEE,
+    CONTACT_NOMINATIF,
+    DATE_ENVOI,
+    DATE_RELANCE,
+    _openpyxl,
+)
 from bleublanccloud.stockage.base import PointEnregistre
 
 DOSSIER_MODELES = Path(__file__).resolve().parent / "courriels"
@@ -109,6 +114,25 @@ class Destinataire:
     date_envoi: date | None
     date_relance: date | None
     passage_a: PassageA | None = None
+    contact_nominatif: str | None = None
+    adresse_utilisee: str | None = None
+
+    @property
+    def adresse_envoi(self) -> str | None:
+        """Le contact nominatif (une personne) est prioritaire sur l'adresse générique."""
+        if self.contact_nominatif and MOTIF_ADRESSE.match(self.contact_nominatif):
+            return self.contact_nominatif
+        if self.courriel and MOTIF_ADRESSE.match(self.courriel):
+            return self.courriel
+        return None
+
+    @property
+    def nominatif(self) -> bool:
+        """Le mail part (ou est parti) vers une personne et non vers l'accueil de la mairie."""
+        adresse = self.adresse_utilisee or self.adresse_envoi
+        return bool(
+            adresse and self.contact_nominatif and adresse.lower() == self.contact_nominatif.lower()
+        )
 
 
 @dataclass(frozen=True)
@@ -177,6 +201,13 @@ def lire_destinataires(
         if not slug:
             continue
         courriel = str(valeur("E-mail de contact") or "").strip() or None
+
+        def facultative(intitule: str, rang: int = rang) -> str | None:
+            # Colonnes ajoutées après coup : un classeur plus ancien peut ne pas les avoir
+            if intitule not in numero:
+                return None
+            return str(feuille.cell(rang, numero[intitule]).value or "").strip() or None
+
         destinataires.append(
             Destinataire(
                 rang=rang,
@@ -188,6 +219,8 @@ def lire_destinataires(
                 date_envoi=_en_date(valeur(DATE_ENVOI)),
                 date_relance=_en_date(valeur(DATE_RELANCE)),
                 passage_a=(passages_a or {}).get(str(slug)),
+                contact_nominatif=facultative(CONTACT_NOMINATIF),
+                adresse_utilisee=facultative(ADRESSE_UTILISEE),
             )
         )
     return destinataires
@@ -241,13 +274,18 @@ def quota_du_jour(destinataires: Iterable[Destinataire], reglages: Reglages, jou
 def type_envoi(
     destinataire: Destinataire, jour: date, reglages: Reglages, relances: bool
 ) -> TypeEnvoi | None:
-    """Premier mail, relance unique, ou rien."""
-    if not destinataire.courriel or not MOTIF_ADRESSE.match(destinataire.courriel):
+    """Premier mail, relance unique, ou rien.
+
+    La relance n'est envoyée qu'à un contact nominatif : relancer l'accueil d'une mairie ne
+    fait qu'ouvrir un nouveau dossier dans son outil de suivi des demandes.
+    """
+    if not destinataire.adresse_envoi:
         return None
     if destinataire.statut == "À contacter" and destinataire.date_envoi is None:
         return "felicitations" if destinataire.passage_a else "premier"
     if (
         relances
+        and destinataire.nominatif
         and destinataire.statut == "Envoyé"
         and destinataire.date_envoi is not None
         and destinataire.date_relance is None
@@ -284,7 +322,7 @@ def analyser_boite(
     """Nouveau statut par slug : « Réponse reçue » ou « Adresse introuvable ».
 
     Réponse : message reçu après l'envoi, venant du domaine de l'adresse contactée, ou dont
-    l'objet reprend « <Commune> obtient la note A » (réponse depuis une autre adresse).
+    l'objet cite la commune et « la note A » (réponse depuis une autre adresse).
     Rebond : message de non-distribution qui cite l'adresse contactée.
     Ignorés : réponses automatiques (accusé de réception, absence) et messages de l'adresse
     d'envoi elle-même (mails de test).
@@ -292,7 +330,7 @@ def analyser_boite(
     suivis = [
         d
         for d in destinataires
-        if d.courriel and d.date_envoi and d.statut in ("Envoyé", "Relancé")
+        if (d.adresse_utilisee or d.courriel) and d.date_envoi and d.statut in ("Envoyé", "Relancé")
     ]
     statuts: dict[str, str] = {}
     for message in messages:
@@ -301,15 +339,17 @@ def analyser_boite(
         if (ignorer and expediteur == ignorer.lower()) or (message.automatique and not rebond):
             continue
         for d in suivis:
-            assert d.courriel and d.date_envoi
+            contactee = d.adresse_utilisee or d.courriel
+            assert contactee and d.date_envoi
             if message.date and message.date < d.date_envoi:
                 continue
             if rebond:
-                if d.courriel.lower() in message.corps.lower():
+                if contactee.lower() in message.corps.lower():
                     statuts[d.slug] = "Adresse introuvable"
                 continue
-            meme_domaine = expediteur and _domaine(expediteur) == _domaine(d.courriel)
-            objet = f"{d.commune} obtient la note A".lower() in message.sujet.lower()
+            meme_domaine = expediteur and _domaine(expediteur) == _domaine(contactee)
+            sujet = message.sujet.lower()
+            objet = d.commune.lower() in sujet and "la note a" in sujet
             if (meme_domaine or objet) and statuts.get(d.slug) != "Adresse introuvable":
                 statuts[d.slug] = "Réponse reçue"
     return statuts
@@ -433,20 +473,41 @@ def _modele(nom: str) -> Template:
     return Template((DOSSIER_MODELES / nom).read_text(encoding="utf-8"))
 
 
+DEMANDE_NOMINATIVE = (
+    "Si cela vous intéresse, je peux vous envoyer le badge « Note A » à afficher sur votre "
+    "site (une simple image, sans cookie ni traceur) : un « oui » en réponse suffit."
+)
+DEMANDE_GENERIQUE = (
+    "Pourriez-vous transmettre ce message à la personne en charge du numérique ou de la "
+    "communication ? Je peux lui envoyer le badge « Note A » à afficher sur votre site (une "
+    "simple image, sans cookie ni traceur)."
+)
+
+
+def sujet_du_mail(destinataire: Destinataire, genre: TypeEnvoi) -> str:
+    """Objets sobres, sans emoji : un emoji fait souvent classer le mail en lettre
+    d'information par les outils de suivi des demandes des mairies."""
+    if genre == "felicitations":
+        return f"{destinataire.commune} vient d'obtenir la note A en souveraineté numérique"
+    if genre == "relance":
+        return f"Rappel : {destinataire.commune} obtient la note A en souveraineté numérique"
+    return f"{destinataire.commune} obtient la note A en souveraineté numérique"
+
+
 def composer(
     destinataire: Destinataire,
     genre: TypeEnvoi,
     reglages: Reglages,
     a: str | None = None,
 ) -> EmailMessage:
-    """Mail en texte et HTML (logo hébergé sur le site, sans paramètre de suivi)."""
-    url_fiche = f"{reglages.url_site}/organisation/{destinataire.slug}/"
+    """Mail en texte simple, sans mise en page, image ni lien de suivi : il ressemble à un
+    message écrit à la main, ce qui évite le classement en « lettre d'information »."""
     valeurs = {
         "commune": destinataire.commune,
         "score": str(destinataire.score),
         "nombre_a": _nombre(reglages.nombre_a),
         "nombre_analysees": _nombre(reglages.nombre_analysees),
-        "url_fiche": url_fiche,
+        "url_fiche": f"{reglages.url_site}/organisation/{destinataire.slug}/",
         "url_site": reglages.url_site,
         "domaine_site": reglages.domaine_site,
         "date_envoi": f"{destinataire.date_envoi:%d/%m/%Y}" if destinataire.date_envoi else "",
@@ -454,23 +515,12 @@ def composer(
         "date_avant": _date_longue(destinataire.passage_a.date_avant)
         if destinataire.passage_a
         else "",
+        "demande": DEMANDE_NOMINATIVE if destinataire.nominatif else DEMANDE_GENERIQUE,
     }
-    if genre == "premier":
-        sujet = f"🏅 {destinataire.commune} obtient la note A en souveraineté numérique"
-    elif genre == "felicitations":
-        sujet = (
-            f"🎉 Bravo : {destinataire.commune} vient d'obtenir la note A en souveraineté numérique"
-        )
-    else:
-        sujet = f"Petit rappel : {destinataire.commune} obtient la note A en souveraineté numérique"
-    echappees = {cle: html.escape(valeur) for cle, valeur in valeurs.items()}
-    contenu = _modele(f"{genre}.html").substitute(echappees)
-    page = _modele("base.html").substitute(echappees, titre=html.escape(sujet), contenu=contenu)
-
     message = EmailMessage()
-    message["Subject"] = sujet
+    message["Subject"] = sujet_du_mail(destinataire, genre)
     message["From"] = email.utils.formataddr((reglages.nom, reglages.adresse))
-    message["To"] = a or destinataire.courriel or ""
+    message["To"] = a or destinataire.adresse_envoi or ""
     message["Reply-To"] = reglages.adresse
     message["Date"] = email.utils.formatdate(localtime=True)
     message["Message-ID"] = email.utils.make_msgid(domain=_domaine(reglages.adresse))
@@ -478,7 +528,6 @@ def composer(
         f"<mailto:{reglages.adresse}?subject=Ne%20plus%20recevoir%20de%20message>"
     )
     message.set_content(_modele(f"{genre}.txt").substitute(valeurs))
-    message.add_alternative(page, subtype="html")
     return message
 
 
@@ -541,6 +590,8 @@ def executer(
                 jour, datetime.min.time()
             )
             feuille.cell(d.rang, numero["Statut"]).value = "Envoyé"
+            if ADRESSE_UTILISEE in numero:
+                feuille.cell(d.rang, numero[ADRESSE_UTILISEE]).value = message["To"]
             if genre == "felicitations" and d.passage_a and "Notes" in numero:
                 cellule = feuille.cell(d.rang, numero["Notes"])
                 mention = f"Mail « nouvelle note A » ({d.passage_a.note_avant} → A)"
@@ -573,7 +624,7 @@ def apercus(
     nombre: int = 5,
     passages_a: Mapping[str, PassageA] | None = None,
 ) -> list[Path]:
-    """Mode simulation : écrit les prochains mails (.eml et .html) sans rien envoyer ni modifier."""
+    """Mode simulation : écrit les prochains mails (.eml et .txt) sans rien envoyer ni modifier."""
     jour = jour or date.today()
     feuille = _openpyxl().load_workbook(chemin, read_only=False)["Communes A"]
     destinataires = lire_destinataires(feuille, passages_a)
@@ -584,9 +635,12 @@ def apercus(
         message = composer(d, genre, reglages)
         base = dossier / f"{d.slug}-{genre}"
         base.with_suffix(".eml").write_bytes(bytes(message))
-        partie_html = message.get_body(preferencelist=("html",))
-        if partie_html is not None:
-            base.with_suffix(".html").write_text(partie_html.get_content(), encoding="utf-8")
+        texte = message.get_body(preferencelist=("plain",))
+        if texte is not None:
+            base.with_suffix(".txt").write_text(
+                f"À : {message['To']}\nObjet : {message['Subject']}\n\n{texte.get_content()}",
+                encoding="utf-8",
+            )
         fichiers.append(base.with_suffix(".eml"))
     return fichiers
 

@@ -57,12 +57,18 @@ COULEURS_STATUTS = {
 # Colonnes saisies à la main, conservées d'une exécution à l'autre
 DATE_ENVOI = "Date mail envoyé"
 DATE_RELANCE = "Date relance"
+# Adresse d'une personne (DSI, élu au numérique, communication), saisie à la main : prioritaire
+CONTACT_NOMINATIF = "Contact nominatif"
+# Adresse à laquelle le premier mail est effectivement parti (renseignée par l'envoi)
+ADRESSE_UTILISEE = "Adresse utilisée"
 COLONNES_SUIVI = (
     DATE_ENVOI,
     "E-mail de contact",
     "Source de l'e-mail",
+    CONTACT_NOMINATIF,
     "Statut",
     DATE_RELANCE,
+    ADRESSE_UTILISEE,
     "Notes",
 )
 # Anciens intitulés, relus pour ne pas perdre le suivi d'un classeur plus ancien
@@ -83,7 +89,7 @@ ENTETES = (
     *COLONNES_SUIVI[1:],
     "Slug",
 )
-LARGEURS = (15, 30, 9, 24, 12, 8, 28, 30, 50, 48, 54, 34, 34, 18, 13, 40, 28)
+LARGEURS = (15, 30, 9, 24, 12, 8, 28, 30, 50, 48, 54, 34, 34, 34, 18, 13, 34, 40, 28)
 SOURCE_ANNUAIRE = "Annuaire de l'administration"
 
 
@@ -272,8 +278,10 @@ def _valeurs(ligne: LigneProspection, url_site: str) -> list[Any]:
         f"{url_site}/badge/sombre/{e.slug}.svg",
         courriel,
         source,
+        suivi.get(CONTACT_NOMINATIF),
         statut,
         suivi.get(DATE_RELANCE),
+        suivi.get(ADRESSE_UTILISEE),
         suivi.get("Notes"),
         e.slug,
     ]
@@ -310,6 +318,12 @@ def ecrire_classeur(
         (
             "Relancer « bbcloud prospection badge » met la liste à jour et conserve le suivi "
             "saisi (adresse corrigée, date d'envoi, statut, notes).",
+            False,
+        ),
+        (
+            f"« {CONTACT_NOMINATIF} » : adresse d'une personne (DSI, élu au numérique, "
+            "communication), à saisir à la main. L'envoi automatique l'utilise en priorité, "
+            "et les relances ne partent que vers ces contacts nominatifs.",
             False,
         ),
         (

@@ -163,8 +163,9 @@ def test_classeur_relance_sans_perdre_le_suivi(tmp_path: Path) -> None:
     classeur = openpyxl.load_workbook(chemin)
     feuille = classeur["Communes A"]
     feuille["L3"] = "mairie@sans.example"
-    feuille["N3"] = "Envoyé"
-    feuille["N2"] = "Badge intégré"
+    feuille["O3"] = "Envoyé"
+    feuille["O2"] = "Badge intégré"
+    feuille["N2"] = "dsi@albi.example"
     feuille["A3"] = datetime(2026, 11, 5)
     classeur.save(chemin)
     lignes = construire_lignes(communes, mairies, lire_suivi(chemin))
@@ -177,6 +178,7 @@ def test_classeur_relance_sans_perdre_le_suivi(tmp_path: Path) -> None:
         "Statut": "Envoyé",
     }
     assert suivi["albi-81004"]["Statut"] == "Badge intégré"
+    assert suivi["albi-81004"]["Contact nominatif"] == "dsi@albi.example"
     feuille = openpyxl.load_workbook(chemin)["Communes A"]
     assert feuille["I2"].value == "https://bbc.example/organisation/albi-81004/"
     assert feuille["J2"].value == "https://bbc.example/badge/albi-81004.svg"

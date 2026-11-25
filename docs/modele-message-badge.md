@@ -8,47 +8,53 @@ main sur le serveur (`uv run --with openpyxl bbcloud prospection badge`, voir
 
 ---
 
-**Objet** : 🏅 [Commune] obtient la note A en souveraineté numérique
+**Objet** : [Commune] obtient la note A en souveraineté numérique
 
 Bonjour,
 
-Je m'appelle Berachem Markria et je développe **Bleu Blanc Cloud** (https://bleublanccloud.fr),
-un observatoire indépendant et open source. Il mesure, commune par commune, si les services
-numériques visibles publiquement (hébergement du site, messagerie, DNS, services tiers) reposent
-sur des fournisseurs européens ou sur des acteurs soumis à des lois étrangères comme le Cloud Act
-américain.
+Je m'appelle Berachem Markria et je développe Bleu Blanc Cloud, un observatoire indépendant et
+open source qui mesure si les services numériques visibles des collectivités (site, messagerie,
+DNS, services tiers) reposent sur des fournisseurs européens.
 
-🎉 J'ai le plaisir de vous annoncer que **[Commune] obtient la note A** (score de [score]/100) !
-[Commune] fait partie des collectivités exemplaires qui ont fait le choix d'un numérique
-européen. Bravo à vos équipes ! 👏
+Bonne nouvelle : [Commune] obtient la note A, avec un score de [score]/100. Bravo à vos équipes
+pour ce choix d'un numérique européen.
 
 Le détail est sur votre fiche : https://bleublanccloud.fr/organisation/[slug]/
 
-Si vous souhaitez le faire savoir, un **badge** est à votre disposition sur cette page, en version
-claire ou sombre : il suffit de copier un petit code dans votre site, ou de télécharger l'image.
-Il ne contient ni cookie ni traceur, bien sûr.
+[Demande : voir ci-dessous]
 
-Deux précisions, par transparence :
-- Bleu Blanc Cloud est un projet personnel, sans lien avec l'État ni avec un fournisseur.
-- La note ne porte que sur ce qui est visible de l'extérieur : elle ne juge ni vos outils internes
-  ni la sécurité de vos sites.
-
-Une question ou une correction ? Il suffit de répondre à ce mail. Et si vous préférez ne plus
-recevoir de message de ma part, dites-le-moi simplement.
+Bleu Blanc Cloud est un projet personnel, sans lien avec l'État ni avec un fournisseur, et la note
+ne porte que sur ce qui est visible de l'extérieur. Si vous préférez ne plus recevoir de message
+de ma part, dites-le-moi simplement.
 
 Belle journée,
-
 Berachem Markria
-Bleu Blanc Cloud · https://bleublanccloud.fr
+Bleu Blanc Cloud · bleublanccloud.fr
+
+---
+
+**Demande**, selon le destinataire :
+- adresse générique de la mairie : « Pourriez-vous transmettre ce message à la personne en charge
+  du numérique ou de la communication ? Je peux lui envoyer le badge « Note A » à afficher sur
+  votre site (une simple image, sans cookie ni traceur). »
+- contact nominatif (DSI, élu au numérique, communication) : « Si cela vous intéresse, je peux
+  vous envoyer le badge « Note A » à afficher sur votre site (une simple image, sans cookie ni
+  traceur) : un « oui » en réponse suffit. »
+
+Pourquoi ce format : les adresses génériques des mairies alimentent des outils de suivi des
+demandes des habitants. Un objet avec emoji et une mise en page HTML font classer le message en
+« lettre d'information », qui n'est presque jamais lue. Le mail part donc en **texte simple**,
+sans emoji, image ni lien de suivi, avec une seule demande claire.
 
 ---
 
 Envoi programmé : `bbcloud prospection envoyer` (modèles dans
-`scanner/src/bleublanccloud/courriels/`, relance unique incluse ; voir `deploy/README.md`).
+`scanner/src/bleublanccloud/courriels/`, voir `deploy/README.md`). Le mail part en priorité au
+**contact nominatif** saisi à la main dans le classeur (colonne « Contact nominatif »), sinon à
+l'adresse générique de la mairie ; l'adresse effectivement utilisée est notée (colonne « Adresse
+utilisée »). La relance unique, 14 jours après, n'est envoyée qu'aux contacts nominatifs : relancer
+l'accueil d'une mairie ne ferait qu'ouvrir un nouveau dossier.
 Une commune passée en A depuis moins de 90 jours (historique des scores) reçoit à la place le
-mail de félicitations (`felicitations.txt` / `.html`) : « Bravo : [Commune] vient d'obtenir la
-note A… Lors de notre analyse du [date], elle était notée [note]. »
-
-Version HTML : logo `https://bleublanccloud.fr/courriel/logo-bleu-blanc-cloud.png` (PNG, car
-Gmail et Outlook n'affichent pas le SVG ; image statique du site, sans paramètre de suivi).
+mail de félicitations (`felicitations.txt`) : « Bravo : [Commune] vient d'obtenir la note A…
+Lors de notre analyse du [date], elle était notée [note]. »
 Champs à remplacer depuis le classeur : [Commune] (colonne Commune), [score] (Score), [slug] (Slug).
