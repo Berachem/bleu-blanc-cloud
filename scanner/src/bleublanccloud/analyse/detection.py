@@ -210,7 +210,14 @@ class Detecteur:
                     },
                 )
             )
-        expliques = frozenset(c.element for _, trouvees in resultats.values() for c in trouvees)
+        # Une règle purement informative (explique_ressources: false) n'explique rien : les
+        # ressources qu'elle reconnaît restent comptées comme avant dans les services tiers.
+        expliques = frozenset(
+            c.element
+            for regle, trouvees in resultats.values()
+            if regle.explique_ressources
+            for c in trouvees
+        )
         return ResultatDetection(constats, expliques)
 
     def ressources_non_couvertes(

@@ -198,6 +198,13 @@ class RegleDetection(ModeleStrict):
         default_factory=list,
         description="Règles qui, si elles sont détectées, annulent celle-ci.",
     )
+    explique_ressources: bool = Field(
+        default=True,
+        description=(
+            "False : la règle signale un usage sans retirer les ressources qu'elle reconnaît "
+            "du calcul des services tiers (règles informatives ajoutées sans changer les scores)."
+        ),
+    )
     motifs: MotifsRegle
     exemples: list[ExempleRegle] = Field(min_length=1)
     description: str | None = None

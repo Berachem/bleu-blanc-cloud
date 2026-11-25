@@ -523,6 +523,73 @@
   exemples:
     - {type: ressource, valeur: "https://api.friendlycaptcha.com/api/v1/puzzle"}
 
+# --- Assistants IA (chatbots) : informatif, sans effet sur le score --------- #
+# Signalés sur la fiche pour documenter l'usage de l'IA par les collectivités. Ils ne
+# modifient pas le score : « explique_ressources: false » laisse les ressources reconnues
+# dans le calcul des services tiers, exactement comme avant leur ajout. Fournisseur non
+# renseigné tant que la juridiction de l'éditeur n'est pas sourcée.
+
+- id: ia-dialogflow-messenger
+  nom: "Assistant IA : Dialogflow Messenger (Google)"
+  categorie: informatif
+  type_service: assistant_ia
+  fournisseur_id: google
+  explique_ressources: false
+  description: "Widget de conversation de Dialogflow (Google Cloud). Source : https://docs.cloud.google.com/dialogflow/cx/docs/concept/integration/dialogflow-messenger"
+  motifs:
+    chemins: ["gstatic\\.com/dialogflow-console/"]
+    html: ["<df-messenger"]
+  exemples:
+    - {type: script, valeur: "https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"}
+
+- id: ia-bot-framework-webchat
+  nom: "Assistant IA : Bot Framework Web Chat (Microsoft)"
+  categorie: informatif
+  type_service: assistant_ia
+  fournisseur_id: microsoft
+  explique_ressources: false
+  description: "Fenêtre de conversation des agents Microsoft (Azure AI Bot Service, Copilot Studio). Source : https://learn.microsoft.com/azure/bot-service/bot-builder-webchat-overview"
+  motifs:
+    domaines_scripts: ["cdn.botframework.com"]
+  exemples:
+    - {type: script, valeur: "https://cdn.botframework.com/botframework-webchat/latest/webchat.js"}
+
+- id: ia-chatbase
+  nom: "Assistant IA : Chatbase"
+  categorie: informatif
+  type_service: assistant_ia
+  niveau: inconnu  # juridiction de l'éditeur non encore sourcée
+  explique_ressources: false
+  description: "Agent conversationnel à intégrer au site. Source : https://www.chatbase.co/docs/developer-guides/website-integration/chat-bubble"
+  motifs:
+    domaines_scripts: ["chatbase.co"]
+  exemples:
+    - {type: script, valeur: "https://www.chatbase.co/embed.min.js"}
+
+- id: ia-botpress
+  nom: "Assistant IA : Botpress"
+  categorie: informatif
+  type_service: assistant_ia
+  niveau: inconnu  # juridiction de l'éditeur non encore sourcée
+  explique_ressources: false
+  description: "Plateforme d'agents conversationnels. Source : https://www.botpress.com/docs/webchat/get-started/embedding-webchat"
+  motifs:
+    domaines_scripts: ["cdn.botpress.cloud", "bpcontent.cloud"]
+  exemples:
+    - {type: script, valeur: "https://cdn.botpress.cloud/webchat/v3.3/inject.js"}
+
+- id: ia-voiceflow
+  nom: "Assistant IA : Voiceflow"
+  categorie: informatif
+  type_service: assistant_ia
+  niveau: inconnu  # juridiction de l'éditeur non encore sourcée
+  explique_ressources: false
+  description: "Plateforme d'agents conversationnels. Source : https://www.voiceflow.com/docs/documentation/deploy/widget/embedding-the-chat-widget.md"
+  motifs:
+    domaines_scripts: ["cdn.voiceflow.com"]
+  exemples:
+    - {type: script, valeur: "https://cdn.voiceflow.com/widget/bundle.mjs"}
+
 # --- Discussion en ligne ---------------------------------------------------- #
 
 - id: crisp
