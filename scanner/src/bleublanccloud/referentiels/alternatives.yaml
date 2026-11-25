@@ -204,6 +204,42 @@
   sources: ["https://fr.wikipedia.org/wiki/Gandi"]
   a_verifier: true
 
+- id: secuserve
+  nom: Secuserve
+  pays: FR
+  url: "https://www.secuserve.com/"
+  categorie: messagerie
+  types_service: [messagerie]
+  description_courte: "Éditeur français de sécurité de la messagerie (filtrage, continuité de service) et de messagerie d'entreprise hébergée en France."
+  sources:
+    - "https://www.solutions-numeriques.com/annuairecybersecurite/fiche/secuserve"
+    - "https://www.lemondeinformatique.fr/actualites/lire-secuserve-rejoint-hexatrust%A0-96940.html"
+  a_verifier: true
+
+- id: mailo
+  nom: Mailo
+  pays: FR
+  url: "https://www.mailo.com/"
+  categorie: messagerie
+  types_service: [messagerie]
+  description_courte: "Messagerie française (ex-NetCourrier) hébergée en France, avec des offres pour associations et organisations."
+  sources:
+    - "https://korben.info/mailo-messagerie-francaise-alternative-gmail.html"
+    - "https://www.lemondeinformatique.fr/actualites/lire-zoom-sur-mailo-une-suite-bureautique-et-collaborative-francaise-98319.html"
+  a_verifier: true
+
+- id: alinto
+  nom: Alinto
+  pays: FR
+  url: "https://www.alinto.com/"
+  categorie: messagerie
+  types_service: [messagerie]
+  description_courte: "Messagerie professionnelle hébergée, éditée à Lyon depuis 2000 (groupe Jamespot)."
+  sources:
+    - "https://next.ink/brief-article/jamespot-rachete-alinto-pour-integrer-le-mail-a-son-offre-collaborative/"
+    - "https://www.lejournaldesentreprises.com/article/alinto-dix-ans-dinnovation-recompenses-56222"
+  a_verifier: true
+
 # =========================================================================== #
 # DNS
 # =========================================================================== #
@@ -246,6 +282,18 @@
   types_service: [dns]
   description_courte: "DNS géré européen avec réseau anycast."
   sources: ["https://bunny.net/"]
+  a_verifier: true
+
+- id: nameshield
+  nom: Nameshield
+  pays: FR
+  url: "https://www.nameshield.com/"
+  categorie: dns
+  types_service: [dns]
+  description_courte: "Bureau d'enregistrement et DNS premium français (anycast, DNSSEC), offre labellisée France Cybersecurity."
+  sources:
+    - "https://www.nameshield.com/partage/DNS_premium_FR.pdf"
+    - "https://www.solutions-numeriques.com/annuairecybersecurite/fiche/nameshield"
   a_verifier: true
 
 # =========================================================================== #
@@ -370,6 +418,66 @@
   types_service: [crm]
   description_courte: "Logiciel de gestion de la relation (CRM) français."
   sources: ["https://axonaut.com/"]
+  a_verifier: true
+
+- id: oodrive
+  nom: Oodrive
+  pays: FR
+  url: "https://www.oodrive.com/fr/"
+  categorie: suites_saas
+  types_service: [stockage, visioconference]
+  description_courte: "Plateforme collaborative française (partage de documents, réunions en ligne), qualifiée SecNumCloud par l'ANSSI."
+  sources:
+    - "https://www.solutions-numeriques.com/?p=235065"
+    - "https://www.lemondeinformatique.fr/actualites/lire-zoom-sur-les-outils-collaboratifs-work-et-meet-d-oodrive-98653.html"
+  a_verifier: true
+
+- id: twake-workplace
+  nom: Twake Workplace (LINAGORA)
+  pays: FR
+  url: "https://linagora.com/"
+  categorie: suites_saas
+  types_service: [messagerie, bureautique, stockage, visioconference]
+  description_courte: "Suite collaborative open source (messagerie, agenda, documents, visioconférence), retenue par la centrale d'achat des collectivités CANUT."
+  sources:
+    - "https://acteurspublics.fr/articles/numerique-public-la-canut-choisit-twake-ai-pour-une-alternative-souveraine-aux-gafam/"
+    - "https://www.lemondeinformatique.fr/actualites/lire-twake-workplace-une-autre-alternative-francaise-aux-suites-americaines-98542.html"
+  a_verifier: true
+
+- id: jamespot
+  nom: Jamespot
+  pays: FR
+  url: "https://www.jamespot.com/"
+  categorie: suites_saas
+  types_service: [gestion_projet, messagerie_instantanee, bureautique]
+  description_courte: "Plateforme collaborative française (intranet, réseau social d'entreprise, bureautique en ligne)."
+  sources:
+    - "https://www.journaldunet.com/collaboratif/1520469-comparatif-des-digital-workplace-souveraines-jamespot-se-demarque"
+    - "https://next.ink/brief-article/jamespot-rachete-alinto-pour-integrer-le-mail-a-son-offre-collaborative/"
+  a_verifier: true
+
+- id: filevert
+  nom: FileVert
+  pays: FR
+  url: "https://filevert.fr/"
+  categorie: suites_saas
+  types_service: [stockage]
+  description_courte: "Transfert de fichiers volumineux, service français hébergé en France."
+  sources:
+    - "https://sustainableit-tools.isit-europe.org/en/tools/filevert.html"
+    - "https://www.appvizer.fr/collaboration/transfert-de-fichiers/filevert"
+  a_verifier: true
+
+- id: retyc
+  nom: Retyc
+  pays: FR
+  url: "https://retyc.com/fr"
+  categorie: suites_saas
+  types_service: [stockage]
+  description_courte: "Transfert de fichiers et espaces de partage chiffrés de bout en bout, hébergés en Europe."
+  sources:
+    - "https://www.it-connect.fr/retyc-une-alternative-francaise-a-wetransfer-chiffree-et-sans-ia/"
+    - "https://lespepitestech.com/startup-de-la-french-tech/retyc"
   a_verifier: true
 
 # =========================================================================== #
