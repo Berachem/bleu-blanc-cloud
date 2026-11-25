@@ -160,5 +160,5 @@ def test_simulation_mail_de_felicitations(
     assert resultat.exit_code == 0, resultat.output
     apercus = sorted(p.name for p in (base_historique / "apercus").glob("*.eml"))
     assert apercus == ["bordeaux-felicitations.eml", "merignac-premier.eml"]
-    texte = (base_historique / "apercus" / "bordeaux-felicitations.html").read_text()
+    texte = (base_historique / "apercus" / "bordeaux-felicitations.txt").read_text()
     assert "vient d'obtenir la note A" in texte

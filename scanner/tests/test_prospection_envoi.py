@@ -57,6 +57,9 @@ REGLAGES = Reglages(
 )
 
 
+PASSAGE = PassageA("C", date(2026, 9, 11), date(2026, 10, 21))
+
+
 def entree(slug: str, nom: str, score: int = 100) -> EntreeIndex:
     return EntreeIndex(
         slug=slug,
@@ -121,29 +124,50 @@ class FauxSmtp:
 # --------------------------------------------------------------------------- #
 
 
-def test_mail_complet_texte_et_html() -> None:
+def test_mail_en_texte_simple_sans_emoji_dans_l_objet() -> None:
     message = composer(destinataire(commune="Saint-Gély-du-Fesc & Cie"), "premier", REGLAGES)
     assert message["Subject"] == (
-        "🏅 Saint-Gély-du-Fesc & Cie obtient la note A en souveraineté numérique"
+        "Saint-Gély-du-Fesc & Cie obtient la note A en souveraineté numérique"
     )
     assert message["To"] == "contact@mairie-nantes.example"
     assert message["Reply-To"] == "contact@bbc.example"
     assert "Ne%20plus%20recevoir" in message["List-Unsubscribe"]
-    texte = message.get_body(preferencelist=("plain",)).get_content()
-    page = message.get_body(preferencelist=("html",)).get_content()
-    assert "fait partie des collectivités exemplaires" in texte
-    assert "486" not in texte and "486" not in page  # aucun chiffre de classement
+    # Texte simple uniquement : pas de version HTML, de logo ni d'image
+    assert not message.is_multipart()
+    assert message.get_body(preferencelist=("html",)) is None
+    texte = message.get_content()
+    assert "Saint-Gély-du-Fesc & Cie obtient la note A, avec un score de 100/100" in texte
+    assert "486" not in texte and "1 162" not in texte  # aucun chiffre de classement
     assert "https://bbc.example/organisation/nantes-44109/" in texte
-    assert "🎉" in texte
-    assert "Saint-Gély-du-Fesc &amp; Cie" in page  # échappé dans le HTML
-    assert 'src="https://bbc.example/courriel/logo-bleu-blanc-cloud.png"' in page
-    assert "$" not in texte and "$" not in page
+    # Adresse générique : on demande de transmettre à la bonne personne
+    assert "Pourriez-vous transmettre ce message" in texte
+    assert "$" not in texte
+
+
+def test_contact_nominatif_prioritaire() -> None:
+    d = destinataire(contact_nominatif="dsi@mairie-nantes.example")
+    message = composer(d, "premier", REGLAGES)
+    assert message["To"] == "dsi@mairie-nantes.example"
+    texte = message.get_content()
+    assert "un « oui » en réponse suffit" in texte
+    assert "Pourriez-vous transmettre" not in texte
+    # Contact nominatif mal saisi : retour à l'adresse générique
+    assert destinataire(contact_nominatif="pas une adresse").adresse_envoi == (
+        "contact@mairie-nantes.example"
+    )
+
+
+@pytest.mark.parametrize("genre", ["premier", "felicitations", "relance"])
+def test_aucun_emoji_dans_les_objets(genre: Any) -> None:
+    d = destinataire(passage_a=PASSAGE, date_envoi=date(2026, 11, 3))
+    sujet = composer(d, genre, REGLAGES)["Subject"]
+    assert all(ord(c) < 0x2000 for c in sujet), sujet
 
 
 def test_relance_courte_et_datee() -> None:
     message = composer(destinataire(date_envoi=date(2026, 11, 3)), "relance", REGLAGES)
-    assert message["Subject"].startswith("Petit rappel : Nantes obtient la note A")
-    texte = message.get_body(preferencelist=("plain",)).get_content()
+    assert message["Subject"].startswith("Rappel : Nantes obtient la note A")
+    texte = message.get_content()
     assert "mon message du 03/11/2026" in texte
     assert "seul rappel" in texte
 
@@ -169,7 +193,28 @@ def test_quota_rodage_puis_croisiere_moins_les_envois_du_jour() -> None:
         ({"courriel": "pas-une-adresse"}, None),
         ({"statut": "Pas intéressé"}, None),
         ({"statut": "Adresse introuvable"}, None),
-        ({"statut": "Envoyé", "date_envoi": date(2026, 10, 27)}, "relance"),
+        # Relance : seulement vers un contact nominatif, jamais vers l'accueil de la mairie
+        ({"statut": "Envoyé", "date_envoi": date(2026, 10, 27)}, None),
+        (
+            {
+                "statut": "Envoyé",
+                "date_envoi": date(2026, 10, 27),
+                "contact_nominatif": "dsi@nantes.example",
+                "adresse_utilisee": "dsi@nantes.example",
+            },
+            "relance",
+        ),
+        # Contact nominatif ajouté après un premier mail parti à l'accueil : pas de relance
+        (
+            {
+                "statut": "Envoyé",
+                "date_envoi": date(2026, 10, 27),
+                "contact_nominatif": "dsi@nantes.example",
+                "adresse_utilisee": "contact@mairie-nantes.example",
+            },
+            None,
+        ),
+        ({"contact_nominatif": "dsi@nantes.example", "courriel": None}, "premier"),
         ({"statut": "Envoyé", "date_envoi": date(2026, 11, 3)}, None),  # moins de 14 jours
         (
             {
@@ -188,7 +233,12 @@ def test_type_envoi(champs: dict[str, Any], attendu: str | None) -> None:
 
 
 def test_sans_relances() -> None:
-    envoye = destinataire(statut="Envoyé", date_envoi=date(2026, 10, 1))
+    envoye = destinataire(
+        statut="Envoyé",
+        date_envoi=date(2026, 10, 1),
+        contact_nominatif="dsi@nantes.example",
+        adresse_utilisee="dsi@nantes.example",
+    )
     assert type_envoi(envoye, JOUR, REGLAGES, relances=False) is None
 
 
@@ -318,7 +368,10 @@ def test_execution_quota_dates_statuts_et_pauses(tmp_path: Path) -> None:
         tmp_path,
         {
             "nantes-44109": a_contacter("contact@mairie-nantes.example"),
-            "albi-81004": a_contacter("secretariat@mairie-albi.example"),
+            "albi-81004": {
+                **a_contacter("secretariat@mairie-albi.example"),
+                "Contact nominatif": "dsi@mairie-albi.example",
+            },
             "sete-34301": a_contacter("mairie@ville-sete.example"),
             "lyon-69123": {"Statut": "Adresse introuvable"},
             "dijon-21231": {**a_contacter("contact@dijon.example"), "Statut": "Pas intéressé"},
@@ -329,13 +382,14 @@ def test_execution_quota_dates_statuts_et_pauses(tmp_path: Path) -> None:
     bilan = executer(chemin, REGLAGES, smtp, jour=JOUR, attendre=pauses.append)
     assert [m["To"] for m in smtp.envoyes] == [
         "contact@mairie-nantes.example",
-        "secretariat@mairie-albi.example",
+        "dsi@mairie-albi.example",  # contact nominatif prioritaire
     ]  # quota de rodage : 2
     assert len(pauses) == 1  # une pause entre deux mails, pas après le dernier
     assert bilan.quota == 2
     suivi = lire_suivi(chemin)
     assert suivi["nantes-44109"]["Date mail envoyé"] == datetime(2026, 11, 10)
     assert suivi["nantes-44109"]["Statut"] == "Envoyé"
+    assert suivi["albi-81004"]["Adresse utilisée"] == "dsi@mairie-albi.example"
     assert "Date mail envoyé" not in suivi["sete-34301"]
 
     # Même jour : quota épuisé, rien ne repart
@@ -355,14 +409,16 @@ def test_execution_quota_dates_statuts_et_pauses(tmp_path: Path) -> None:
     assert bilan.reponses == ["nantes-44109"]
     assert [slug for slug, _ in bilan.envoyes] == ["sete-34301"]
 
-    # 14 jours plus tard : relance d'Albi seulement (Nantes a répondu, Sète trop récent)
+    # 14 jours plus tard : relance d'Albi seulement (contact nominatif ; Nantes a répondu,
+    # Sète trop récent et contacté via l'accueil)
     bilan = executer(chemin, REGLAGES, smtp, jour=date(2026, 11, 24), attendre=pauses.append)
     assert bilan.envoyes == [("albi-81004", "relance")]
     suivi = lire_suivi(chemin)
     assert suivi["albi-81004"]["Statut"] == "Relancé"
     assert suivi["albi-81004"]["Date relance"] == datetime(2026, 11, 24)
     assert suivi["nantes-44109"]["Statut"] == "Réponse reçue"
-    assert smtp.envoyes[-1]["Subject"].startswith("Petit rappel : Albi")
+    assert smtp.envoyes[-1]["Subject"].startswith("Rappel : Albi")
+    assert smtp.envoyes[-1]["To"] == "dsi@mairie-albi.example"
 
 
 def test_adresse_refusee_et_panne_du_serveur(tmp_path: Path) -> None:
@@ -399,7 +455,8 @@ def test_simulation_ne_modifie_rien(tmp_path: Path) -> None:
     avant = chemin.read_bytes()
     fichiers = apercus(chemin, REGLAGES, tmp_path / "apercus", jour=JOUR)
     assert [f.name for f in fichiers] == ["nantes-44109-premier.eml"]
-    assert (tmp_path / "apercus" / "nantes-44109-premier.html").exists()
+    apercu = (tmp_path / "apercus" / "nantes-44109-premier.txt").read_text(encoding="utf-8")
+    assert apercu.startswith("À : contact@nantes.example\nObjet : Nantes obtient la note A")
     assert chemin.read_bytes() == avant
 
 
@@ -429,7 +486,7 @@ def test_commande_simulation_puis_sans_mot_de_passe(
     classeur_xlsx = openpyxl.load_workbook(chemin)
     feuille = classeur_xlsx["Communes A"]
     feuille["L2"] = "contact@bordeaux.example"
-    feuille["N2"] = "À contacter"
+    feuille["O2"] = "À contacter"
     classeur_xlsx.save(chemin)
 
     sans_adresse = lanceur.invoke(app, ["prospection", "envoyer", "--vers", str(chemin)])
@@ -523,20 +580,13 @@ def test_detecter_passage_a(points: list[PointEnregistre], attendu: PassageA | N
     assert detecter_passage_a(points, JOUR) == attendu
 
 
-PASSAGE = PassageA("C", date(2026, 9, 11), date(2026, 10, 21))
-
-
 def test_mail_de_felicitations() -> None:
     message = composer(destinataire(passage_a=PASSAGE), "felicitations", REGLAGES)
-    assert message["Subject"] == (
-        "🎉 Bravo : Nantes vient d'obtenir la note A en souveraineté numérique"
-    )
-    texte = message.get_body(preferencelist=("plain",)).get_content()
-    page = message.get_body(preferencelist=("html",)).get_content()
+    assert message["Subject"] == "Nantes vient d'obtenir la note A en souveraineté numérique"
+    texte = message.get_content()
     assert "Nantes vient d'obtenir la note A, avec un score de 100/100" in texte
     assert "Lors de notre analyse du 11 septembre 2026, elle était notée C" in texte
-    assert "Voir la fiche et la progression" in page
-    assert "$" not in texte and "$" not in page
+    assert "$" not in texte
 
 
 def test_felicitations_prioritaires_et_notees(tmp_path: Path) -> None:
@@ -547,6 +597,8 @@ def test_felicitations_prioritaires_et_notees(tmp_path: Path) -> None:
             "albi-81004": a_contacter("contact@albi.example"),
             "sete-34301": {
                 **a_contacter("mairie@sete.example"),
+                "Contact nominatif": "elu@sete.example",
+                "Adresse utilisée": "elu@sete.example",
                 "Statut": "Envoyé",
                 "Date mail envoyé": datetime(2026, 10, 1),
             },
@@ -567,7 +619,7 @@ def test_felicitations_prioritaires_et_notees(tmp_path: Path) -> None:
         ("albi-81004", "felicitations"),
         ("nantes-44109", "premier"),
     ]
-    assert smtp.envoyes[1]["Subject"].startswith("🎉 Bravo : Albi")
+    assert smtp.envoyes[1]["Subject"].startswith("Albi vient d'obtenir la note A")
     suivi = lire_suivi(chemin)
     assert suivi["albi-81004"]["Statut"] == "Envoyé"
     assert suivi["albi-81004"]["Notes"] == "Mail « nouvelle note A » (C → A)"
