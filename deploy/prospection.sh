@@ -2,7 +2,8 @@
 # Envoi programmé de la prospection badge « Note A » (bbcloud-prospection.timer : du mardi
 # au jeudi à 9 h 05). Le mardi, le classeur est d'abord mis à jour (nouvelles communes
 # notées A et leur adresse de contact, suivi conservé) : celles qui viennent de passer en A
-# reçoivent le mail « Bravo, vous venez d'obtenir la note A » en priorité. Puis : lecture de
+# reçoivent le mail « Bravo, vous venez d'obtenir la note A » en priorité, et une adresse de
+# service (communication@, numerique@…) est cherchée sur le site officiel. Puis : lecture de
 # la boîte de réception (réponses, rebonds) et quota du jour, avec 3 à 6 minutes entre deux
 # mails. Verrou propre au classeur : n'empêche jamais la campagne, les demandes ni la mise à
 # jour automatique.
@@ -15,5 +16,8 @@ if [ "$(date +%u)" = "2" ]; then
   echo "▶ Mise à jour du classeur (nouvelles communes notées A)"
   uv run --frozen --with openpyxl bbcloud prospection badge \
     || echo "⚠ Classeur non mis à jour (annuaire injoignable ?) : envoi avec la liste existante"
+  echo "▶ Adresses fonctionnelles (communication, numérique…) sur les sites officiels"
+  uv run --frozen --with openpyxl bbcloud prospection adresses \
+    || echo "⚠ Recherche des adresses fonctionnelles interrompue : envoi avec la liste existante"
 fi
 exec uv run --frozen --with openpyxl bbcloud prospection envoyer

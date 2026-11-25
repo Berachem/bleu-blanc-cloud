@@ -162,10 +162,11 @@ def test_classeur_relance_sans_perdre_le_suivi(tmp_path: Path) -> None:
 
     classeur = openpyxl.load_workbook(chemin)
     feuille = classeur["Communes A"]
-    feuille["L3"] = "mairie@sans.example"
-    feuille["O3"] = "Envoyé"
-    feuille["O2"] = "Badge intégré"
-    feuille["N2"] = "dsi@albi.example"
+    lettre = {c.value: c.column_letter for c in feuille[1]}
+    feuille[f"{lettre['E-mail de contact']}3"] = "mairie@sans.example"
+    feuille[f"{lettre['Statut']}3"] = "Envoyé"
+    feuille[f"{lettre['Statut']}2"] = "Badge intégré"
+    feuille[f"{lettre['Contact nominatif']}2"] = "dsi@albi.example"
     feuille["A3"] = datetime(2026, 11, 5)
     classeur.save(chemin)
     lignes = construire_lignes(communes, mairies, lire_suivi(chemin))

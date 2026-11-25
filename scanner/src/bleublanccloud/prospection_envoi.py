@@ -36,6 +36,7 @@ from typing import Any, Literal
 
 from bleublanccloud.analyse.score import VERSION_METHODO, note_depuis_score
 from bleublanccloud.prospection import (
+    ADRESSE_FONCTIONNELLE,
     ADRESSE_UTILISEE,
     CONTACT_NOMINATIF,
     DATE_ENVOI,
@@ -116,23 +117,33 @@ class Destinataire:
     passage_a: PassageA | None = None
     contact_nominatif: str | None = None
     adresse_utilisee: str | None = None
+    adresse_fonctionnelle: str | None = None
+
+    def _ciblees(self) -> list[str]:
+        """Adresses valides d'une personne ou d'un service, par ordre de priorité."""
+        return [
+            a
+            for a in (self.contact_nominatif, self.adresse_fonctionnelle)
+            if a and MOTIF_ADRESSE.match(a)
+        ]
 
     @property
     def adresse_envoi(self) -> str | None:
-        """Le contact nominatif (une personne) est prioritaire sur l'adresse générique."""
-        if self.contact_nominatif and MOTIF_ADRESSE.match(self.contact_nominatif):
-            return self.contact_nominatif
+        """Contact nominatif, puis adresse fonctionnelle (service communication, numérique…),
+        puis adresse générique de la mairie."""
+        ciblees = self._ciblees()
+        if ciblees:
+            return ciblees[0]
         if self.courriel and MOTIF_ADRESSE.match(self.courriel):
             return self.courriel
         return None
 
     @property
-    def nominatif(self) -> bool:
-        """Le mail part (ou est parti) vers une personne et non vers l'accueil de la mairie."""
-        adresse = self.adresse_utilisee or self.adresse_envoi
-        return bool(
-            adresse and self.contact_nominatif and adresse.lower() == self.contact_nominatif.lower()
-        )
+    def ciblee(self) -> bool:
+        """Le mail part (ou est parti) vers une personne ou un service, et non vers l'accueil
+        de la mairie."""
+        adresse = (self.adresse_utilisee or self.adresse_envoi or "").lower()
+        return bool(adresse) and adresse in (a.lower() for a in self._ciblees())
 
 
 @dataclass(frozen=True)
@@ -221,6 +232,7 @@ def lire_destinataires(
                 passage_a=(passages_a or {}).get(str(slug)),
                 contact_nominatif=facultative(CONTACT_NOMINATIF),
                 adresse_utilisee=facultative(ADRESSE_UTILISEE),
+                adresse_fonctionnelle=facultative(ADRESSE_FONCTIONNELLE),
             )
         )
     return destinataires
@@ -276,8 +288,8 @@ def type_envoi(
 ) -> TypeEnvoi | None:
     """Premier mail, relance unique, ou rien.
 
-    La relance n'est envoyée qu'à un contact nominatif : relancer l'accueil d'une mairie ne
-    fait qu'ouvrir un nouveau dossier dans son outil de suivi des demandes.
+    La relance n'est envoyée qu'à une personne ou un service : relancer l'accueil d'une mairie
+    ne fait qu'ouvrir un nouveau dossier dans son outil de suivi des demandes.
     """
     if not destinataire.adresse_envoi:
         return None
@@ -285,7 +297,7 @@ def type_envoi(
         return "felicitations" if destinataire.passage_a else "premier"
     if (
         relances
-        and destinataire.nominatif
+        and destinataire.ciblee
         and destinataire.statut == "Envoyé"
         and destinataire.date_envoi is not None
         and destinataire.date_relance is None
@@ -515,7 +527,7 @@ def composer(
         "date_avant": _date_longue(destinataire.passage_a.date_avant)
         if destinataire.passage_a
         else "",
-        "demande": DEMANDE_NOMINATIVE if destinataire.nominatif else DEMANDE_GENERIQUE,
+        "demande": DEMANDE_NOMINATIVE if destinataire.ciblee else DEMANDE_GENERIQUE,
     }
     message = EmailMessage()
     message["Subject"] = sujet_du_mail(destinataire, genre)
