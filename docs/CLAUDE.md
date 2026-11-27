@@ -460,7 +460,7 @@ bbcloud cibles universites [--enregistrer]        # universités publiques (aper
 bbcloud cibles hopitaux [--enregistrer]           # CHU et CHR publics (liste sourcée hopitaux.yaml ; ADR-0006)
 bbcloud scanner berachem.dev                      # scan unitaire, affichage rich
 bbcloud scanner berachem.dev --json               # sortie JSON
-bbcloud campagne lancer [--limite N] [--dry-run]
+bbcloud campagne lancer [--limite N] [--type hopital] [--dry-run]
 bbcloud rapports generer [--max N] [--dry-run]
 bbcloud exporter --vers ../site/public/donnees
 bbcloud publier                                   # export + build + push Pages

@@ -283,6 +283,26 @@ def test_cli_campagne_demande_confirmation(base_temporaire: Path) -> None:
     assert "Lancer l'analyse passive" in refus.output
 
 
+def test_cli_campagne_filtre_par_type(base_temporaire: Path) -> None:
+    lanceur = CliRunner()
+    lanceur.invoke(app, ["cibles", "ajouter", "--nom", "Exempleville", "--site", "exempleville.fr"])
+    with Base(base_temporaire) as base:
+        base.enregistrer_organisation(
+            Organisation(
+                slug="chu-exempleville",
+                nom="CHU d'Exempleville",
+                type="hopital",
+                site_web="https://chu-exempleville.example/",
+                source="test",
+            )
+        )
+    simulation = lanceur.invoke(app, ["campagne", "lancer", "--type", "hopital", "--dry-run"])
+    assert simulation.exit_code == 0, simulation.output
+    assert "chu-exempleville.example" in simulation.output
+    assert "exempleville.fr" not in simulation.output
+    assert lanceur.invoke(app, ["campagne", "lancer", "--type", "clinique"]).exit_code == 2
+
+
 def test_cli_campagne_organisation_inconnue(base_temporaire: Path) -> None:
     resultat = CliRunner().invoke(app, ["campagne", "lancer", "--organisation", "inconnue"])
     assert resultat.exit_code == 2
