@@ -66,13 +66,16 @@
   pays_maison_mere: FR
   soumis_cloud_act: false
   propose_offre_secnumcloud: true
+  asn: [50624]
   motifs_domaines: ["outscale.com"]
-  categories: [hebergement]
+  categories: [hebergement, messagerie]
   sources:
     - "https://fr.wikipedia.org/wiki/Outscale"
     - "https://www.outscale.com/"
     - "https://www.3ds.com/newsroom/press-releases/dassault-systemes-acquires-majority-stake-outscale"
-  remarque: "ASN à compléter après vérification. Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+    - "https://www.peeringdb.com/net/12006"
+    - "https://bgp.he.net/AS50624"
+  remarque: "ASN 50624 (OUTSCALE SASU) ajouté le 27/11/2026 d'après PeeringDB et bgp.he.net : à confirmer. Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
   a_verifier: false
 
 - id: clever-cloud
@@ -117,7 +120,7 @@
   maison_mere: Your.Online
   pays_maison_mere: NL
   soumis_cloud_act: false
-  asn: [29169]
+  asn: [29169, 203476]
   motifs_domaines: ["gandi.net"]
   categories: [hebergement, messagerie, dns, bureau_enregistrement]
   sources:
@@ -126,7 +129,9 @@
     - "https://en.wikipedia.org/wiki/Gandi"
     - "https://www.gandi.net/about-us"
     - "https://domainincite.com/tag/gandi"
-  remarque: "Rapprochement avec Total Webhosting Solutions (Pays-Bas) en 2023, groupe renommé Your.Online. Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
+    - "https://stat.ripe.net/AS203476"
+    - "https://www.peeringdb.com/net/13452"
+  remarque: "Second ASN 203476 (GANDI-AS-2) ajouté le 27/11/2026, à confirmer. Rapprochement avec Total Webhosting Solutions (Pays-Bas) en 2023, groupe renommé Your.Online. Vérifié le 22/10/2026 (siège, maison mère, exposition au Cloud Act) à partir des sources ci-dessus ; à relire par l'auteur."
   a_verifier: false
 
 - id: ionos
@@ -2086,4 +2091,166 @@
     - "https://www.peeringdb.com/asn/20473"
     - "https://www.constant.com/company/about-us/"
   remarque: "Société de West Palm Beach (Floride). Les serveurs DNS observés peuvent appartenir à un prestataire qui loue cette infrastructure : le niveau suit l'opérateur du réseau."
+  a_verifier: true
+
+# --- Fournisseurs fréquents parmi les « inconnus » (ajout du 27/11/2026, tous à vérifier) ---
+
+- id: eurofiber-france
+  nom: Eurofiber France
+  pays_siege: FR
+  maison_mere: Eurofiber
+  pays_maison_mere: NL
+  soumis_cloud_act: false
+  asn: [35625]
+  categories: [hebergement]
+  sources:
+    - "https://www.peeringdb.com/asn/35625"
+    - "https://www.eurofiber.com/press/eurofiber-acquires-eurafibre-ate-and-eura-dc-in-france/"
+    - "https://www.lejournaldesentreprises.com/entreprise/eurofiber-france"
+  remarque: "Filiale française (Issy-les-Moulineaux) du groupe néerlandais Eurofiber, détenu par le fonds Antin Infrastructure Partners."
+  a_verifier: true
+
+- id: koesio
+  nom: Koesio Networks
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [197033, 205933, 202755, 206120]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://bgp.he.net/AS197033"
+    - "https://www.peeringdb.com/net/13894"
+  remarque: "Opérateur et intégrateur français (ex-Heliaq pour certains ASN) : rattachement des ASN secondaires à confirmer."
+  a_verifier: true
+
+- id: moji
+  nom: MOJI
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [47160, 213873, 203698]
+  categories: [hebergement, messagerie]
+  sources:
+    - "https://bgp.he.net/AS47160"
+    - "https://www.ripe.net/membership/indices/data/fr.moji.html"
+  remarque: "Infogéreur et opérateur basé à Nanterre."
+  a_verifier: true
+
+- id: idom-technologies
+  nom: IDOM Technologies
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [51110]
+  categories: [hebergement, messagerie]
+  sources:
+    - "https://db-ip.com/as51110"
+    - "https://asrank.caida.org/asns/51110"
+  remarque: "Opérateur présent en outre-mer (La Réunion, Martinique)."
+  a_verifier: true
+
+- id: fortinet
+  nom: Fortinet
+  pays_siege: US
+  maison_mere: Fortinet, Inc.
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn: [40934]
+  categories: [messagerie]
+  sources:
+    - "https://ipinfo.io/AS40934"
+    - "https://www.peeringdb.com/asn/40934"
+  remarque: "Société de Sunnyvale (Californie) ; service de filtrage de messagerie (FortiMail Cloud) placé devant les MX."
+  a_verifier: true
+
+- id: forcepoint
+  nom: Forcepoint
+  pays_siege: GB
+  maison_mere: Forcepoint
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn: [44444]
+  categories: [messagerie]
+  sources:
+    - "https://db-ip.com/as44444-forcepoint-uk-limited"
+    - "https://www.forcepoint.com/newsroom/2021/francisco-partners-completes-acquisition-forcepoint"
+  remarque: "ASN enregistré par Forcepoint UK Limited, filiale du groupe Forcepoint (Austin, Texas), propriété de Francisco Partners : service de filtrage de messagerie."
+  a_verifier: true
+
+- id: devclic
+  nom: DEVCLIC
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [44141, 205541]
+  categories: [hebergement, dns]
+  sources:
+    - "https://ipinfo.io/AS44141"
+    - "https://www.peeringdb.com/net/1712"
+  a_verifier: true
+
+- id: evolix
+  nom: Evolix
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [197696]
+  categories: [hebergement]
+  sources:
+    - "https://www.peeringdb.com/net/5064"
+    - "https://www.ripe.net/membership/indices/data/fr.evolix.html"
+  remarque: "Hébergeur et infogéreur basé à Marseille."
+  a_verifier: true
+
+- id: easyteam
+  nom: EasyTeam
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [20986]
+  categories: [hebergement]
+  sources:
+    - "https://www.peeringdb.com/net/15406"
+    - "https://ipinfo.io/AS20986"
+  a_verifier: true
+
+- id: bretagne-telecom
+  nom: Bretagne Télécom
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [42845]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.peeringdb.com/asn/42845"
+    - "https://bgp.he.net/AS42845"
+  remarque: "Opérateur et hébergeur basé à Châteaubourg (Ille-et-Vilaine)."
+  a_verifier: true
+
+- id: planet-bourgogne
+  nom: Planet Bourgogne
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [200339]
+  categories: [hebergement, dns]
+  sources:
+    - "https://ipinfo.io/AS200339"
+    - "https://www.ripe.net/membership/indices/data/fr.planetbourgogne.html"
+  remarque: "Fournisseur basé à Saint-Apollinaire (Côte-d'Or)."
+  a_verifier: true
+
+- id: level-sys
+  nom: LEVEL SYS
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [201699]
+  categories: [hebergement, dns]
+  sources:
+    - "https://ipinfo.io/AS201699"
+    - "https://www.ripe.net/membership/indices/data/fr.levelsys.html"
+  a_verifier: true
+
+- id: promatec
+  nom: PROMATEC
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [203386]
+  categories: [hebergement]
+  sources:
+    - "https://ipinfo.io/AS203386"
+    - "https://www.ripe.net/membership/indices/data/fr.promatec.html"
+  remarque: "Fournisseur basé à Bondues (Nord)."
   a_verifier: true
