@@ -1,4 +1,5 @@
-# Centres hospitaliers universitaires (CHU) et régionaux publics : liste tenue à la main (ADR-0006).
+# Hôpitaux publics : centres hospitaliers universitaires (CHU) et régionaux, puis établissements
+# supports des groupements hospitaliers de territoire (GHT) ; liste tenue à la main (ADR-0006).
 #
 # Chaque entrée a au moins une source (page du site officiel de l'établissement) ; tant que
 # l'auteur n'a pas relu l'entrée, « a_verifier: true ». L'import se fait en deux temps :
@@ -274,4 +275,158 @@
     - "https://chu-guyane.fr/cayenne/accueil"
     - "https://www.vidal.fr/actualites/31738-la-guyane-desormais-dotee-d-un-centre-hospitalier-universitaire.html"
   remarque: "CHU créé en 2025 à partir du centre hospitalier régional de Guyane."
+  a_verifier: true
+
+# --- Établissements supports de GHT (hors CHU/CHR ci-dessus et hors AP-HP) ---
+# Statut d'établissement support : page GHT de l'ARS (seconde source).
+# Site web : fiche acceslibre de l'établissement (première source).
+
+- nom: "Centre hospitalier de Bourg-en-Bresse (Fleyriat)"
+  ville: "Bourg-en-Bresse"
+  departement: "01"
+  site_web: "https://www.ch-bourg-en-bresse.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/01-bourg-en-bresse/a/hopital/erp/hopital-fleyriat-services-des-urgences/"
+    - "https://www.auvergne-rhone-alpes.ars.sante.fr/groupement-hospitalier-de-territoire-ght-0"
+  remarque: "établissement support du GHT Bresse Haut-Bugey ; la fiche acceslibre (service des urgences) pointe vers une page du site ; racine du domaine retenue"
+  a_verifier: true
+
+- nom: "Centre hospitalier Henri Mondor d'Aurillac"
+  ville: "Aurillac"
+  departement: "15"
+  site_web: "http://www.ch-aurillac.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/15-aurillac/a/hopital/erp/centre-hospitalier-henri-mondor/"
+    - "https://www.auvergne-rhone-alpes.ars.sante.fr/groupement-hospitalier-de-territoire-ght-0"
+  remarque: "établissement support du GHT Cantal"
+  a_verifier: true
+
+- nom: "Centre hospitalier de Valence"
+  ville: "Valence"
+  departement: "26"
+  site_web: "http://www.ch-valence.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/26-valence/a/hopital/erp/centre-hospitalier-de-valence-2/"
+    - "https://www.auvergne-rhone-alpes.ars.sante.fr/groupement-hospitalier-de-territoire-ght-0"
+  remarque: "établissement support du GHT Drôme-Ardèche-Vercors"
+  a_verifier: true
+
+- nom: "Centre hospitalier Émile Roux du Puy-en-Velay"
+  ville: "Le Puy-en-Velay"
+  departement: "43"
+  site_web: "http://www.ch-lepuy.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/43-le-puy-en-velay/a/hopital/erp/centre-hospitalier-emile-roux/"
+    - "https://www.auvergne-rhone-alpes.ars.sante.fr/groupement-hospitalier-de-territoire-ght-0"
+  remarque: "établissement support du GHT Haute-Loire"
+  a_verifier: true
+
+- nom: "Centre hospitalier Annecy Genevois"
+  ville: "Epagny Metz-Tessy"
+  departement: "74"
+  site_web: "https://www.ch-annecygenevois.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/74-epagny-metz-tessy/a/hopital/erp/centre-hospitalier-annecy-genevois-change/"
+    - "https://www.auvergne-rhone-alpes.ars.sante.fr/groupement-hospitalier-de-territoire-ght-0"
+  remarque: "établissement support du GHT Haute-Savoie Pays de Gex ; la fiche acceslibre indique https://www.ch-annecygenevois.fr/fr ; racine du domaine retenue"
+  a_verifier: true
+
+- nom: "Centre hospitalier Alpes-Léman"
+  ville: "Contamine-sur-Arve"
+  departement: "74"
+  site_web: "http://www.ch-alpes-leman.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/74-contamine-sur-arve/a/hopital/erp/centre-hospitalier-alpes-leman-chal/"
+    - "https://www.auvergne-rhone-alpes.ars.sante.fr/groupement-hospitalier-de-territoire-ght-0"
+  remarque: "établissement support du GHT Léman Mont-Blanc"
+  a_verifier: true
+
+- nom: "Centre hospitalier Pierre Oudot de Bourgoin-Jallieu"
+  ville: "Bourgoin-Jallieu"
+  departement: "38"
+  site_web: "https://www.ch-bourgoin.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/38-bourgoin-jallieu/a/hopital/erp/centre-hospitalier-pierre-oudot/"
+    - "https://www.auvergne-rhone-alpes.ars.sante.fr/groupement-hospitalier-de-territoire-ght-0"
+  remarque: "établissement support du GHT Nord Dauphiné"
+  a_verifier: true
+
+- nom: "Hôpital Nord-Ouest de Villefranche-sur-Saône"
+  ville: "Gleizé"
+  departement: "69"
+  site_web: "https://hno.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/69-gleize/a/hopital/erp/hopitaux-nord-ouest-villefranche-sur-saone/"
+    - "https://www.auvergne-rhone-alpes.ars.sante.fr/groupement-hospitalier-de-territoire-ght-0"
+  remarque: "établissement support du GHT Rhône Nord Beaujolais Dombes"
+  a_verifier: true
+
+- nom: "Centre hospitalier Métropole Savoie"
+  ville: "Chambéry"
+  departement: "73"
+  site_web: "https://www.ch-metropole-savoie.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/73-chambery/a/hopital/erp/pavillon-ste-helene-centre-hospitalier-metropole-savoie/"
+    - "https://www.auvergne-rhone-alpes.ars.sante.fr/groupement-hospitalier-de-territoire-ght-0"
+  remarque: "établissement support du GHT Savoie Belley"
+  a_verifier: true
+
+- nom: "Groupe hospitalier du Havre"
+  ville: "Le Havre"
+  departement: "76"
+  site_web: "http://www.ch-havre.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/76-le-havre/a/hopital/erp/hopital-flaubert-ghh/"
+    - "https://www.normandie.ars.sante.fr/groupements-hospitaliers-de-territoire-6"
+  remarque: "établissement support du GHT Estuaire de la Seine ; site relevé sur la fiche acceslibre de l'hôpital Flaubert (GHH)"
+  a_verifier: true
+
+- nom: "Centre hospitalier intercommunal Elbeuf-Louviers-Val de Reuil"
+  ville: "Saint-Aubin-lès-Elbeuf"
+  departement: "76"
+  site_web: "http://www.chi-elbeuf-louviers.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/76-saint-aubin-les-elbeuf/a/hopital/erp/centre-hospitalier-intercommunal-elbeuf-louviers-val-de-reuil/"
+    - "https://www.normandie.ars.sante.fr/groupements-hospitaliers-de-territoire-6"
+  remarque: "établissement support du GHT Val de Seine et plateaux de l'Eure"
+  a_verifier: true
+
+- nom: "Centre hospitalier intercommunal Alençon-Mamers"
+  ville: "Alençon"
+  departement: "61"
+  site_web: "http://www.ch-alencon.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/61-alencon/a/hopital/erp/centre-hospitalier-intercommunal-alencon-mamers/"
+    - "https://www.normandie.ars.sante.fr/groupements-hospitaliers-de-territoire-6"
+  remarque: "établissement support du GHT Orne-Perche-Saosnois"
+  a_verifier: true
+
+- nom: "Centre hospitalier d'Avranches-Granville"
+  ville: "Avranches"
+  departement: "50"
+  site_web: "http://www.ch-avranches-granville.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/50-avranches/a/hopital/erp/centre-hospitalier-davranches-granville/"
+    - "https://www.normandie.ars.sante.fr/groupements-hospitaliers-de-territoire-6"
+  remarque: "établissement support du GHT Groupe hospitalier Mont-Saint-Michel"
+  a_verifier: true
+
+- nom: "Centre hospitalier Mémorial de Saint-Lô"
+  ville: "Saint-Lô"
+  departement: "50"
+  site_web: "http://www.ch-stlo.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/50-saint-lo/a/hopital/erp/centre-hospitalier-memorial-de-saint-lo/"
+    - "https://www.normandie.ars.sante.fr/groupements-hospitaliers-de-territoire-6"
+  remarque: "établissement support du GHT Centre Manche"
+  a_verifier: true
+
+- nom: "Centre hospitalier public du Cotentin"
+  ville: "Cherbourg-en-Cotentin"
+  departement: "50"
+  site_web: "http://www.ch-cotentin.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/50-cherbourg-en-cotentin/a/hopital/erp/centre-hospitalier-public-du-cotentin-2/"
+    - "https://www.normandie.ars.sante.fr/groupements-hospitaliers-de-territoire-6"
+  remarque: "établissement support du GHT Cotentin"
   a_verifier: true

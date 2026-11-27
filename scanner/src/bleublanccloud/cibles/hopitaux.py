@@ -1,5 +1,6 @@
-"""Hôpitaux publics : centres hospitaliers universitaires (CHU) et régionaux, d'après la liste
-tenue à la main `referentiels/hopitaux.yaml` (une source par établissement), voir ADR-0006.
+"""Hôpitaux publics : centres hospitaliers universitaires (CHU) et régionaux, puis établissements
+supports des groupements hospitaliers de territoire (GHT), d'après la liste tenue à la main
+`referentiels/hopitaux.yaml` (une source par établissement), voir ADR-0006.
 
 La base FINESS compte des milliers d'établissements, sans site web : pour une première
 catégorie restreinte (une trentaine de CHU), une liste relue et sourcée est plus fiable.
@@ -36,9 +37,11 @@ def charger_hopitaux(chemin: Path = CHEMIN_HOPITAUX) -> list[Hopital]:
 
 
 def slug_hopital(hopital: Hopital) -> str:
-    """« CHU de Nantes » → chu-de-nantes ; préfixe « hopital- » si le nom ne dit pas CHU/CHR."""
+    """« CHU de Nantes » → chu-de-nantes ; préfixe « hopital- » si le nom ne dit pas déjà
+    CHU/CHR/hôpital (« Hôpital Nord-Ouest » → hopital-nord-ouest, sans doublon)."""
     slug = slugifier(hopital.nom)
-    if not any(mot in slug.split("-") for mot in ("chu", "chru", "chr", "hopitaux", "hospices")):
+    mots_hopital = ("chu", "chru", "chr", "hopital", "hopitaux", "hospices")
+    if not any(mot in slug.split("-") for mot in mots_hopital):
         slug = f"hopital-{slug}"
     return slug
 
