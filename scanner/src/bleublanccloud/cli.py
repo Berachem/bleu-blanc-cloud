@@ -295,8 +295,9 @@ def cibles_hopitaux(
         ),
     ] = False,
 ) -> None:
-    """CHU et CHR publics (liste sourcée referentiels/hopitaux.yaml, ADR-0006). Par défaut,
-    affiche un aperçu sans rien enregistrer ; « --enregistrer » est le point de contrôle."""
+    """CHU, CHR et supports de GHT publics (liste sourcée referentiels/hopitaux.yaml, ADR-0006).
+    Par défaut, affiche un aperçu sans rien enregistrer ; « --enregistrer » est le point de
+    contrôle."""
     from bleublanccloud.cibles.hopitaux import charger_hopitaux, construire_hopitaux
 
     parametres = obtenir_parametres()

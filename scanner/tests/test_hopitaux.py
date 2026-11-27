@@ -39,12 +39,24 @@ def test_liste_reelle_valide_et_sourcee() -> None:
     assert len({o.site_web for o in organisations}) == len(organisations)
 
 
+def test_supports_ght_sources_par_acceslibre_et_ars() -> None:
+    """Lot GHT : site web relevé sur une fiche publique, statut de support sur la page ARS."""
+    supports = [h for h in charger_hopitaux() if h.remarque and "support du GHT" in h.remarque]
+    assert len(supports) >= 15
+    for h in supports:
+        assert h.a_verifier
+        hotes = {s.host for s in h.sources}
+        assert "acceslibre.beta.gouv.fr" in hotes or "www.sante.fr" in hotes, h.nom
+        assert any(hote and hote.endswith(".ars.sante.fr") for hote in hotes), h.nom
+
+
 @pytest.mark.parametrize(
     ("nom", "attendu"),
     [
         ("CHU de Nantes", "chu-de-nantes"),
         ("Hospices Civils de Lyon", "hospices-civils-de-lyon"),
         ("Centre hospitalier d'Exempleville", "hopital-centre-hospitalier-d-exempleville"),
+        ("Hôpital Nord-Ouest d'Exempleville", "hopital-nord-ouest-d-exempleville"),
     ],
 )
 def test_slug_hopital(nom: str, attendu: str) -> None:

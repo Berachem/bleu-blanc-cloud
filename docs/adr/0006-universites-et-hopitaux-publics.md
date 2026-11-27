@@ -29,7 +29,10 @@ réseaux publics que le référentiel ne connaît pas encore).
    - hôpitaux : liste tenue à la main `referentiels/hopitaux.yaml` des CHU et CHR (une
      trentaine), chaque entrée avec au moins une source (site officiel) et `a_verifier`
      tant qu'elle n'est pas relue. La base FINESS (milliers d'établissements, sans site
-     web) reste une piste pour élargir aux autres centres hospitaliers.
+     web) reste une piste pour élargir aux autres centres hospitaliers. Premier élargissement
+     (lot GHT) : les **établissements supports de GHT**, seulement quand la page GHT de l'ARS
+     nomme l'établissement support et qu'une fiche publique (acceslibre, sante.fr ou ARS)
+     donne son site web ; le reste est laissé de côté tant qu'il n'est pas vérifiable.
 4. **Import en deux temps.** `bbcloud cibles universites` affiche d'abord un **aperçu**
    (rien n'est enregistré) ; `--enregistrer` ajoute les établissements à la base. La
    campagne hebdomadaire analysant toutes les organisations enregistrées, l'import est le
