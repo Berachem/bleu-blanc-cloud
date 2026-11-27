@@ -224,6 +224,66 @@ def scanner(
 # --------------------------------------------------------------------------- #
 
 
+@app_cibles.command("universites")
+def cibles_universites(
+    enregistrer: Annotated[
+        bool,
+        typer.Option(
+            "--enregistrer",
+            help="Ajoute les universités à la base (sinon : simple aperçu, rien n'est écrit).",
+        ),
+    ] = False,
+) -> None:
+    """Universités publiques (open data du ministère de l'Enseignement supérieur, ADR-0006).
+    Par défaut, affiche un aperçu sans rien enregistrer : la campagne hebdomadaire analysant
+    toutes les organisations enregistrées, « --enregistrer » est le point de contrôle."""
+    from bleublanccloud.cibles.universites import construire_universites, telecharger_universites
+
+    parametres = obtenir_parametres()
+
+    async def telecharger() -> Any:
+        async with httpx.AsyncClient(
+            headers={"User-Agent": parametres.user_agent}, timeout=120, follow_redirects=True
+        ) as client:
+            return await telecharger_universites(client)
+
+    try:
+        enregistrements = asyncio.run(telecharger())
+    except httpx.HTTPError as erreur:
+        console_erreur.print(f"[red]Données de l'enseignement supérieur injoignables : {erreur}[/]")
+        raise typer.Exit(code=1) from erreur
+    universites = construire_universites(enregistrements)
+    if not universites:
+        champs = sorted(enregistrements[0]) if enregistrements else []
+        console_erreur.print(
+            f"[red]Aucune université publique reconnue parmi {len(enregistrements)} "
+            f"établissement(s). Champs disponibles : {', '.join(champs)}[/]"
+        )
+        raise typer.Exit(code=1)
+    tableau = Table(title=f"{len(universites)} université(s) publique(s)")
+    for colonne in ("Nom", "Dép.", "Site"):
+        tableau.add_column(colonne)
+    for universite in universites:
+        tableau.add_row(universite.nom, universite.departement or "?", universite.site_web or "—")
+    console.print(tableau)
+    sans_site = sum(1 for u in universites if not u.site_web)
+    if not enregistrer:
+        console.print(
+            f"[yellow]Aperçu seulement ({sans_site} sans site) : relancez avec --enregistrer "
+            "pour les ajouter à la base (elles seront analysées par la prochaine campagne).[/]"
+        )
+        return
+    with Base(parametres.base_sqlite) as base:
+        regions = {code: parent for code, (_, parent) in base.territoires("departement").items()}
+        for universite in universites:
+            universite.region = regions.get(universite.departement or "")
+            base.enregistrer_organisation(universite)
+    console.print(
+        f"[green]✓[/] {len(universites)} université(s) enregistrée(s) ({sans_site} sans site). "
+        "Conseillé : « bbcloud campagne lancer --limite 10 » pour vérifier l'attribution."
+    )
+
+
 @app_cibles.command("importer")
 def cibles_importer(
     population_min: Annotated[

@@ -863,6 +863,18 @@
   remarque: "Opérateur de Minden (Allemagne) ; service de messagerie précis (filtrage ?) à identifier."
   a_verifier: true
 
+- id: renater
+  nom: RENATER (réseau national de l'enseignement et de la recherche)
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [2200]
+  categories: [hebergement, messagerie, dns]
+  sources:
+    - "https://fr.wikipedia.org/wiki/RENATER"
+    - "https://www.peeringdb.com/asn/2200"
+  remarque: "Groupement d'intérêt public depuis 1993 : réseau national des établissements d'enseignement supérieur et de recherche (ADR-0006)."
+  a_verifier: true
+
 - id: auto-hebergement-public
   nom: Auto-hébergement public (collectivité ou groupement public)
   pays_siege: FR
