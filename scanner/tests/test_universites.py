@@ -45,6 +45,18 @@ ENREGISTREMENTS = [
         "type_d_etablissement": "École d'ingénieurs",
         "secteur_d_etablissement": "public",
     },
+    {  # statut particulier mais université publique
+        "uo_lib": "Université Fictive Alpes",
+        "type_d_etablissement": "Établissement public expérimental",
+        "secteur_d_etablissement": "public",
+        "url": "https://www.univ-alpes.example/",
+    },
+    {
+        "uo_lib": "Exemple-Ville Université",
+        "type_d_etablissement": "Université",
+        "secteur_d_etablissement": "public",
+        "url": "https://www.evu.example/",
+    },
     {  # doublon
         "uo_lib": "Université de Exempleville",
         "type_d_etablissement": "Université",
@@ -56,7 +68,9 @@ ENREGISTREMENTS = [
 def test_seules_les_universites_publiques_sont_retenues() -> None:
     universites = construire_universites(ENREGISTREMENTS)
     assert [(u.slug, u.departement, u.site_web) for u in universites] == [
+        ("exemple-ville-universite", None, "https://www.evu.example/"),
         ("universite-de-exempleville", "75", "https://www.univ-exempleville.example"),
+        ("universite-fictive-alpes", None, "https://www.univ-alpes.example/"),
         ("universite-fictive-sud", "2A", "https://univ-sud.example/"),
     ]
     assert all(u.type == "universite" for u in universites)
@@ -95,7 +109,12 @@ def test_apercu_puis_enregistrement(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert resultat.exit_code == 0, resultat.output
     with Base(chemin) as base:
         par_slug = {o.organisation.slug: o.organisation for o in base.organisations()}
-    assert set(par_slug) == {"universite-de-exempleville", "universite-fictive-sud"}
+    assert set(par_slug) == {
+        "exemple-ville-universite",
+        "universite-de-exempleville",
+        "universite-fictive-alpes",
+        "universite-fictive-sud",
+    }
     assert par_slug["universite-de-exempleville"].region == "11"
     assert par_slug["universite-de-exempleville"].type == "universite"
 
