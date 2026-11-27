@@ -37,7 +37,9 @@ Categorie = Literal[
 MotifExclusion = Literal["inconnu", "indisponible", "sans_objet"]
 """Raison pour laquelle une catégorie n'est pas évaluée."""
 
-TypeOrganisation = Literal["commune", "departement", "region", "universite", "autre", "sur_demande"]
+TypeOrganisation = Literal[
+    "commune", "departement", "region", "universite", "hopital", "autre", "sur_demande"
+]
 """« sur_demande » : analyse demandée par un visiteur, hors observatoire (carte, classements)."""
 
 

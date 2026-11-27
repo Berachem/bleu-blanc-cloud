@@ -1,0 +1,277 @@
+# Centres hospitaliers universitaires (CHU) et régionaux publics : liste tenue à la main (ADR-0006).
+#
+# Chaque entrée a au moins une source (page du site officiel de l'établissement) ; tant que
+# l'auteur n'a pas relu l'entrée, « a_verifier: true ». L'import se fait en deux temps :
+# « bbcloud cibles hopitaux » (aperçu) puis « --enregistrer ».
+
+- nom: "Assistance Publique – Hôpitaux de Paris (AP-HP)"
+  ville: "Paris"
+  departement: "75"
+  site_web: "https://www.aphp.fr/"
+  sources:
+    - "https://www.aphp.fr/actualites/lap-hp-presente-au-salon-santexpo-2023-avec-les-32-chu-de-france-du-23-au-25-mai"
+  a_verifier: true
+
+- nom: "Assistance Publique – Hôpitaux de Marseille (AP-HM)"
+  ville: "Marseille"
+  departement: "13"
+  site_web: "https://fr.ap-hm.fr/"
+  sources:
+    - "https://fr.ap-hm.fr/service/hospidom-l-hospitalisation-a-domicile-de-l-ap-hm"
+  a_verifier: true
+
+- nom: "Hospices Civils de Lyon"
+  ville: "Lyon"
+  departement: "69"
+  site_web: "https://www.chu-lyon.fr/"
+  sources:
+    - "https://www.chu-lyon.fr/service-accueil-urgences-lyon-sud"
+  a_verifier: true
+
+- nom: "CHU de Bordeaux"
+  ville: "Bordeaux"
+  departement: "33"
+  site_web: "https://www.chu-bordeaux.fr/"
+  sources:
+    - "https://www.chu-bordeaux.fr/Patient-proches/Livret-accueil-CHU-2024-.pdf"
+  a_verifier: true
+
+- nom: "CHU de Toulouse"
+  ville: "Toulouse"
+  departement: "31"
+  site_web: "https://www.chu-toulouse.fr/"
+  sources:
+    - "https://www.chu-toulouse.fr/-qui-sommes-nous-"
+  a_verifier: true
+
+- nom: "CHU de Lille"
+  ville: "Lille"
+  departement: "59"
+  site_web: "https://www.chu-lille.fr/"
+  sources:
+    - "https://www.chu-lille.fr/wp-content/uploads/2022/03/LIVRET_ACCUEIL188X278_FD_V1.pdf"
+  a_verifier: true
+
+- nom: "CHU de Nantes"
+  ville: "Nantes"
+  departement: "44"
+  site_web: "https://www.chu-nantes.fr/"
+  sources:
+    - "https://www.chu-nantes.fr/types-d-hospitalisation-9014.kjsp?RF=TYPESHOSP&RH=HOSP"
+  a_verifier: true
+
+- nom: "Hôpitaux Universitaires de Strasbourg"
+  ville: "Strasbourg"
+  departement: "67"
+  site_web: "https://www.chru-strasbourg.fr/"
+  sources:
+    - "https://www.chru-strasbourg.fr/le-chu/"
+  a_verifier: true
+
+- nom: "CHU de Montpellier"
+  ville: "Montpellier"
+  departement: "34"
+  site_web: "https://www.chu-montpellier.fr/"
+  sources:
+    - "https://www.chu-montpellier.fr/fr/hotel-patient"
+  a_verifier: true
+
+- nom: "CHU de Nice"
+  ville: "Nice"
+  departement: "06"
+  site_web: "https://www.chu-nice.fr/"
+  sources:
+    - "https://www.chu-nice.fr/patients-visiteurs/sejour/"
+  a_verifier: true
+
+- nom: "CHU de Rennes"
+  ville: "Rennes"
+  departement: "35"
+  site_web: "https://www.chu-rennes.fr/"
+  sources:
+    - "https://www.chu-rennes.fr/le-nouveauchurennes/un-hopital-organise-a-partir-des-parcours-patients-360.html"
+  a_verifier: true
+
+- nom: "CHU Grenoble Alpes"
+  ville: "Grenoble"
+  departement: "38"
+  site_web: "https://www.chu-grenoble.fr/"
+  sources:
+    - "https://www.chu-grenoble.fr/sites/default/files/content/page/documents/chuga-livret_accueil_2022_web-planches2_compressed.pdf"
+  a_verifier: true
+
+- nom: "CHU de Saint-Étienne"
+  ville: "Saint-Étienne"
+  departement: "42"
+  site_web: "https://www.chu-st-etienne.fr/"
+  sources:
+    - "https://www.chu-st-etienne.fr/Patient_Usager/Maison_Des_Usagers/Accueil"
+  a_verifier: true
+
+- nom: "CHU de Clermont-Ferrand"
+  ville: "Clermont-Ferrand"
+  departement: "63"
+  site_web: "https://www.chu-clermontferrand.fr/"
+  sources:
+    - "https://www.chu-clermontferrand.fr/sites/default/files/media/2026-02/2026%2002%2016%20LAPH_web.pdf"
+  a_verifier: true
+
+- nom: "CHU Dijon Bourgogne"
+  ville: "Dijon"
+  departement: "21"
+  site_web: "https://www.chu-dijon.fr/"
+  sources:
+    - "https://www.chu-dijon.fr/sites/default/files/pdf/1467_LIVRET%20ACCUEIL%20DES%20INTERNES%20-%20DAM%202024.pdf"
+  a_verifier: true
+
+- nom: "CHU de Besançon"
+  ville: "Besançon"
+  departement: "25"
+  site_web: "https://www.chu-besancon.fr/"
+  sources:
+    - "https://www.chu-besancon.fr/fileadmin/user_upload/MEDIATHEQUE/Le_CHRU/livret-accueil-chu-besancon.pdf"
+  a_verifier: true
+
+- nom: "CHRU de Nancy"
+  ville: "Nancy"
+  departement: "54"
+  site_web: "https://www.chu-nancy.fr/"
+  sources:
+    - "https://acceslibre.beta.gouv.fr/app/54-nancy/a/hopital/erp/centre-hospitalier-regional-universitaire-chru-nancy/rpa_pdf"
+  remarque: "Adresse du site relevée dans la fiche acceslibre (d'anciennes pages utilisent chru-nancy.fr) : à confirmer."
+  a_verifier: true
+
+- nom: "CHU de Reims"
+  ville: "Reims"
+  departement: "51"
+  site_web: "https://www.chu-reims.fr/"
+  sources:
+    - "https://www.chu-reims.fr/offre-de-soins/prises-en-charge/service/accueil-des-urgences-adultes-et-service-daide-medicale-urgente-samu"
+  a_verifier: true
+
+- nom: "CHU Amiens-Picardie"
+  ville: "Amiens"
+  departement: "80"
+  site_web: "https://www.chu-amiens.fr/"
+  sources:
+    - "https://www.chu-amiens.fr/patients-et-visiteurs/vos-droits-et-vos-devoirs/"
+  a_verifier: true
+
+- nom: "CHU de Rouen"
+  ville: "Rouen"
+  departement: "76"
+  site_web: "https://www.chu-rouen.fr/"
+  sources:
+    - "https://www.chu-rouen.fr/connaitre-vos-droits/"
+  a_verifier: true
+
+- nom: "CHU Caen Normandie"
+  ville: "Caen"
+  departement: "14"
+  site_web: "https://www.chu-caen.fr/"
+  sources:
+    - "https://www.chu-caen.fr/en/"
+  a_verifier: true
+
+- nom: "CHU de Brest"
+  ville: "Brest"
+  departement: "29"
+  site_web: "https://www.chu-brest.fr/"
+  sources:
+    - "https://www.chu-brest.fr/patient-et-public"
+  a_verifier: true
+
+- nom: "CHU d'Angers"
+  ville: "Angers"
+  departement: "49"
+  site_web: "https://www.chu-angers.fr/"
+  sources:
+    - "https://www.chu-angers.fr/patients-residents"
+  a_verifier: true
+
+- nom: "CHRU de Tours"
+  ville: "Tours"
+  departement: "37"
+  site_web: "https://www.chu-tours.fr/"
+  sources:
+    - "https://www.chu-tours.fr/actualites/liste-des-actualites/une-annee-au-chru-de-tours-en-images-et-en-chiffres/"
+  a_verifier: true
+
+- nom: "CHU de Poitiers"
+  ville: "Poitiers"
+  departement: "86"
+  site_web: "https://www.chu-poitiers.fr/"
+  sources:
+    - "https://www.chu-poitiers.fr/en/accueil-et-integration-des-nouveaux-praticiens-au-chu-de-poitiers/"
+  a_verifier: true
+
+- nom: "CHU de Limoges"
+  ville: "Limoges"
+  departement: "87"
+  site_web: "https://www.chu-limoges.fr/"
+  sources:
+    - "https://www.chu-limoges.fr/ma-prise-en-charge/mon-parcours-de-soins/mon-admission/"
+  a_verifier: true
+
+- nom: "CHU de Nîmes"
+  ville: "Nîmes"
+  departement: "30"
+  site_web: "https://www.chu-nimes.fr/"
+  sources:
+    - "https://www.chu-nimes.fr/sites/default/files/media/2024-12/2023-chiffres_cles_chu_nimes.pdf"
+  a_verifier: true
+
+- nom: "CHU d'Orléans"
+  ville: "Orléans"
+  departement: "45"
+  site_web: "https://www.chu-orleans.fr/"
+  sources:
+    - "https://www.chu-orleans.fr/app/uploads/1/2025/10/LIVRET-ACCUEIL-CHU-ORLEANS.pdf"
+    - "https://www.lequotidiendumedecin.fr/jeunes-medecins/formation-initiale/le-chr-dorleans-fait-peau-neuve-et-se-transforme-en-chu"
+  remarque: "Ancien CHR devenu CHU en octobre 2023."
+  a_verifier: true
+
+- nom: "CHR Metz-Thionville"
+  ville: "Metz"
+  departement: "57"
+  site_web: "https://chr-metz-thionville.fr/"
+  sources:
+    - "https://chr-metz-thionville.fr/espace-patient/preparation-de-votre-hospitalisation/"
+  remarque: "Centre hospitalier régional (sans le « U ») : retenu car membre du réseau des CHR et CHU ; à confirmer."
+  a_verifier: true
+
+- nom: "CHU de La Réunion"
+  ville: "Saint-Denis"
+  departement: "974"
+  site_web: "https://www.chu-reunion.fr/"
+  sources:
+    - "https://www.chu-reunion.fr/wp-content/uploads/2018/10/Livret_nouvel_arrivant_CHU.pdf"
+  a_verifier: true
+
+- nom: "CHU de Martinique"
+  ville: "Fort-de-France"
+  departement: "972"
+  site_web: "https://www.chu-martinique.fr/"
+  sources:
+    - "https://www.chu-martinique.fr/wp-content/uploads/2025/02/Livret-daccueil-version-du-25-juillet-2023.pdf"
+  a_verifier: true
+
+- nom: "CHU de la Guadeloupe"
+  ville: "Les Abymes"
+  departement: "971"
+  site_web: "https://www.chu-guadeloupe.fr/"
+  sources:
+    - "https://aurehal.archives-ouvertes.fr/structure/read/id/505642"
+    - "https://www.has-sante.fr/fiche-etablissement/970100442"
+  remarque: "Adresse du site relevée dans le référentiel ROR (via HAL), une autre adresse (chu-guadeloupe.info) circule : à confirmer."
+  a_verifier: true
+
+- nom: "CHU de Guyane"
+  ville: "Cayenne"
+  departement: "973"
+  site_web: "https://chu-guyane.fr/"
+  sources:
+    - "https://chu-guyane.fr/cayenne/accueil"
+    - "https://www.vidal.fr/actualites/31738-la-guyane-desormais-dotee-d-un-centre-hospitalier-universitaire.html"
+  remarque: "CHU créé en 2025 à partir du centre hospitalier régional de Guyane."
+  a_verifier: true
