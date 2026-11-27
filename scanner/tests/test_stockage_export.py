@@ -85,7 +85,8 @@ def test_migrations_idempotentes(tmp_path: Path) -> None:
     with Base(chemin) as b:
         versions = [r["version"] for r in b.connexion.execute("SELECT version FROM migrations")]
     assert versions == [
-        "001_initial", "002_demandes", "003_photos", "004_recalcul", "005_contours"
+        "001_initial", "002_demandes", "003_photos", "004_recalcul", "005_contours",
+        "006_universites",
     ]  # fmt: skip
 
 

@@ -39,7 +39,7 @@ export interface MetaExport {
 export interface EntreeIndex {
   slug: string;
   nom: string;
-  type: "commune" | "departement" | "region" | "autre" | "sur_demande";
+  type: "commune" | "departement" | "region" | "universite" | "autre" | "sur_demande";
   departement: string | null;
   departement_nom: string | null;
   region: string | null;
@@ -59,7 +59,7 @@ export interface EntreeIndex {
 export interface OrganisationExport {
   slug: string;
   nom: string;
-  type: "commune" | "departement" | "region" | "autre" | "sur_demande";
+  type: "commune" | "departement" | "region" | "universite" | "autre" | "sur_demande";
   departement: string | null;
   departement_nom: string | null;
   region: string | null;

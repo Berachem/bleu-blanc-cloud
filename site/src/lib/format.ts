@@ -23,6 +23,7 @@ export const LIBELLES_TYPES: Record<string, string> = {
   commune: "Commune",
   departement: "Département",
   region: "Région",
+  universite: "Université",
   autre: "Autre organisation",
   sur_demande: "Analyse sur demande",
 };
