@@ -171,6 +171,20 @@ const description = `${org.nom} : note ${score.note}${mentionProvisoire}, score 
       </p>
     </div>
 
+    {
+      org.type === "hopital" && (
+        <div class="alerte">
+          <p>
+            <strong>Établissement de santé.</strong> Seuls le site web public et la messagerie
+            sont visibles de l'extérieur : les systèmes de soins et les données des patients ne
+            sont pas analysés. La note mesure une dépendance à des fournisseurs extra-européens,
+            elle ne dit rien du niveau de sécurité (souveraineté ≠ sécurité).
+            <a href="/dossiers/souverainete-securite/">En savoir plus</a>
+          </p>
+        </div>
+      )
+    }
+
     <div class="colonnes section apparition">
       <section aria-labelledby="titre-detail">
         <h2 id="titre-detail">Détail par catégorie</h2>

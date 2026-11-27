@@ -356,6 +356,7 @@ export function carteSituation(org: OrganisationExport): Situation | null {
     case "region":
       return situationRegion(org);
     case "universite":
+    case "hopital":
     case "autre":
       return org.departement ? situationDepartement(org) : situationRegion(org);
     default:

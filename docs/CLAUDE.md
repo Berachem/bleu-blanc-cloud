@@ -457,6 +457,7 @@ retraits(domaine, date_demande, motif)
 bbcloud referentiels maj                          # plages IP, base ASN, liste SecNumCloud
 bbcloud cibles importer --population-min 10000    # communes, départements, régions
 bbcloud cibles universites [--enregistrer]        # universités publiques (aperçu, puis ajout à la base ; ADR-0006)
+bbcloud cibles hopitaux [--enregistrer]           # CHU et CHR publics (liste sourcée hopitaux.yaml ; ADR-0006)
 bbcloud scanner berachem.dev                      # scan unitaire, affichage rich
 bbcloud scanner berachem.dev --json               # sortie JSON
 bbcloud campagne lancer [--limite N] [--dry-run]

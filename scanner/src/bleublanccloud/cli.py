@@ -284,6 +284,49 @@ def cibles_universites(
     )
 
 
+@app_cibles.command("hopitaux")
+def cibles_hopitaux(
+    enregistrer: Annotated[
+        bool,
+        typer.Option(
+            "--enregistrer",
+            help="Ajoute les hôpitaux à la base (sinon : simple aperçu, rien n'est écrit).",
+        ),
+    ] = False,
+) -> None:
+    """CHU et CHR publics (liste sourcée referentiels/hopitaux.yaml, ADR-0006). Par défaut,
+    affiche un aperçu sans rien enregistrer ; « --enregistrer » est le point de contrôle."""
+    from bleublanccloud.cibles.hopitaux import charger_hopitaux, construire_hopitaux
+
+    parametres = obtenir_parametres()
+    hopitaux = charger_hopitaux()
+    organisations = construire_hopitaux(hopitaux)
+    a_verifier = sum(1 for h in hopitaux if h.a_verifier)
+    tableau = Table(title=f"{len(organisations)} hôpital(aux) public(s)")
+    for colonne in ("Nom", "Dép.", "Site"):
+        tableau.add_column(colonne)
+    for organisation in organisations:
+        tableau.add_row(organisation.nom, organisation.departement or "?", organisation.site_web)
+    console.print(tableau)
+    if a_verifier:
+        console.print(f"[yellow]{a_verifier} entrée(s) encore marquée(s) « a_verifier ».[/]")
+    if not enregistrer:
+        console.print(
+            "[yellow]Aperçu seulement : relancez avec --enregistrer pour les ajouter à la base "
+            "(ils seront analysés par la prochaine campagne).[/]"
+        )
+        return
+    with Base(parametres.base_sqlite) as base:
+        regions = {code: parent for code, (_, parent) in base.territoires("departement").items()}
+        for organisation in organisations:
+            organisation.region = regions.get(organisation.departement or "")
+            base.enregistrer_organisation(organisation)
+    console.print(
+        f"[green]✓[/] {len(organisations)} hôpital(aux) enregistré(s). "
+        "Conseillé : « bbcloud campagne lancer --limite 10 » pour vérifier l'attribution."
+    )
+
+
 @app_cibles.command("importer")
 def cibles_importer(
     population_min: Annotated[

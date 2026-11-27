@@ -1,6 +1,6 @@
 # ADR-0006 : universités et hôpitaux publics dans l'observatoire
 
-- **Statut** : acceptée (universités : mises en œuvre ; hôpitaux : à venir)
+- **Statut** : acceptée (universités et hôpitaux : mis en œuvre)
 - **Date** : 2026-11-27
 
 ## Contexte
@@ -26,7 +26,10 @@ réseaux publics que le référentiel ne connaît pas encore).
 3. **Sources ouvertes et sourcées** :
    - universités : jeu de données « Principaux établissements d'enseignement supérieur »
      du ministère de l'Enseignement supérieur (Licence Ouverte 2.0) ;
-   - hôpitaux : base FINESS (data.gouv.fr), licence à vérifier avant usage.
+   - hôpitaux : liste tenue à la main `referentiels/hopitaux.yaml` des CHU et CHR (une
+     trentaine), chaque entrée avec au moins une source (site officiel) et `a_verifier`
+     tant qu'elle n'est pas relue. La base FINESS (milliers d'établissements, sans site
+     web) reste une piste pour élargir aux autres centres hospitaliers.
 4. **Import en deux temps.** `bbcloud cibles universites` affiche d'abord un **aperçu**
    (rien n'est enregistré) ; `--enregistrer` ajoute les établissements à la base. La
    campagne hebdomadaire analysant toutes les organisations enregistrées, l'import est le
@@ -50,4 +53,5 @@ réseaux publics que le référentiel ne connaît pas encore).
 - Une première campagne limitée (`bbcloud campagne lancer --limite 10`) est conseillée après
   l'import, pour vérifier l'attribution (RENATER, hébergeurs régionaux) avant la campagne
   complète.
-- Les hôpitaux feront l'objet d'une mise en œuvre séparée, avec l'avertissement santé.
+- Les hôpitaux (type « hopital ») s'importent avec `bbcloud cibles hopitaux` (aperçu, puis
+  `--enregistrer`, migration 007) ; leurs fiches affichent l'avertissement santé du point 6.
