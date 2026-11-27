@@ -280,7 +280,8 @@ def cibles_universites(
             base.enregistrer_organisation(universite)
     console.print(
         f"[green]✓[/] {len(universites)} université(s) enregistrée(s) ({sans_site} sans site). "
-        "Conseillé : « bbcloud campagne lancer --limite 10 » pour vérifier l'attribution."
+        "Conseillé : « bbcloud campagne lancer --type universite --limite 10 » "
+        "pour vérifier l'attribution."
     )
 
 
@@ -323,7 +324,8 @@ def cibles_hopitaux(
             base.enregistrer_organisation(organisation)
     console.print(
         f"[green]✓[/] {len(organisations)} hôpital(aux) enregistré(s). "
-        "Conseillé : « bbcloud campagne lancer --limite 10 » pour vérifier l'attribution."
+        "Conseillé : « bbcloud campagne lancer --type hopital --limite 10 » "
+        "pour vérifier l'attribution."
     )
 
 
@@ -500,6 +502,13 @@ def campagne_lancer(
     organisation: Annotated[
         str | None, typer.Option("--organisation", help="Slug d'une seule organisation.")
     ] = None,
+    type_organisation: Annotated[
+        str | None,
+        typer.Option(
+            "--type",
+            help="Seulement ce type d'organisation (commune, universite, hopital…).",
+        ),
+    ] = None,
     simulation: Annotated[
         bool, typer.Option("--dry-run", help="Liste les cibles sans aucune requête réseau.")
     ] = False,
@@ -508,6 +517,16 @@ def campagne_lancer(
     ] = False,
 ) -> None:
     """Scanne les organisations enregistrées et enregistre leurs scores."""
+    from typing import get_args
+
+    from bleublanccloud.modeles import TypeOrganisation
+
+    types_valides = get_args(TypeOrganisation)
+    if type_organisation is not None and type_organisation not in types_valides:
+        console_erreur.print(
+            f"[red]Type inconnu : {type_organisation} (attendu : {', '.join(types_valides)})[/]"
+        )
+        raise typer.Exit(code=2)
     from rich.progress import Progress
 
     from bleublanccloud.campagne import lancer_campagne, preparer_cibles
@@ -525,6 +544,8 @@ def campagne_lancer(
             candidates = [unique]
         else:
             candidates = base.organisations(avec_site=True)
+        if type_organisation is not None:
+            candidates = [c for c in candidates if c.organisation.type == type_organisation]
         cibles, ignorees = preparer_cibles(candidates, referentiels.est_retire, limite)
         console.print(f"{len(cibles)} organisation(s) à analyser, {len(ignorees)} ignorée(s).")
         for ligne in ignorees[:10]:
