@@ -69,9 +69,14 @@ def site_web(url: str) -> str | None:
 
 
 def est_universite_publique(enregistrement: Mapping[str, Any]) -> bool:
+    """Secteur public, et type « Université » ou nom qui contient « université » : certaines
+    grandes universités ont un autre statut (établissement public expérimental, grand
+    établissement), comme Grenoble Alpes, Côte d'Azur ou Lorraine."""
+    if "public" not in _cle(champ(enregistrement, "secteur")):
+        return False
     type_etablissement = _cle(champ(enregistrement, "type"))
-    secteur = _cle(champ(enregistrement, "secteur"))
-    return type_etablissement.startswith("universite") and "public" in secteur
+    nom = _cle(champ(enregistrement, "nom"))
+    return type_etablissement.startswith("universite") or "universite" in nom
 
 
 def construire_universites(enregistrements: Iterable[Mapping[str, Any]]) -> list[Organisation]:
@@ -82,7 +87,7 @@ def construire_universites(enregistrements: Iterable[Mapping[str, Any]]) -> list
         if not nom or not est_universite_publique(enregistrement):
             continue
         slug = slugifier(nom)
-        if not slug.startswith("universite"):
+        if "universite" not in slug:  # « Aix-Marseille Université » → aix-marseille-universite
             slug = f"universite-{slug}"
         organisations.setdefault(
             slug,
