@@ -1,0 +1,339 @@
+---
+// Explorer : fusion des anciennes pages Carte et Classements (redirigées ici, filtres
+// conservés). Carte des départements, liste filtrable des organisations, moyennes par type
+// et tableau des départements (équivalent accessible de la carte).
+import BadgeNote from "../composants/BadgeNote.astro";
+import BoutonAnalyse from "../composants/BoutonAnalyse.astro";
+import CarteFrance from "../composants/CarteFrance.astro";
+import EtiquetteType from "../composants/EtiquetteType.astro";
+import Base from "../mises-en-page/Base.astro";
+import { departements, observatoire } from "../lib/donnees";
+import { nombre } from "../lib/format";
+import { trierTypes } from "../lib/types-organisation";
+
+// Les analyses sur demande sont exclues (accessibles par la recherche)
+const entrees = [...observatoire()].sort((a, b) => b.score - a.score || a.nom.localeCompare(b.nom, "fr"));
+const listeDepartements = departements();
+const avecDonnees = listeDepartements
+  .filter((d) => d.nombre_organisations > 0)
+  .sort((a, b) => a.code.localeCompare(b.code, "fr", { numeric: true }));
+const types = trierTypes(entrees.map((e) => e.type));
+const parType = types.map((type) => {
+  const membres = entrees.filter((e) => e.type === type);
+  return {
+    type,
+    nombre: membres.length,
+    moyenne: membres.reduce((s, e) => s + e.score, 0) / membres.length,
+    notesA: membres.filter((e) => e.note === "A").length,
+  };
+});
+const sections = [
+  { id: "carte", libelle: "Carte" },
+  { id: "organisations", libelle: "Organisations" },
+  { id: "types", libelle: "Par type" },
+  { id: "departements", libelle: "Par département" },
+];
+---
+<Base
+  titre="Explorer l'observatoire"
+  description="Carte des départements, liste filtrable des organisations analysées (villes, départements, régions, hôpitaux, universités) et moyennes par type."
+>
+  <div class="conteneur">
+    <header class="entete-page">
+      <span class="surtitre">Observatoire</span>
+      <h1>Explorer</h1>
+      <p class="chapeau">
+        Un score élevé indique une empreinte numérique externe reposant sur des fournisseurs
+        européens. Un score faible signale une dépendance, pas une faute : consultez chaque fiche
+        pour les preuves et les pistes d'alternatives.
+      </p>
+      <nav class="sommaire-explorer" aria-label="Sections de la page">
+        <ul>
+          {sections.map((s) => <li><a href={`#${s.id}`}>{s.libelle}</a></li>)}
+        </ul>
+      </nav>
+    </header>
+
+    <section class="section section--ancre" id="carte" aria-labelledby="titre-carte">
+      <h2 id="titre-carte">Carte des départements</h2>
+      <p class="chapeau">
+        Chaque département est coloré selon la note moyenne des organisations analysées.
+        Sélectionnez un département pour afficher ses organisations ; les mêmes données sont dans
+        <a href="#departements">le tableau par département</a>.
+      </p>
+      <div class="cadre-carte cadre-carte--large">
+        <CarteFrance departements={listeDepartements} titre="Note moyenne par département (carte interactive)" />
+      </div>
+    </section>
+
+    <section class="section section--ancre" id="organisations" aria-labelledby="titre-organisations">
+      <h2 id="titre-organisations">Organisations</h2>
+      <form class="filtres filtres--explorer" data-filtres onsubmit="return false">
+        <fieldset class="filtre-types">
+          <legend>Type d'organisation</legend>
+          <label>
+            <input type="radio" name="type" value="" checked />
+            <span class="type-organisation type-organisation--pastille type--services">
+              <span>Tous</span> <span class="nombre-type">{entrees.length}</span>
+            </span>
+          </label>
+          {
+            parType.map((ligne) => (
+              <label>
+                <input type="radio" name="type" value={ligne.type} />
+                <EtiquetteType type={ligne.type} variante="pastille" pluriel>
+                  {" "}<span class="nombre-type">{ligne.nombre}</span>
+                </EtiquetteType>
+              </label>
+            ))
+          }
+        </fieldset>
+        <div class="filtres__champs">
+          <div class="champ">
+            <label for="filtre-texte">Nom, département ou domaine</label>
+            <input id="filtre-texte" type="search" name="texte" autocomplete="off" />
+          </div>
+          <div class="champ">
+            <label for="filtre-departement">Département</label>
+            <select id="filtre-departement" name="departement">
+              <option value="">Tous les départements</option>
+              {avecDonnees.map((d) => <option value={d.code}>{d.code} — {d.nom}</option>)}
+            </select>
+          </div>
+          <div class="champ seulement-mobile">
+            <label for="tri-mobile">Trier par</label>
+            <select id="tri-mobile" data-tri-mobile>
+              <option value="score:desc">Meilleur score d'abord</option>
+              <option value="score:asc">Score le plus faible d'abord</option>
+              <option value="nom:asc">Nom (A → Z)</option>
+              <option value="population:desc">Population décroissante</option>
+              <option value="departement:asc">Département (par numéro)</option>
+            </select>
+          </div>
+        </div>
+      </form>
+      <p class="texte-secondaire petit" aria-live="polite" data-nombre-resultats>
+        {entrees.length} organisation(s)
+      </p>
+      <div class="carte" data-aucun-resultat hidden>
+        <p>
+          Aucune organisation ne correspond. Votre site n'est pas encore analysé&nbsp;? Vous
+          pouvez demander son analyse passive.
+        </p>
+        <BoutonAnalyse />
+      </div>
+      <div class="tableau-defilant">
+        <table class="tableau-cartes" data-tableau>
+          <caption class="visuellement-cache">Organisations analysées, triées par score décroissant</caption>
+          <thead>
+            <tr>
+              <th scope="col" data-tri="nom"><button type="button">Organisation</button></th>
+              <th scope="col" data-tri="departement"><button type="button">Département</button></th>
+              <th scope="col">Type</th>
+              <th scope="col" class="nombre" data-tri="population"><button type="button">Population</button></th>
+              <th scope="col" class="nombre" data-tri="score" aria-sort="descending"><button type="button">Score</button></th>
+              <th scope="col">Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              entrees.map((e) => (
+                <tr
+                  data-nom={e.nom}
+                  data-texte={`${e.nom} ${e.departement_nom ?? ""} ${e.domaine}`.toLowerCase()}
+                  data-departement={e.departement ?? ""}
+                  data-type={e.type}
+                  data-population={e.population ?? 0}
+                  data-score={e.score}
+                >
+                  <td class="cellule-titre"><a href={`/organisation/${e.slug}/`}>{e.nom}</a></td>
+                  <td>{e.departement_nom ?? "—"}</td>
+                  <td><EtiquetteType type={e.type} /></td>
+                  <td class:list={["nombre", e.population == null && "masque-mobile"]}>
+                    {e.population != null ? nombre(e.population) : "—"}
+                    {e.population != null && <span class="suffixe-mobile">hab.</span>}
+                  </td>
+                  <td class="nombre">{e.score}/100</td>
+                  <td class="cellule-note"><BadgeNote note={e.note} provisoire={e.note_provisoire} /></td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section section--ancre" id="types" aria-labelledby="titre-types">
+      <h2 id="titre-types">Par type d'organisation</h2>
+      <div class="tableau-defilant">
+        <table class="tableau-cartes">
+          <thead>
+            <tr>
+              <th scope="col">Type</th>
+              <th scope="col" class="nombre">Organisations</th>
+              <th scope="col" class="nombre">Score moyen</th>
+              <th scope="col" class="nombre">Notées A</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              parType.map((ligne) => (
+                <tr>
+                  <td class="cellule-titre">
+                    <a href={`?type=${ligne.type}#organisations`} data-lien-type={ligne.type}>
+                      <EtiquetteType type={ligne.type} pluriel />
+                    </a>
+                  </td>
+                  <td class="nombre">
+                    {ligne.nombre}
+                    <span class="suffixe-mobile">{ligne.nombre > 1 ? "organisations" : "organisation"}</span>
+                  </td>
+                  <td class="nombre"><span class="suffixe-mobile">moyenne </span>{nombre(ligne.moyenne, 1)}/100</td>
+                  <td class="nombre">
+                    <span class="suffixe-mobile">notées A : </span>
+                    {ligne.nombre ? Math.round((100 * ligne.notesA) / ligne.nombre) : 0} %
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section section--ancre" id="departements" aria-labelledby="titre-departements">
+      <h2 id="titre-departements">Par département</h2>
+      <div class="tableau-defilant">
+        <table class="tableau-cartes">
+          <caption class="visuellement-cache">
+            Score moyen, note moyenne et nombre d'organisations analysées par département
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Code</th>
+              <th scope="col">Département</th>
+              <th scope="col" class="nombre">Organisations</th>
+              <th scope="col" class="nombre">Score moyen</th>
+              <th scope="col">Note moyenne</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              avecDonnees.map((d) => (
+                <tr>
+                  <td><span class="suffixe-mobile">Dép. </span>{d.code}</td>
+                  <td class="cellule-titre">
+                    <a href={`?departement=${encodeURIComponent(d.code)}#organisations`} data-lien-departement={d.code}>{d.nom}</a>
+                  </td>
+                  <td class="nombre">
+                    {d.nombre_organisations}
+                    <span class="suffixe-mobile">{d.nombre_organisations > 1 ? "organisations" : "organisation"}</span>
+                  </td>
+                  <td class="nombre">
+                    <span class="suffixe-mobile">moyenne </span>
+                    {d.score_moyen != null ? `${nombre(d.score_moyen, 1)}/100` : "—"}
+                  </td>
+                  <td class="cellule-note">{d.note_moyenne && <BadgeNote note={d.note_moyenne} />}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      {
+        listeDepartements.length > avecDonnees.length && (
+          <p class="texte-secondaire petit">
+            {listeDepartements.length - avecDonnees.length} département(s) sans organisation analysée pour le moment.
+          </p>
+        )
+      }
+    </section>
+  </div>
+</Base>
+
+<script>
+  // Relancé après chaque transition de page (View Transitions)
+  document.addEventListener("astro:page-load", () => {
+  const formulaire = document.querySelector<HTMLFormElement>("[data-filtres]");
+  const tableau = document.querySelector<HTMLTableElement>("[data-tableau]");
+  const compteur = document.querySelector<HTMLElement>("[data-nombre-resultats]");
+  if (formulaire && tableau && compteur) {
+    const corps = tableau.tBodies[0];
+    const lignes = [...corps.rows];
+    const parametres = new URLSearchParams(location.search);
+    const champDepartement = formulaire.elements.namedItem("departement") as HTMLSelectElement;
+    const champType = formulaire.elements.namedItem("type") as RadioNodeList;
+    const champTexte = formulaire.elements.namedItem("texte") as HTMLInputElement;
+    const aucunResultat = document.querySelector<HTMLElement>("[data-aucun-resultat]");
+    const appliquerParametres = (p: URLSearchParams) => {
+      champDepartement.value = p.get("departement") ?? "";
+      champType.value = p.get("type") ?? "";
+      if (champType.value !== (p.get("type") ?? "")) champType.value = "";
+      champTexte.value = p.get("texte") ?? "";
+    };
+    appliquerParametres(parametres);
+
+    const normaliser = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const filtrer = () => {
+      const texte = normaliser(champTexte.value.trim());
+      let visibles = 0;
+      for (const ligne of lignes) {
+        const visible =
+          (!champDepartement.value || ligne.dataset.departement === champDepartement.value) &&
+          (!champType.value || ligne.dataset.type === champType.value) &&
+          (!texte || normaliser(ligne.dataset.texte ?? "").includes(texte));
+        ligne.hidden = !visible;
+        if (visible) visibles += 1;
+      }
+      compteur.textContent = `${visibles} organisation(s)`;
+      if (aucunResultat) aucunResultat.hidden = visibles > 0;
+    };
+    formulaire.addEventListener("input", filtrer);
+    filtrer();
+
+    // Liens internes (tableaux par type et par département) : filtre sans rechargement
+    for (const lien of document.querySelectorAll<HTMLAnchorElement>("[data-lien-type], [data-lien-departement]")) {
+      lien.addEventListener("click", (evenement) => {
+        evenement.preventDefault();
+        const p = new URLSearchParams();
+        if (lien.dataset.lienType) p.set("type", lien.dataset.lienType);
+        if (lien.dataset.lienDepartement) p.set("departement", lien.dataset.lienDepartement);
+        appliquerParametres(p);
+        filtrer();
+        history.replaceState(null, "", `?${p}#organisations`);
+        document.getElementById("organisations")?.scrollIntoView();
+      });
+    }
+
+    // Tri commun aux en-têtes (écran large) et à la liste « Trier par » (mobile)
+    const triMobile = document.querySelector<HTMLSelectElement>("[data-tri-mobile]");
+    const trier = (cle: string, descendant: boolean) => {
+      for (const entete of tableau.querySelectorAll<HTMLElement>("th[data-tri]")) {
+        if (entete.dataset.tri === cle) entete.setAttribute("aria-sort", descendant ? "descending" : "ascending");
+        else entete.removeAttribute("aria-sort");
+      }
+      if (triMobile) {
+        const valeur = `${cle}:${descendant ? "desc" : "asc"}`;
+        triMobile.value = [...triMobile.options].some((o) => o.value === valeur) ? valeur : "";
+      }
+      const numerique = cle === "score" || cle === "population";
+      lignes.sort((a, b) => {
+        const va = a.dataset[cle] ?? "";
+        const vb = b.dataset[cle] ?? "";
+        const comparaison = numerique ? Number(va) - Number(vb) : va.localeCompare(vb, "fr", { numeric: true });
+        return descendant ? -comparaison : comparaison;
+      });
+      corps.append(...lignes);
+    };
+    for (const entete of tableau.querySelectorAll<HTMLTableCellElement>("th[data-tri]")) {
+      entete.querySelector("button")?.addEventListener("click", () => {
+        trier(entete.dataset.tri as string, entete.getAttribute("aria-sort") !== "descending");
+      });
+    }
+    triMobile?.addEventListener("change", () => {
+      const [cle, sens] = triMobile.value.split(":");
+      if (cle) trier(cle, sens === "desc");
+    });
+  }
+  });
+</script>

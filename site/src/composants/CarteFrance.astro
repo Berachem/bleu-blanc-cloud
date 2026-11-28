@@ -74,7 +74,7 @@ function classe(entite: Feature<Geometry, Proprietes>): string {
 function lien(entite: Feature<Geometry, Proprietes>): string | null {
   const donnees = parCode.get(entite.properties.code);
   return avecLiens && donnees && donnees.nombre_organisations > 0
-    ? `/classements/?departement=${encodeURIComponent(entite.properties.code)}`
+    ? `/explorer/?departement=${encodeURIComponent(entite.properties.code)}#organisations`
     : null;
 }
 const departementsMetropole = metropole.map((entite) => ({

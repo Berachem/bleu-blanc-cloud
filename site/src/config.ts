@@ -79,13 +79,12 @@ export const MENTIONS_LEGALES = {
   },
 } as const;
 
+// Quatre entrées : chaque entrée est active sur ses pages (préfixes de « actif »).
+// Carte et Classements sont fusionnées dans Explorer ; Comprendre réunit les dossiers et le
+// simulateur ; la méthodologie (adresse citée par le robot d'analyse) est rattachée à À propos.
 export const NAVIGATION = [
-  { href: "/", libelle: "Accueil" },
-  { href: "/carte/", libelle: "Carte" },
-  { href: "/classements/", libelle: "Classements" },
-  { href: "/simulateur/", libelle: "Simulateur" },
-  { href: "/alternatives/", libelle: "Alternatives" },
-  { href: "/methodologie/", libelle: "Méthodologie" },
-  { href: "/dossiers/", libelle: "Dossiers" },
-  { href: "/a-propos/", libelle: "À propos" },
+  { href: "/explorer/", libelle: "Explorer", actif: ["/explorer/", "/organisation/"] },
+  { href: "/alternatives/", libelle: "Alternatives", actif: ["/alternatives/"] },
+  { href: "/dossiers/", libelle: "Comprendre", actif: ["/dossiers/", "/simulateur/"] },
+  { href: "/a-propos/", libelle: "À propos", actif: ["/a-propos/", "/methodologie/", "/mcp/", "/badge/"] },
 ] as const;

@@ -9,6 +9,7 @@ import Base from "../mises-en-page/Base.astro";
 import { departements, meta, observatoire, organisations } from "../lib/donnees";
 import { URL_DEMANDE_FORMULAIRE } from "../lib/demandes";
 import { date, nombre } from "../lib/format";
+import { svgType, typeOrganisation } from "../lib/types-organisation";
 import { DATE_BUILD } from "../lib/version";
 import contenuDossiers from "../contenu/dossiers.json";
 
@@ -32,6 +33,15 @@ const infos = meta();
 // Bandeau d'actualité : disparaît au premier build après sa date d'expiration
 const actualite = contenuDossiers.actualite;
 const actualiteVisible = DATE_BUILD < new Date(`${actualite.expire_le}T23:59:59Z`);
+// Titre animé : « Nos services publics » puis chaque type, avec son pictogramme, sa couleur et
+// l'accord du pronom (ils / elles). Lecteurs d'écran : phrase fixe, animation masquée.
+const motsTitre = [
+  { texte: "services publics", classe: "type--services", icone: "", accord: "ils" },
+  ...["hopital", "commune", "universite", "region"].map((id) => {
+    const type = typeOrganisation(id);
+    return { texte: type.pluriel.toLowerCase(), classe: `type--${id}`, icone: svgType(id, 2.2), accord: type.accord };
+  }),
+];
 const chiffres = [
   { valeur: total, suffixe: "", libelle: "organisations analysées", alerte: false },
   { valeur: Math.round(moyenne), suffixe: "/100", libelle: "score moyen", alerte: false },
@@ -48,7 +58,7 @@ const chiffres = [
     )
   }
   <section class="accroche" aria-labelledby="titre-accueil">
-    <div class="accroche__decor" aria-hidden="true"><EtoilesEurope rayonEtoile={8} /></div>
+    <div class="accroche__decor" aria-hidden="true"><EtoilesEurope rayonEtoile={9} /></div>
     <div class="conteneur">
       <div class="accroche__texte">
         <p class="accroche__badge">
@@ -56,12 +66,16 @@ const chiffres = [
           Observatoire indépendant · open source
         </p>
         <h1 id="titre-accueil">
-          Nos services publics <span class="insecable">dépendent-ils</span> du <span class="degrade">cloud américain</span>&nbsp;?
+          <span class="visuellement-cache">Nos services publics dépendent-ils du cloud américain&nbsp;?</span>
+          <span class="titre-anime" aria-hidden="true" data-titre-anime={JSON.stringify(motsTitre)}>
+            <span class="titre-anime__ligne">Nos <span class="titre-anime__fenetre"><span class="titre-anime__mot type--services" data-mot>services publics</span></span></span>
+            <span class="insecable">dépendent-<span data-pronom>ils</span></span> du <span class="degrade">cloud américain</span>&nbsp;?
+          </span>
         </h1>
         <p class="accroche__intro">
-          Hébergement, messagerie, services tiers : Bleu Blanc Cloud mesure, de façon passive et
-          transparente, la dépendance numérique des collectivités françaises — et propose des
-          pistes européennes.
+          <strong>Villes, départements, régions, hôpitaux, universités</strong>&nbsp;: Bleu Blanc
+          Cloud mesure, de façon passive et transparente, leur dépendance numérique, et propose
+          des pistes européennes.
         </p>
         <Recherche variante="accroche" />
         <p class="accroche__analyse">
@@ -101,7 +115,7 @@ const chiffres = [
         <h2 id="titre-carte" class="apparition">La France, département par département</h2>
         <p class="chapeau apparition">
           Couleur : note moyenne des organisations analysées. Sélectionnez un département pour voir
-          ses organisations, ou consultez <a href="/carte/">la carte détaillée et son tableau</a>.
+          ses organisations, ou consultez <a href="/explorer/#carte">la carte détaillée et son tableau</a>.
         </p>
         <ul class="repartition apparition" aria-label="Répartition des notes">
           {
@@ -132,7 +146,7 @@ const chiffres = [
         {recents.map((entree) => <li class="apparition"><CarteOrganisation entree={entree} /></li>)}
       </ul>
       <p style="margin-top: 2rem">
-        <a class="bouton bouton--secondaire" href="/classements/">Toutes les organisations →</a>
+        <a class="bouton bouton--secondaire" href="/explorer/#organisations">Toutes les organisations →</a>
       </p>
     </section>
 
@@ -180,3 +194,33 @@ const chiffres = [
     </section>
   </div>
 </Base>
+
+<script>
+  // Mot qui tourne dans le titre (désactivé si l'utilisateur réduit les animations)
+  let minuterie: number | undefined;
+  document.addEventListener("astro:page-load", () => {
+    window.clearInterval(minuterie);
+    const titre = document.querySelector<HTMLElement>("[data-titre-anime]");
+    const mot = titre?.querySelector<HTMLElement>("[data-mot]");
+    const pronom = titre?.querySelector<HTMLElement>("[data-pronom]");
+    if (!titre || !mot || !pronom) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const mots = JSON.parse(titre.dataset.titreAnime ?? "[]") as {
+      texte: string; classe: string; icone: string; accord: string;
+    }[];
+    let indice = 0;
+    minuterie = window.setInterval(() => {
+      if (document.hidden) return;
+      indice = (indice + 1) % mots.length;
+      const suivant = mots[indice];
+      mot.classList.add("titre-anime__mot--sortie");
+      window.setTimeout(() => {
+        mot.className = `titre-anime__mot ${suivant.classe} titre-anime__mot--entree`;
+        mot.innerHTML = suivant.icone + suivant.texte;
+        pronom.textContent = suivant.accord;
+        void mot.offsetWidth; // relance la transition
+        mot.classList.remove("titre-anime__mot--entree");
+      }, 420);
+    }, 2600);
+  });
+</script>

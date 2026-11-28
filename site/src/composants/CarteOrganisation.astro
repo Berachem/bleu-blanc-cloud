@@ -1,21 +1,21 @@
 ---
 import BadgeNote from "./BadgeNote.astro";
 import JaugeNote from "./JaugeNote.astro";
-import { LIBELLES_TYPES } from "../lib/format";
+import EtiquetteType from "./EtiquetteType.astro";
 import type { EntreeIndex } from "../lib/types";
 interface Props {
   entree: EntreeIndex;
 }
 const { entree } = Astro.props;
 ---
-<a class="carte-organisation" href={`/organisation/${entree.slug}/`}>
+<a class:list={["carte-organisation", `type--${entree.type}`]} href={`/organisation/${entree.slug}/`}>
   <span class="carte-organisation__haut">
     <BadgeNote note={entree.note} taille="moyen" provisoire={entree.note_provisoire} />
     <JaugeNote score={entree.score} note={entree.note} />
   </span>
   <span class="carte-organisation__nom">{entree.nom}</span>
   <span class="texte-secondaire petit">
-    {LIBELLES_TYPES[entree.type]}
+    <EtiquetteType type={entree.type} />
     {entree.departement_nom && ` · ${entree.departement_nom}`} · <span class="mono">{entree.domaine}</span>
   </span>
 </a>

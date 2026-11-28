@@ -114,7 +114,13 @@ const texteImage = image?.texte ?? IMAGE_PARTAGE.texte;
                 <li>
                   <a
                     href={entree.href}
-                    aria-current={cheminCourant === entree.href ? "page" : undefined}
+                    aria-current={
+                      cheminCourant === entree.href
+                        ? "page"
+                        : entree.actif.some((prefixe) => cheminCourant.startsWith(prefixe))
+                          ? "true"
+                          : undefined
+                    }
                   >
                     {entree.libelle}
                   </a>

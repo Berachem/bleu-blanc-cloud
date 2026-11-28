@@ -1,6 +1,6 @@
 ---
 // Recherche instantanée : l'index léger (/recherche.json) n'est chargé qu'à la première saisie.
-// C'est aussi un formulaire : Entrée (ou « Rechercher ») ouvre les classements filtrés,
+// C'est aussi un formulaire : Entrée (ou « Rechercher ») ouvre la liste filtrée (Explorer),
 // y compris sans JavaScript.
 // Variantes : « accroche » (page d'accueil : champ en pilule et bouton, sans libellé visible)
 // et « entete » (panneau ouvert par la loupe de l'en-tête).
@@ -15,7 +15,7 @@ const avecAide = variante !== "accroche";
 <form
   class:list={["recherche", `recherche--${variante}`]}
   role="search"
-  action="/classements/"
+  action="/explorer/"
   method="get"
   data-recherche
   data-url-demande={URL_DEMANDE_FORMULAIRE}
@@ -31,7 +31,7 @@ const avecAide = variante !== "accroche";
         type="search"
         autocomplete="off"
         spellcheck="false"
-        placeholder="Commune, département, domaine…"
+        placeholder="Une ville, un hôpital, une université…"
         aria-describedby={avecAide ? `${identifiant}-aide` : undefined}
         aria-controls={`${identifiant}-resultats`}
       />
@@ -43,7 +43,7 @@ const avecAide = variante !== "accroche";
     {
       avecAide && (
         <span id={`${identifiant}-aide`} class="texte-secondaire petit">
-          Ou consultez <a href="/classements/">la liste complète</a>.
+          Ou consultez <a href="/explorer/#organisations">la liste complète</a>.
         </span>
       )
     }
@@ -52,6 +52,7 @@ const avecAide = variante !== "accroche";
 </form>
 
 <script>
+  import { svgType, typeOrganisation } from "../lib/types-organisation";
   type Ligne = [
     slug: string,
     nom: string,
@@ -60,6 +61,7 @@ const avecAide = variante !== "accroche";
     score: number,
     domaine: string,
     provisoire: 0 | 1,
+    type: string,
   ];
   const normaliser = (texte: string) =>
     texte.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -104,7 +106,7 @@ const avecAide = variante !== "accroche";
         liste.append(vide);
         return;
       }
-      for (const [slug, nom, departement, note, score, , provisoire] of trouvees) {
+      for (const [slug, nom, departement, note, score, , provisoire, type] of trouvees) {
         const element = document.createElement("li");
         const lien = document.createElement("a");
         lien.href = `/organisation/${slug}/`;
@@ -114,7 +116,12 @@ const avecAide = variante !== "accroche";
         badge.setAttribute("aria-hidden", "true");
         const texte = document.createElement("span");
         texte.textContent = `${nom}${departement ? ` · ${departement}` : ""} — ${score}/100 (note ${note}${provisoire ? " provisoire" : ""})`;
-        lien.append(badge, texte);
+        // Type avec sa direction artistique (pictogramme, couleur, libellé)
+        const etiquette = document.createElement("span");
+        etiquette.className = `type-organisation type--${type} recherche__type`;
+        etiquette.innerHTML = svgType(type, 2);
+        etiquette.append(typeOrganisation(type).libelle);
+        lien.append(badge, texte, etiquette);
         element.append(lien);
         liste.append(element);
       }

@@ -79,6 +79,14 @@
   --ombre-forte: 0 1px 0 rgb(255 255 255 / 6%) inset, 0 40px 80px -30px rgb(0 0 0 / 80%);
   --halo-bleu: rgb(0 35 149 / 55%);
   --halo-rouge: rgb(237 41 57 / 32%);
+  /* Types d'organisation (contraste ≥ 4,5:1 sur les surfaces sombres) */
+  --type-services: #7ea2ff;
+  --type-commune: #5fd39a;
+  --type-departement: #a9b6cf;
+  --type-region: #4fd1e0;
+  --type-hopital: #f783ac;
+  --type-universite: #a894ff;
+  --type-neutre: #b0b8dc;
 }
 
 [data-theme="light"] {
@@ -107,6 +115,14 @@
   --ombre-forte: 0 40px 80px -30px rgb(14 19 48 / 32%);
   --halo-bleu: rgb(0 35 149 / 18%);
   --halo-rouge: rgb(237 41 57 / 12%);
+  /* Types d'organisation (contraste ≥ 4,5:1 sur blanc) */
+  --type-services: #002395;
+  --type-commune: #1f7a4d;
+  --type-departement: #4b5b76;
+  --type-region: #0b7285;
+  --type-hopital: #c2255c;
+  --type-universite: #6741d9;
+  --type-neutre: #4b5378;
 }
 
 /* ---------------------------------------------------------------- Base */
@@ -405,6 +421,12 @@ th {
 .navigation a[aria-current="page"] {
   color: #fff;
   background: var(--bleu-france);
+}
+/* Sous-page d'une entrée (fiche dans Explorer, simulateur dans Comprendre…) */
+.navigation a[aria-current="true"] {
+  color: var(--texte);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--bordure-forte);
 }
 .bascule-theme {
   display: inline-grid;
@@ -960,6 +982,88 @@ html:has(.fenetre[open]) {
   }
 }
 
+/* ---------------------------------------------------- Types d'organisation */
+
+/* Chaque type porte sa couleur (--c) ; la couleur n'est jamais seule : icône + libellé. */
+.type--commune { --c: var(--type-commune); }
+.type--departement { --c: var(--type-departement); }
+.type--region { --c: var(--type-region); }
+.type--hopital { --c: var(--type-hopital); }
+.type--universite { --c: var(--type-universite); }
+.type--autre,
+.type--sur_demande { --c: var(--type-neutre); }
+.type--services { --c: var(--type-services); }
+
+.type-organisation {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  color: var(--c, var(--texte-secondaire));
+  font-weight: 700;
+  line-height: 1.25;
+  vertical-align: middle;
+}
+.icone-type {
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+}
+.type-organisation--pastille {
+  padding: 0.3rem 0.75rem 0.3rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--c) 38%, var(--bordure));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c) 9%, var(--surface));
+  color: var(--texte);
+  font-size: 0.9rem;
+}
+.type-organisation--pastille .icone-type {
+  color: var(--c);
+}
+
+/* Filtre par type : pastilles à cocher (boutons radio), une couleur par type */
+.filtre-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.filtre-types legend {
+  margin-bottom: 0.45rem;
+  padding: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.filtre-types label {
+  cursor: pointer;
+}
+.filtre-types input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.filtre-types .type-organisation--pastille {
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.filtre-types label:hover .type-organisation--pastille {
+  transform: translateY(-1px);
+}
+.filtre-types input:checked + .type-organisation--pastille {
+  border-color: var(--c);
+  background: color-mix(in srgb, var(--c) 22%, var(--surface));
+  box-shadow: inset 0 0 0 1px var(--c);
+}
+.filtre-types input:focus-visible + .type-organisation--pastille {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.filtre-types .nombre-type {
+  color: var(--texte-secondaire);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------------------------------------------------------------- Accueil */
 
 /* Accroche centrée : badge, titre, introduction, recherche en pilule, lien d'analyse ;
@@ -981,13 +1085,14 @@ html:has(.fenetre[open]) {
   overflow: hidden;
   pointer-events: none;
 }
+/* Cercle d'étoiles sur le côté droit (le titre animé reste seul au centre) */
 .accroche .etoiles {
   position: absolute;
-  left: 50%;
-  top: 44%;
-  width: min(900px, 150vw);
-  transform: translate(-50%, -50%);
-  opacity: 0.5;
+  right: max(-15rem, calc(50vw - 52rem));
+  top: 50%;
+  width: clamp(22rem, 32vw, 34rem);
+  transform: translateY(-50%);
+  opacity: 0.55;
 }
 [data-theme="dark"] .accroche .etoiles {
   opacity: 0.3;
@@ -1055,6 +1160,46 @@ html:has(.fenetre[open]) {
 .insecable {
   white-space: nowrap;
 }
+/* Titre animé : « Nos » + mot qui tourne (icône et couleur du type) sur sa propre ligne */
+/* Flex aligné sur la ligne de base : le mot reste au niveau de « Nos » malgré la fenêtre
+   masquée (un inline-block masqué s'alignerait sur son bord bas). */
+.titre-anime__ligne {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.25em;
+  white-space: nowrap;
+}
+.titre-anime__fenetre {
+  display: flex;
+  overflow: hidden;
+  padding: 0.04em 0 0.12em;
+}
+.titre-anime__mot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  color: var(--c);
+  transition: transform 0.42s var(--adouci), opacity 0.42s ease;
+}
+.titre-anime__mot .icone-type {
+  width: 0.78em;
+  height: 0.78em;
+}
+.titre-anime__mot--sortie {
+  transform: translateY(-70%);
+  opacity: 0;
+}
+.titre-anime__mot--entree {
+  transform: translateY(70%);
+  opacity: 0;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .titre-anime__mot {
+    transition: none;
+  }
+}
 .accroche__analyse {
   margin: 1.1rem 0 0;
   color: var(--texte-secondaire);
@@ -1107,8 +1252,11 @@ html:has(.fenetre[open]) {
     margin-bottom: 1.5rem;
   }
   .accroche .etoiles {
-    top: 36%;
-    opacity: 0.38;
+    top: 0;
+    right: -7rem;
+    width: 15rem;
+    transform: none;
+    opacity: 0.3;
   }
   [data-theme="dark"] .accroche .etoiles {
     opacity: 0.22;
@@ -1399,6 +1547,15 @@ html:has(.fenetre[open]) {
 }
 .carte-organisation:hover {
   color: var(--texte);
+}
+/* Liseré de la couleur du type en haut de la carte */
+.carte-organisation::before {
+  content: "";
+  position: absolute;
+  inset: 0 1.5rem auto;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--c, transparent);
 }
 .carte-organisation__haut {
   display: flex;
@@ -1778,9 +1935,90 @@ select:focus {
   box-shadow: var(--ombre);
 }
 
+/* Explorer : pastilles de type au-dessus, champs en grille dessous */
+.filtres--explorer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+.filtres__champs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+/* Comprendre : le simulateur mis en avant comme un dossier interactif */
+.carte-simulateur {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0.5rem 0 2.5rem;
+  padding: 1.6rem;
+  color: var(--texte);
+  text-decoration: none;
+}
+.carte-simulateur strong {
+  font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem);
+}
+.carte-simulateur .lien-fleche {
+  color: var(--lien);
+  font-weight: 700;
+}
+.titre-dossiers {
+  margin: 0 0 1rem;
+}
+/* À propos : accès direct à la méthodologie et aux pages liées */
+.liens-a-propos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.liens-a-propos a {
+  display: inline-block;
+  padding: 0.4rem 0.95rem;
+  border: 1px solid var(--bordure-forte);
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Sommaire de la page Explorer (ancres) */
+.sommaire-explorer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sommaire-explorer a {
+  display: inline-block;
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--bordure-forte);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--texte);
+  font-weight: 700;
+  text-decoration: none;
+}
+.sommaire-explorer a:hover {
+  background: var(--surface-2);
+}
+.section--ancre {
+  scroll-margin-top: 5.5rem;
+}
+
 .recherche {
   position: relative;
   max-width: 42rem;
+}
+.recherche__type {
+  margin-left: auto;
+  padding-left: 0.6rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 .recherche .champ {
   padding: 0.6rem;

@@ -377,6 +377,29 @@ def profils(referentiels: Referentiels) -> list[ProfilDemo]:
             ],
             info(bureau_enregistrement="Bureau fictif"),
         ),
+        ProfilDemo(
+            "CHU fictif d'Exempleville", "hopital", "33", None, "chu-exempleville.example",
+            [
+                _hebergement("ovhcloud", "A", "198.51.100.160 (AS16276 OVH SAS)"),
+                _serveur("messagerie", "mx", "chu-exempleville.mail.protection.outlook.com", "microsoft", "D"),
+                _serveur("dns", "ns", "dns200.ovh.net", "ovhcloud", "A"),
+                s("microsoft-365", "MS=ms11223344"),
+                s("matomo-auto-heberge", "https://stats.chu-exempleville.example/matomo.js"),
+                *_informatifs("v=spf1 include:spf.protection.outlook.com -all", "v=DMARC1; p=quarantine"),
+            ],
+            info(bureau_enregistrement="Bureau fictif"),
+        ),
+        ProfilDemo(
+            "Université fictive de Démoville", "universite", "59", None, "univ-demoville.example",
+            [
+                _hebergement("renater", "A", "198.51.100.170 (AS2200 Renater)"),
+                _serveur("messagerie", "mx", "mx.univ-demoville.example", "renater", "A"),
+                _serveur("dns", "ns", "ns1.univ-demoville.example", "renater", "A"),
+                s("youtube", "https://www.youtube.com/embed/demo4"),
+                *_informatifs("v=spf1 mx -all", "v=DMARC1; p=reject"),
+            ],
+            info(bureau_enregistrement="Bureau fictif"),
+        ),
         # Analyse sur demande (ticket Codeberg) : visible par lien et recherche, hors carte,
         # classements et statistiques de l'observatoire.
         ProfilDemo(

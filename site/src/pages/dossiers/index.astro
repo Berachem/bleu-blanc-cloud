@@ -3,13 +3,26 @@ import Base from "../../mises-en-page/Base.astro";
 import contenu from "../../contenu/dossiers.json";
 import { date } from "../../lib/format";
 ---
-<Base titre="Dossiers" description="Dossiers pédagogiques de Bleu Blanc Cloud pour les élus et les agents : souveraineté numérique, sécurité, dépendances.">
+<Base titre="Comprendre" description="Dossiers pédagogiques et simulateur « Et si… ? » de Bleu Blanc Cloud pour les élus et les agents : souveraineté numérique, sécurité, dépendances.">
   <div class="conteneur">
     <header class="entete-page">
-      <span class="surtitre">Dossiers</span>
-      <h1>Dossiers</h1>
-      <p class="chapeau">Des explications simples pour les élus et les agents, à partir des données de l'observatoire.</p>
+      <span class="surtitre">Comprendre</span>
+      <h1>Comprendre</h1>
+      <p class="chapeau">Des explications simples et un simulateur pour les élus et les agents, à partir des données de l'observatoire.</p>
     </header>
+    <section aria-labelledby="titre-simulateur">
+      <a class="carte carte--survol carte-simulateur" href="/simulateur/">
+        <span class="surtitre">Dossier interactif</span>
+        <strong id="titre-simulateur">Simulateur « Et si… ? »</strong>
+        <span class="texte-secondaire">
+          Si un fournisseur tombe en panne ou coupe l'accès (Cloud Act), combien de services
+          publics sont touchés, et sur quels services&nbsp;? Simulation à partir des dépendances
+          détectées, en totaux seulement.
+        </span>
+        <span class="lien-fleche">Lancer une simulation&nbsp;→</span>
+      </a>
+    </section>
+    <h2 class="titre-dossiers">Dossiers</h2>
     <ul class="grille-prereglages">
       {
         contenu.dossiers.map((d) => (
