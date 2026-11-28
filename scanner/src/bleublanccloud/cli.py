@@ -702,6 +702,12 @@ def exporter(
 # --------------------------------------------------------------------------- #
 
 
+def _editeurs_ia(stats: Any) -> str:
+    """« openai : 3, mistral-ai : 1 » ou « aucun »."""
+    par_editeur = sorted(stats.domaines_verifies_ia_par_editeur.items(), key=lambda e: -e[1])
+    return ", ".join(f"{editeur} : {nombre}" for editeur, nombre in par_editeur) or "aucun"
+
+
 def _pourcentage(valeur: float) -> str:
     return f"{valeur:.1f}".replace(".", ",") + " %"
 
@@ -1129,9 +1135,10 @@ def afficher_statistiques(stats: Statistiques) -> None:
         f"[bold]Assistants IA repérés sur les sites[/] : {ia.nombre} organisation(s) "
         f"({_pourcentage(100 * ia.nombre / total)}), dont "
         f"{stats.assistants_ia_cloud_act.nombre} chez un fournisseur soumis au Cloud Act ; "
-        "domaines vérifiés auprès d'OpenAI : "
-        f"{stats.domaines_verifies_openai.nombre}. Seul l'usage visible de l'extérieur est "
-        "compté (l'IA utilisée en interne ne laisse pas de trace publique)."
+        "domaines vérifiés auprès d'un éditeur d'IA : "
+        f"{stats.domaines_verifies_ia.nombre} ({_editeurs_ia(stats)}). "
+        "Seul l'usage visible de l'extérieur est compté "
+        "(l'IA utilisée en interne ne laisse pas de trace publique)."
     )
     for outil, nombre in sorted(stats.assistants_ia_par_outil.items(), key=lambda e: -e[1]):
         console.print(f"  · {outil} : {nombre}")

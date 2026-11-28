@@ -380,7 +380,8 @@ def test_usage_ia_compte_les_organisations_sans_toucher_aux_notes() -> None:
         *souveraine(),
         informatif("ia-botpress", "assistant_ia", "inconnu"),
         informatif("ia-botnation", "assistant_ia", "inconnu"),
-        informatif("ia-openai-verification-domaine", "verification_domaine", "D"),
+        informatif("ia-verification-openai", "verification_domaine", "D"),
+        informatif("ia-verification-mistral", "verification_domaine", "A"),
     ]
     stats = calculer_statistiques(
         [
@@ -392,7 +393,11 @@ def test_usage_ia_compte_les_organisations_sans_toucher_aux_notes() -> None:
     )
     assert stats.assistants_ia.nombre == 2
     assert stats.assistants_ia_cloud_act.nombre == 1
-    assert stats.domaines_verifies_openai.nombre == 1
+    assert stats.domaines_verifies_ia.nombre == 1  # une organisation, deux éditeurs
+    assert stats.domaines_verifies_ia_par_editeur == {
+        "ia-verification-openai": 1,
+        "ia-verification-mistral": 1,
+    }
     assert stats.assistants_ia_par_outil == {
         "Dialogflow Messenger (Google)": 1,
         "Botpress": 1,
