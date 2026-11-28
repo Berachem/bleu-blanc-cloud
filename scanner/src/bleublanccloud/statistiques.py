@@ -149,7 +149,8 @@ class Statistiques:
     assistants_ia: Compte = field(default_factory=Compte)
     assistants_ia_cloud_act: Compte = field(default_factory=Compte)
     assistants_ia_par_outil: dict[str, int] = field(default_factory=dict)
-    domaines_verifies_openai: Compte = field(default_factory=Compte)
+    domaines_verifies_ia: Compte = field(default_factory=Compte)
+    domaines_verifies_ia_par_editeur: dict[str, int] = field(default_factory=dict)
 
     def en_dict(self) -> dict[str, Any]:
         """Représentation JSON (parts provisoires et moyennes calculées incluses)."""
@@ -213,9 +214,15 @@ class Statistiques:
                 "par_outil": dict(
                     sorted(self.assistants_ia_par_outil.items(), key=lambda e: (-e[1], e[0]))
                 ),
-                "domaines_verifies_openai": {
-                    **compte(self.domaines_verifies_openai),
-                    "part": round(100 * self.domaines_verifies_openai.nombre / total, 1),
+                "domaines_verifies": {
+                    **compte(self.domaines_verifies_ia),
+                    "part": round(100 * self.domaines_verifies_ia.nombre / total, 1),
+                    "par_editeur": dict(
+                        sorted(
+                            self.domaines_verifies_ia_par_editeur.items(),
+                            key=lambda e: (-e[1], e[0]),
+                        )
+                    ),
                 },
             },
         }
@@ -343,7 +350,7 @@ def calculer_statistiques(
     return stats
 
 
-REGLE_VERIFICATION_OPENAI: Final = "ia-openai-verification-domaine"
+PREFIXE_VERIFICATION_IA: Final = "ia-verification-"
 
 
 def _compter_usage_ia(
@@ -362,8 +369,16 @@ def _compter_usage_ia(
     for outil in outils:
         nom = noms_regles.get(outil, outil).removeprefix("Assistant IA : ")
         stats.assistants_ia_par_outil[nom] = stats.assistants_ia_par_outil.get(nom, 0) + 1
-    if any(c.preuve.get("regle") == REGLE_VERIFICATION_OPENAI for c in constats):
-        stats.domaines_verifies_openai.ajouter(provisoire)
+    editeurs = {
+        c.fournisseur_id or str(c.preuve["regle"])
+        for c in constats
+        if str(c.preuve.get("regle", "")).startswith(PREFIXE_VERIFICATION_IA)
+    }
+    if editeurs:
+        stats.domaines_verifies_ia.ajouter(provisoire)
+    for editeur in editeurs:
+        par_editeur = stats.domaines_verifies_ia_par_editeur
+        par_editeur[editeur] = par_editeur.get(editeur, 0) + 1
 
 
 def entrees_observatoire(base: Base) -> list[EntreeStatistique]:

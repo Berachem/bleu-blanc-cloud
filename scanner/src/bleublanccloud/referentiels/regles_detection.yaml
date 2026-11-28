@@ -602,11 +602,12 @@
   exemples:
     - {type: script, valeur: "https://cbassets.botnation.ai/js/widget.js"}
 
-# Vérification de domaine auprès d'OpenAI (enregistrement TXT public) : indique que le
-# domaine a été validé pour un espace ChatGPT (Business, Enterprise, Edu), l'authentification
-# unique ou la publication de GPT. Ce n'est qu'un indice : il ne dit rien de l'usage réel.
+# Vérifications de domaine auprès d'éditeurs d'IA (enregistrements TXT publics) : le
+# domaine a été validé pour un espace d'entreprise (ChatGPT, Claude, Le Chat),
+# l'authentification unique ou la connexion par adresse professionnelle. Ce n'est qu'un
+# indice : il ne dit rien de l'usage réel. Identifiants préfixés « ia-verification- ».
 
-- id: ia-openai-verification-domaine
+- id: ia-verification-openai
   nom: "Domaine vérifié auprès d'OpenAI (ChatGPT)"
   categorie: informatif
   type_service: verification_domaine
@@ -616,6 +617,28 @@
     txt: ["^openai-domain-verification="]
   exemples:
     - {type: txt, valeur: "openai-domain-verification=dv-AbCdEf123456"}
+
+- id: ia-verification-anthropic
+  nom: "Domaine vérifié auprès d'Anthropic (Claude)"
+  categorie: informatif
+  type_service: verification_domaine
+  fournisseur_id: anthropic
+  description: "Enregistrement TXT de vérification de domaine Anthropic (espaces Claude Team ou Enterprise, SSO). Source : https://support.claude.com/en/articles/13132885-setting-up-single-sign-on-sso-for-claude-and-claude-console"
+  motifs:
+    txt: ["^anthropic-domain-verification-"]
+  exemples:
+    - {type: txt, valeur: "anthropic-domain-verification-abc123=def456"}
+
+- id: ia-verification-mistral
+  nom: "Domaine vérifié auprès de Mistral AI (Le Chat)"
+  categorie: informatif
+  type_service: verification_domaine
+  fournisseur_id: mistral-ai
+  description: "Enregistrement TXT de vérification de domaine Mistral AI (Le Chat Team ou Enterprise, SSO). Source : https://docs.mistral.ai/admin/set-up-organization/verify-domain"
+  motifs:
+    txt: ["^mistral-domain-verification="]
+  exemples:
+    - {type: txt, valeur: "mistral-domain-verification=abc123"}
 
 # --- Discussion en ligne ---------------------------------------------------- #
 
