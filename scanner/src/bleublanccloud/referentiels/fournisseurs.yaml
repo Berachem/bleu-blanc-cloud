@@ -872,11 +872,13 @@
   nom: RENATER (réseau national de l'enseignement et de la recherche)
   pays_siege: FR
   soumis_cloud_act: false
-  asn: [2200]
+  asn: [2200, 1942]
   categories: [hebergement, messagerie, dns]
   sources:
     - "https://fr.wikipedia.org/wiki/RENATER"
     - "https://www.peeringdb.com/asn/2200"
+    - "https://db-ip.com/as1942-renater"
+    - "https://ipinfo.io/AS1942"
   remarque: "Groupement d'intérêt public depuis 1993 : réseau national des établissements d'enseignement supérieur et de recherche (ADR-0006)."
   a_verifier: true
 
@@ -933,12 +935,14 @@
   nom: Celeste
   pays_siege: FR
   soumis_cloud_act: false
-  asn: [34177]
+  asn: [34177, 57633]
   motifs_domaines: ["celeste.fr"]
   categories: [hebergement, messagerie, dns]
   sources:
     - "https://www.celeste.fr/qui-est-l-operateur-celeste/"
     - "https://bgp.tools/as/34177"
+    - "https://stat.ripe.net/AS57633"
+    - "https://www.ripe.net/membership/indices/data/fr.celeste.html"
   remarque: "Actionnaire majoritaire : CVC DIF (fonds d'infrastructure de CVC Capital Partners) depuis janvier 2026, auparavant InfraVia. Pays de rattachement du fonds à vérifier : le niveau repose ici sur le siège français."
   a_verifier: true
 
@@ -2253,4 +2257,115 @@
     - "https://ipinfo.io/AS203386"
     - "https://www.ripe.net/membership/indices/data/fr.promatec.html"
   remarque: "Fournisseur basé à Bondues (Nord)."
+  a_verifier: true
+
+# --- Lot 2 des fournisseurs « inconnus » (ajout du 28/11/2026, tous à vérifier) ---
+
+- id: afnic
+  nom: Afnic (registre du .fr)
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [2484]
+  categories: [dns]
+  sources:
+    - "https://www.peeringdb.com/asn/2484"
+    - "https://stat.ripe.net/AS2484"
+  remarque: "Association française gestionnaire du .fr : DNS anycast (FR-NIC-DNS-ANYCAST)."
+  a_verifier: true
+
+- id: netnod
+  nom: Netnod
+  pays_siege: SE
+  soumis_cloud_act: false
+  asn: [8674]
+  categories: [dns]
+  sources:
+    - "https://netnod.se/node/150"
+    - "https://www.peeringdb.com/asn/8674"
+  remarque: "Société suédoise (Stockholm) : DNS anycast et points d'échange internet."
+  a_verifier: true
+
+- id: luxnetwork
+  nom: LuxNetwork
+  pays_siege: LU
+  soumis_cloud_act: false
+  asn: [29467]
+  categories: [hebergement, messagerie]
+  sources:
+    - "https://ipinfo.io/AS29467"
+    - "https://db-ip.com/as29467-luxnetwork-sa"
+  a_verifier: true
+
+- id: octopuce
+  nom: Octopuce
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [28855]
+  categories: [hebergement]
+  sources:
+    - "https://www.peeringdb.com/net/2798"
+    - "https://bgp.he.net/AS28855"
+  remarque: "Hébergeur parisien."
+  a_verifier: true
+
+- id: hexanet
+  nom: Hexanet
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [34863]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.peeringdb.com/net/3992"
+    - "https://www.ripe.net/membership/member-support/list-of-members/fr/hexanet8/"
+  remarque: "Opérateur et hébergeur basé à Reims (centres de données en Champagne)."
+  a_verifier: true
+
+- id: ipgarde
+  nom: IPGarde
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [41765]
+  categories: [hebergement, dns]
+  sources:
+    - "https://www.peeringdb.com/asn/41765"
+    - "https://ipinfo.io/AS41765"
+  remarque: "Société française ; une partie des adresses est localisée à Genève : localisation des serveurs à vérifier."
+  a_verifier: true
+
+- id: alkante
+  nom: Alkante
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [198978]
+  categories: [hebergement]
+  sources:
+    - "https://ipinfo.io/AS198978"
+    - "https://www.ip2location.com/as198978"
+  remarque: "Éditeur et hébergeur basé à Rennes."
+  a_verifier: true
+
+- id: weaccess
+  nom: WeAccess (ex-Infosat Telecom)
+  pays_siege: FR
+  soumis_cloud_act: false
+  asn: [33835]
+  categories: [hebergement, dns]
+  sources:
+    - "https://db-ip.com/as33835-weaccess-group-sa"
+    - "https://www.ripe.net/membership/indices/data/fr.infosat.html"
+  remarque: "Opérateur normand (Rouen, Saint-Étienne-du-Rouvray)."
+  a_verifier: true
+
+- id: sucuri
+  nom: Sucuri
+  pays_siege: US
+  maison_mere: GoDaddy
+  pays_maison_mere: US
+  soumis_cloud_act: true
+  asn_cdn: [30148]
+  categories: [cdn]
+  sources:
+    - "https://ipinfo.io/AS30148"
+    - "https://db-ip.com/as30148-sucuri"
+  remarque: "Pare-feu applicatif et CDN du groupe GoDaddy placé devant le site : hébergeur réel masqué."
   a_verifier: true
