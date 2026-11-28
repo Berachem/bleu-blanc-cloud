@@ -87,11 +87,25 @@ const avecAide = variante !== "accroche";
       if (requete.length < 2) return;
       const lignes = await charger();
       if (numero !== derniere) return;
+      // Pertinence : nom exact, nom qui commence par la saisie, mot entier du nom, début d'un
+      // mot, simple présence dans le nom, puis dans le département ou le domaine.
+      // « paris » donne d'abord la ville de Paris, puis Cormeilles-en-Parisis…
+      const pertinence = ([, nom, departement, , , domaine]: Ligne): number => {
+        const n = normaliser(nom);
+        if (n === requete) return 0;
+        if (n.startsWith(requete)) return 1;
+        const mots = n.split(/[\s'’\-()]+/);
+        if (mots.includes(requete)) return 2;
+        if (mots.some((mot) => mot.startsWith(requete))) return 3;
+        if (n.includes(requete)) return 4;
+        return normaliser(`${departement} ${domaine}`).includes(requete) ? 5 : 99;
+      };
       const trouvees = lignes
-        .filter(([, nom, departement, , , domaine]) =>
-          normaliser(`${nom} ${departement} ${domaine}`).includes(requete),
-        )
-        .slice(0, 8);
+        .map((ligne) => ({ ligne, rang: pertinence(ligne) }))
+        .filter(({ rang }) => rang < 99)
+        .sort((a, b) => a.rang - b.rang || a.ligne[1].length - b.ligne[1].length)
+        .slice(0, 8)
+        .map(({ ligne }) => ligne);
       if (trouvees.length === 0) {
         const vide = document.createElement("li");
         vide.className = "texte-secondaire petit";
