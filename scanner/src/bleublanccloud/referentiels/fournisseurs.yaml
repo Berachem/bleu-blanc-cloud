@@ -2380,3 +2380,25 @@
     - "https://openai.com/about/"
   remarque: "Société de San Francisco (Californie) éditrice de ChatGPT. Sans motif de domaine : seule la vérification de domaine (constat informatif) y renvoie, aucun effet sur le score."
   a_verifier: true
+
+- id: anthropic
+  nom: Anthropic
+  pays_siege: US
+  soumis_cloud_act: true
+  categories: [suites_saas]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Anthropic"
+    - "https://www.anthropic.com/company"
+  remarque: "Société de San Francisco (Californie) éditrice de Claude. Sans motif de domaine : seule la vérification de domaine (constat informatif) y renvoie, aucun effet sur le score."
+  a_verifier: true
+
+- id: mistral-ai
+  nom: Mistral AI
+  pays_siege: FR
+  soumis_cloud_act: false
+  categories: [suites_saas]
+  sources:
+    - "https://fr.wikipedia.org/wiki/Mistral_AI"
+    - "https://mistral.ai/fr/about"
+  remarque: "Société parisienne éditrice de Le Chat. Sans motif de domaine : seule la vérification de domaine (constat informatif) y renvoie, aucun effet sur le score."
+  a_verifier: true
