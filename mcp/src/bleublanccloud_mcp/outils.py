@@ -27,7 +27,7 @@ LIBELLES_CATEGORIES = {
     "mesure_audience": "Mesure d'audience et cookies",
 }
 NOTES = ("A", "B", "C", "D", "E")
-TYPES = ("commune", "departement", "region")
+TYPES = ("commune", "departement", "region", "universite", "hopital")
 LIMITE_MAX = 50
 COMPARAISON_MAX = 6
 MOTIF_CODE_INSEE = re.compile(r"-(\d{5}|2[ab]\d{3})$")

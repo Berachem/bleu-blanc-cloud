@@ -91,7 +91,7 @@ def test_protocole_mcp_en_http(client: TestClient) -> None:
     )
     assert appel.status_code == 200, appel.text
     contenu = json.loads(appel.json()["result"]["content"][0]["text"])
-    assert contenu["nombre_collectivites"] == 14
+    assert contenu["nombre_collectivites"] == 16
 
 
 def test_racine_accepte_aussi_le_protocole_mcp(client: TestClient) -> None:

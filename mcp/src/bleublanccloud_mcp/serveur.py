@@ -20,11 +20,12 @@ from bleublanccloud_mcp.donnees import DonneeIntrouvable, SourceDonnees
 
 INSTRUCTIONS = """\
 Bleu Blanc Cloud est un observatoire indépendant et open source (sans lien avec l'État) de la
-souveraineté numérique des collectivités françaises : communes de plus de 10 000 habitants,
-départements et régions. Pour chacune, une analyse passive de l'empreinte visible publiquement
-(hébergement du site, messagerie, DNS, suites collaboratives, services tiers, mesure
-d'audience) donne un score de 0 à 100 et une note de A à E (A : fournisseurs européens ;
-D ou E : forte dépendance à des fournisseurs soumis au Cloud Act américain).
+souveraineté numérique des services publics français : communes de plus de 10 000 habitants,
+départements, régions, universités publiques et hôpitaux publics (CHU, CHR, supports de GHT).
+Pour chacun, une analyse passive de l'empreinte visible publiquement (hébergement du site,
+messagerie, DNS, suites collaboratives, services tiers, mesure d'audience) donne un score de 0 à
+100 et une note de A à E (A : fournisseurs européens ; D ou E : forte dépendance à des
+fournisseurs soumis au Cloud Act américain).
 
 Règles de réponse :
 - Commencez par rechercher_collectivite pour obtenir l'identifiant (slug) d'une collectivité.
@@ -96,7 +97,8 @@ async def classement(
         str | None, Field(description="Code (« 33 ») ou nom (« Gironde ») du département.")
     ] = None,
     type: Annotated[
-        Literal["commune", "departement", "region"] | None, Field(description="Type.")
+        Literal["commune", "departement", "region", "universite", "hopital"] | None,
+        Field(description="Type d'organisation."),
     ] = None,
     note: Annotated[
         str | None, Field(description="Note(s) à garder, ex. « A » ou « D,E ».")

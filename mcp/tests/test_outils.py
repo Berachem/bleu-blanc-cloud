@@ -9,7 +9,7 @@ import respx
 from bleublanccloud_mcp import outils
 from bleublanccloud_mcp.donnees import SourceDonnees
 from bleublanccloud_mcp.outils import code_insee, normaliser
-from tests.conftest import BASE
+from tests.conftest import BASE, DEMO
 
 
 def test_normaliser_et_code_insee() -> None:
@@ -55,14 +55,16 @@ async def test_fiche_inconnue_ou_slug_invalide(
 
 async def test_classement_filtres_et_ordre(donnees: SourceDonnees) -> None:
     nord = await outils.classement(donnees, departement="Nord")
-    assert [r["slug"] for r in nord["resultats"]] == ["demoville-demo"]
-    assert (await outils.classement(donnees, departement="59"))["nombre_total"] == 1
+    assert {r["slug"] for r in nord["resultats"]} == {"demoville-demo", "univ-demoville-demo"}
+    assert (await outils.classement(donnees, departement="59"))["nombre_total"] == 2
+    hopitaux = await outils.classement(donnees, type="hopital")
+    assert [r["slug"] for r in hopitaux["resultats"]] == ["chu-exempleville-demo"]
     notes_e = await outils.classement(donnees, note="E", ordre="moins_bons")
     scores = [r["score"] for r in notes_e["resultats"]]
     assert scores == sorted(scores) and all(r["note"] == "E" for r in notes_e["resultats"])
     tous = await outils.classement(donnees, limite=50)
     assert all(r["type"] != "sur_demande" for r in tous["resultats"])
-    assert tous["nombre_total"] == 14  # observatoire de démonstration, hors analyse sur demande
+    assert tous["nombre_total"] == 16  # observatoire de démonstration, hors analyse sur demande
     meilleurs = [r["score"] for r in tous["resultats"]]
     assert meilleurs == sorted(meilleurs, reverse=True)
 
@@ -78,10 +80,10 @@ async def test_comparer(donnees: SourceDonnees) -> None:
 async def test_statistiques(donnees: SourceDonnees) -> None:
     france = await outils.statistiques(donnees)
     assert france["perimetre"] == "France"
-    assert france["nombre_collectivites"] == 14
-    assert sum(france["repartition_notes"].values()) == 14
+    assert france["nombre_collectivites"] == 16
+    assert sum(france["repartition_notes"].values()) == 16
     nord = await outils.statistiques(donnees, "59")
-    assert nord["perimetre"] == "Nord" and nord["nombre_collectivites"] == 1
+    assert nord["perimetre"] == "Nord" and nord["nombre_collectivites"] == 2  # ville + université
 
 
 async def test_collectivites_par_fournisseur(donnees: SourceDonnees) -> None:
@@ -107,7 +109,9 @@ async def test_alternatives(donnees: SourceDonnees) -> None:
         or "messagerie" in (a["description"] or "").lower()
         for a in messagerie["alternatives"]
     )
-    assert len((await outils.alternatives(donnees))["alternatives"]) == 55
+    # Toutes les alternatives du fichier de démonstration (régénéré avec le référentiel)
+    attendues = json.loads((DEMO / "alternatives.json").read_text(encoding="utf-8"))
+    assert len((await outils.alternatives(donnees))["alternatives"]) == len(attendues)
 
 
 async def test_cache_une_requete_par_fichier(
