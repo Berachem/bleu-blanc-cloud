@@ -1123,6 +1123,19 @@ def afficher_statistiques(stats: Statistiques) -> None:
             )
         console.print(tableau)
 
+    total = stats.ensemble.compte.nombre or 1
+    ia = stats.assistants_ia
+    console.print(
+        f"[bold]Assistants IA repérés sur les sites[/] : {ia.nombre} organisation(s) "
+        f"({_pourcentage(100 * ia.nombre / total)}), dont "
+        f"{stats.assistants_ia_cloud_act.nombre} chez un fournisseur soumis au Cloud Act ; "
+        "domaines vérifiés auprès d'OpenAI : "
+        f"{stats.domaines_verifies_openai.nombre}. Seul l'usage visible de l'extérieur est "
+        "compté (l'IA utilisée en interne ne laisse pas de trace publique)."
+    )
+    for outil, nombre in sorted(stats.assistants_ia_par_outil.items(), key=lambda e: -e[1]):
+        console.print(f"  · {outil} : {nombre}")
+
     grandes = stats.grandes_collectivites
     notees_a = stats.grandes_collectivites_a
     console.print(

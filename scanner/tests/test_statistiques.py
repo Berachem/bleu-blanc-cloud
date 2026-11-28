@@ -359,3 +359,45 @@ def test_cli_stats_base_vide(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     resultat = CliRunner().invoke(app, ["stats", "--sans-image"])
     assert resultat.exit_code == 1
     assert "Aucun scan noté" in resultat.output
+
+
+def test_usage_ia_compte_les_organisations_sans_toucher_aux_notes() -> None:
+    def informatif(regle: str, type_service: str, niveau: str) -> Constat:
+        return Constat.model_validate(
+            {
+                "sonde": "http",
+                "categorie": "informatif",
+                "cle": "service_detecte",
+                "valeur": regle,
+                "fournisseur_id": None,
+                "niveau": niveau,
+                "preuve": {"regle": regle, "type_service": type_service},
+            }
+        )
+
+    avec_google = [*souveraine(), informatif("ia-dialogflow-messenger", "assistant_ia", "D")]
+    avec_deux = [
+        *souveraine(),
+        informatif("ia-botpress", "assistant_ia", "inconnu"),
+        informatif("ia-botnation", "assistant_ia", "inconnu"),
+        informatif("ia-openai-verification-domaine", "verification_domaine", "D"),
+    ]
+    stats = calculer_statistiques(
+        [
+            entree(organisation("bordeaux"), avec_google),
+            entree(organisation("pessac"), avec_deux),
+            entree(organisation("talence"), souveraine()),
+        ],
+        referentiels_par_defaut(),
+    )
+    assert stats.assistants_ia.nombre == 2
+    assert stats.assistants_ia_cloud_act.nombre == 1
+    assert stats.domaines_verifies_openai.nombre == 1
+    assert stats.assistants_ia_par_outil == {
+        "Dialogflow Messenger (Google)": 1,
+        "Botpress": 1,
+        "Botnation": 1,
+    }
+    assert stats.notes["A"].nombre == 3  # constats informatifs : notes inchangées
+    usage = stats.en_dict()["usage_ia"]
+    assert usage["assistants_sur_le_site"]["part"] == 66.7

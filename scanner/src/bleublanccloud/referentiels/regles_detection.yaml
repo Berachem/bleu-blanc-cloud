@@ -590,6 +590,33 @@
   exemples:
     - {type: script, valeur: "https://cdn.voiceflow.com/widget/bundle.mjs"}
 
+- id: ia-botnation
+  nom: "Assistant IA : Botnation"
+  categorie: informatif
+  type_service: assistant_ia
+  niveau: inconnu  # juridiction de l'éditeur non encore sourcée
+  explique_ressources: false
+  description: "Agent conversationnel à intégrer au site. Source : https://support.botnation.ai/en/?p=2927"
+  motifs:
+    domaines_scripts: ["cbassets.botnation.ai"]
+  exemples:
+    - {type: script, valeur: "https://cbassets.botnation.ai/js/widget.js"}
+
+# Vérification de domaine auprès d'OpenAI (enregistrement TXT public) : indique que le
+# domaine a été validé pour un espace ChatGPT (Business, Enterprise, Edu), l'authentification
+# unique ou la publication de GPT. Ce n'est qu'un indice : il ne dit rien de l'usage réel.
+
+- id: ia-openai-verification-domaine
+  nom: "Domaine vérifié auprès d'OpenAI (ChatGPT)"
+  categorie: informatif
+  type_service: verification_domaine
+  fournisseur_id: openai
+  description: "Enregistrement TXT de vérification de domaine OpenAI. Source : https://help.openai.com/en/articles/8871611-domain-verification"
+  motifs:
+    txt: ["^openai-domain-verification="]
+  exemples:
+    - {type: txt, valeur: "openai-domain-verification=dv-AbCdEf123456"}
+
 # --- Discussion en ligne ---------------------------------------------------- #
 
 - id: crisp

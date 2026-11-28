@@ -2369,3 +2369,14 @@
     - "https://db-ip.com/as30148-sucuri"
   remarque: "Pare-feu applicatif et CDN du groupe GoDaddy placé devant le site : hébergeur réel masqué."
   a_verifier: true
+
+- id: openai
+  nom: OpenAI
+  pays_siege: US
+  soumis_cloud_act: true
+  categories: [suites_saas]
+  sources:
+    - "https://fr.wikipedia.org/wiki/OpenAI"
+    - "https://openai.com/about/"
+  remarque: "Société de San Francisco (Californie) éditrice de ChatGPT. Sans motif de domaine : seule la vérification de domaine (constat informatif) y renvoie, aucun effet sur le score."
+  a_verifier: true

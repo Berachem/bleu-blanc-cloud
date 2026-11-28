@@ -145,6 +145,11 @@ class Statistiques:
     departements: list[GroupeMoyen] = field(default_factory=list)
     grandes_collectivites: Compte = field(default_factory=Compte)
     grandes_collectivites_a: list[GrandeCollectivite] = field(default_factory=list)
+    # Usage visible de l'IA (constats informatifs, sans effet sur le score)
+    assistants_ia: Compte = field(default_factory=Compte)
+    assistants_ia_cloud_act: Compte = field(default_factory=Compte)
+    assistants_ia_par_outil: dict[str, int] = field(default_factory=dict)
+    domaines_verifies_openai: Compte = field(default_factory=Compte)
 
     def en_dict(self) -> dict[str, Any]:
         """Représentation JSON (parts provisoires et moyennes calculées incluses)."""
@@ -199,6 +204,20 @@ class Statistiques:
                 **compte(self.grandes_collectivites),
                 "notees_a": [asdict(g) for g in self.grandes_collectivites_a],
             },
+            "usage_ia": {
+                "assistants_sur_le_site": {
+                    **compte(self.assistants_ia),
+                    "part": round(100 * self.assistants_ia.nombre / total, 1),
+                },
+                "dont_fournisseur_cloud_act": compte(self.assistants_ia_cloud_act),
+                "par_outil": dict(
+                    sorted(self.assistants_ia_par_outil.items(), key=lambda e: (-e[1], e[0]))
+                ),
+                "domaines_verifies_openai": {
+                    **compte(self.domaines_verifies_openai),
+                    "part": round(100 * self.domaines_verifies_openai.nombre / total, 1),
+                },
+            },
         }
 
 
@@ -246,6 +265,7 @@ def calculer_statistiques(
     departements: dict[str, Moyenne] = {}
     tranches: dict[tuple[int, int | None], Moyenne] = {}
     presences: dict[str, dict[str, Compte]] = {c: {} for c in (*CATEGORIES_NIVEAUX, "toutes")}
+    noms_regles = {regle.id: regle.nom for regle in referentiels.regles}
 
     for entree in entrees:
         organisation, score = entree.organisation, entree.score
@@ -268,6 +288,8 @@ def calculer_statistiques(
         for cle, identifiants in vus.items():
             for identifiant in identifiants:
                 presences[cle].setdefault(identifiant, Compte()).ajouter(provisoire)
+
+        _compter_usage_ia(stats, entree.constats, noms_regles, provisoire)
 
         if organisation.region:
             regions.setdefault(organisation.region, Moyenne()).ajouter(score)
@@ -319,6 +341,29 @@ def calculer_statistiques(
     ]
     stats.grandes_collectivites_a.sort(key=lambda g: (-g.population, g.nom))
     return stats
+
+
+REGLE_VERIFICATION_OPENAI: Final = "ia-openai-verification-domaine"
+
+
+def _compter_usage_ia(
+    stats: Statistiques,
+    constats: Sequence[Constat],
+    noms_regles: Mapping[str, str],
+    provisoire: bool,
+) -> None:
+    """Une organisation compte une fois par outil d'IA repéré (constats informatifs)."""
+    assistants = [c for c in constats if c.preuve.get("type_service") == "assistant_ia"]
+    outils = {str(c.preuve.get("regle", "")) for c in assistants}
+    if assistants:
+        stats.assistants_ia.ajouter(provisoire)
+        if any(c.niveau == "D" for c in assistants):
+            stats.assistants_ia_cloud_act.ajouter(provisoire)
+    for outil in outils:
+        nom = noms_regles.get(outil, outil).removeprefix("Assistant IA : ")
+        stats.assistants_ia_par_outil[nom] = stats.assistants_ia_par_outil.get(nom, 0) + 1
+    if any(c.preuve.get("regle") == REGLE_VERIFICATION_OPENAI for c in constats):
+        stats.domaines_verifies_openai.ajouter(provisoire)
 
 
 def entrees_observatoire(base: Base) -> list[EntreeStatistique]:
