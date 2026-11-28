@@ -8,8 +8,7 @@ import { prereglages } from "../lib/simulateur";
 // demande restent consultables par leur lien mais ne sont pas signalées aux moteurs.
 const PAGES_FIXES: { chemin: string; campagne?: boolean }[] = [
   { chemin: "/", campagne: true },
-  { chemin: "/carte/", campagne: true },
-  { chemin: "/classements/", campagne: true },
+  { chemin: "/explorer/", campagne: true },
   { chemin: "/simulateur/", campagne: true },
   { chemin: "/dossiers/" },
   { chemin: "/dossiers/souverainete-securite/", campagne: true },

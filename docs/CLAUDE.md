@@ -371,9 +371,8 @@ class RapportIA(BaseModel):
 | Route | Contenu |
 |---|---|
 | `/` | Accueil : accroche, recherche, chiffres clés, carte, derniers scans |
-| `/carte` | Carte des départements (score moyen) + tableau équivalent accessible |
+| `/explorer` | Carte des départements, liste filtrable des organisations (pastilles par type), moyennes par type et par département (fusion des anciennes `/carte` et `/classements`, qui redirigent en gardant les filtres) |
 | `/organisation/[slug]` | Page détaillée (générée au build) |
-| `/classements` | Par département, par type d'organisation, filtres |
 | `/methodologie` | Contenu de `docs/methodologie.md` + version |
 | `/alternatives` | Alternatives françaises et européennes par catégorie |
 | `/a-propos` | Qui, pourquoi, open source, limites, indépendance vis-à-vis de l'État |
@@ -383,6 +382,11 @@ class RapportIA(BaseModel):
 | `/retrait` | Demande d'exclusion ou droit de réponse (adresse de contact) |
 | `/mentions-legales` | Éditeur et hébergeur (me demander les informations à afficher) |
 | `404` | Page d'erreur dans le thème |
+
+### Navigation et direction artistique des types
+- Menu à 4 entrées : **Explorer** (`/explorer`, fiches) · **Alternatives** · **Comprendre** (`/dossiers`, avec le simulateur mis en avant) · **À propos** (avec liens vers `/methodologie`, `/retrait`, `/badge`, `/mcp`). `/methodologie` garde son adresse (citée par le User-Agent).
+- Chaque type d'organisation a un pictogramme maison et une couleur (`site/src/lib/types-organisation.ts`, variables `--type-*` dans `theme.css`) : villes (colonnes, vert), départements (carte, ardoise), régions (hexagone, bleu canard), hôpitaux (bâtiment à croix, rose framboise, jamais de croix rouge), universités (toque, violet). « Services publics » : bleu de la marque, sans icône. Ces couleurs n'empiètent jamais sur celles des notes, et sont toujours accompagnées de l'icône et du libellé. Partout où un type apparaît : composant `EtiquetteType`.
+- Accueil : titre animé « Nos services publics → hôpitaux → villes → universités → régions dépendent-ils/elles… » (phrase fixe pour les lecteurs d'écran, animation coupée avec `prefers-reduced-motion`), cercle d'étoiles sur le côté.
 
 ### Page organisation
 - Grand badge de note (A à E) + score sur 100 + date du scan + version de la méthodologie.

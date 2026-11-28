@@ -1,5 +1,6 @@
 // Libellés et mise en forme (français).
 import type { Categorie } from "./types";
+import { TYPES_ORGANISATION } from "./types-organisation";
 
 export const LIBELLES_CATEGORIES: Record<Categorie | "informatif", string> = {
   hebergement: "Hébergement du site",
@@ -19,15 +20,10 @@ export const DESCRIPTIONS_NIVEAUX: Record<string, string> = {
   inconnu: "Fournisseur non identifié",
 };
 
-export const LIBELLES_TYPES: Record<string, string> = {
-  commune: "Commune",
-  departement: "Département",
-  region: "Région",
-  universite: "Université",
-  hopital: "Hôpital public",
-  autre: "Autre organisation",
-  sur_demande: "Analyse sur demande",
-};
+// Libellés des types : source unique dans types-organisation.ts (direction artistique)
+export const LIBELLES_TYPES: Record<string, string> = Object.fromEntries(
+  Object.values(TYPES_ORGANISATION).map((type) => [type.id, type.libelle]),
+);
 
 export const LIBELLES_TYPES_SERVICE: Record<string, string> = {
   assistant_ia: "Assistant IA (chatbot)",

@@ -1,0 +1,18 @@
+---
+// Type d'organisation avec sa direction artistique (pictogramme et couleur propres).
+// « texte » : icône + libellé colorés (fiches, cartes, tableaux) ;
+// « pastille » : même contenu dans une pilule teintée (filtres, listes).
+import { svgType, typeOrganisation } from "../lib/types-organisation";
+interface Props {
+  type: string;
+  variante?: "texte" | "pastille";
+  pluriel?: boolean;
+  class?: string;
+}
+const { type, variante = "texte", pluriel = false, class: classe } = Astro.props;
+const definition = typeOrganisation(type);
+---
+<span class:list={["type-organisation", `type--${definition.id}`, `type-organisation--${variante}`, classe]}>
+  <Fragment set:html={svgType(definition.id, variante === "pastille" ? 1.8 : 2)} />
+  <span>{pluriel ? definition.pluriel : definition.libelle}</span><slot />
+</span>

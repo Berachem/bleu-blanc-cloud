@@ -13,6 +13,7 @@ export const GET: APIRoute = () =>
         e.score,
         e.domaine,
         e.note_provisoire ? 1 : 0,
+        e.type,
       ]),
     ),
     { headers: { "Content-Type": "application/json; charset=utf-8" } },
