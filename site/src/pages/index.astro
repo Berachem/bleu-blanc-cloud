@@ -94,7 +94,7 @@ const chiffres = [
     <ul class="chiffres">
       {
         chiffres.map((chiffre) => (
-          <li class:list={["chiffre", "apparition", chiffre.alerte && "chiffre--alerte"]}>
+          <li class:list={["chiffre", chiffre.alerte && "chiffre--alerte"]}>
             <span class="chiffre__valeur" data-compteur={chiffre.valeur} data-suffixe={chiffre.suffixe}>
               {nombre(chiffre.valeur)}{chiffre.suffixe}
             </span>

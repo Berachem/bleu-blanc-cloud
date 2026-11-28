@@ -1072,7 +1072,7 @@ html:has(.fenetre[open]) {
 .accroche {
   position: relative;
   isolation: isolate;
-  padding: clamp(2.5rem, 1.5rem + 4vw, 5rem) 0 clamp(6rem, 4.5rem + 5vw, 9rem);
+  padding: clamp(2rem, 1rem + 3vw, 4rem) 0 clamp(5rem, 4rem + 4vw, 7.5rem);
   text-align: center;
   background:
     radial-gradient(46rem 30rem at 0% 0%, var(--halo-bleu), transparent 68%),
@@ -1085,14 +1085,13 @@ html:has(.fenetre[open]) {
   overflow: hidden;
   pointer-events: none;
 }
-/* Cercle d'étoiles sur le côté droit (le titre animé reste seul au centre) */
 .accroche .etoiles {
   position: absolute;
-  right: max(-15rem, calc(50vw - 52rem));
-  top: 50%;
-  width: clamp(22rem, 32vw, 34rem);
-  transform: translateY(-50%);
-  opacity: 0.55;
+  left: 50%;
+  top: 44%;
+  width: min(900px, 150vw);
+  transform: translate(-50%, -50%);
+  opacity: 0.5;
 }
 [data-theme="dark"] .accroche .etoiles {
   opacity: 0.3;
@@ -1173,7 +1172,8 @@ html:has(.fenetre[open]) {
 .titre-anime__fenetre {
   display: flex;
   overflow: hidden;
-  padding: 0.04em 0 0.12em;
+  padding: 0.22em 0.04em 0.16em;
+  margin: -0.22em -0.04em -0.16em;
 }
 .titre-anime__mot {
   display: inline-flex;
@@ -1252,11 +1252,8 @@ html:has(.fenetre[open]) {
     margin-bottom: 1.5rem;
   }
   .accroche .etoiles {
-    top: 0;
-    right: -7rem;
-    width: 15rem;
-    transform: none;
-    opacity: 0.3;
+    top: 36%;
+    opacity: 0.38;
   }
   [data-theme="dark"] .accroche .etoiles {
     opacity: 0.22;
@@ -1984,6 +1981,82 @@ select:focus {
   text-decoration: none;
 }
 
+/* Explorer : en-tête compact, puis carte (à gauche, fixe au défilement) et liste filtrable
+   (à droite) dès l'arrivée. Téléphone et tablette : carte compacte au-dessus de la liste. */
+.entete-explorer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6rem 2.5rem;
+  padding: clamp(1.4rem, 1rem + 1.5vw, 2.4rem) 0 1.2rem;
+}
+.entete-explorer h1 {
+  margin: 0.3rem 0 0;
+  font-size: clamp(2rem, 1.4rem + 2.2vw, 3rem);
+}
+.entete-explorer .chapeau {
+  max-width: 34rem;
+  margin: 0;
+  font-size: 1rem;
+}
+.explorer-principal {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  grid-template-areas: "carte liste";
+  gap: 1.5rem;
+  align-items: start;
+  padding-bottom: 2rem;
+}
+.explorer-carte {
+  grid-area: carte;
+  position: sticky;
+  top: 5.5rem;
+}
+.explorer-liste {
+  grid-area: liste;
+}
+.explorer-liste .filtres--explorer {
+  margin-top: 0;
+}
+.explorer-carte__cadre {
+  padding: 1rem;
+}
+.explorer-carte__aide {
+  margin: 0.6rem 0 0;
+}
+/* Liste à côté de la carte : la population (triable depuis « Trier par ») est retirée pour
+   que le tableau tienne sans défilement horizontal ; elle reste visible sur téléphone. */
+@media (min-width: 40.01rem) {
+  .explorer-liste .colonne-population {
+    display: none;
+  }
+  .explorer-liste .tableau-defilant table {
+    min-width: 0;
+  }
+  .explorer-liste th,
+  .explorer-liste td {
+    padding-inline: 0.65rem;
+  }
+}
+.carte-france a.departement-choisi path {
+  stroke: var(--texte);
+  stroke-width: 2.5;
+}
+@media (max-width: 72rem) {
+  .explorer-principal {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "carte" "liste";
+  }
+  .explorer-carte {
+    position: static;
+  }
+  .explorer-carte__cadre {
+    max-width: 30rem;
+    margin-inline: auto;
+  }
+}
+
 /* Sommaire de la page Explorer (ancres) */
 .sommaire-explorer ul {
   display: flex;
@@ -2232,6 +2305,10 @@ select:focus {
   }
   .tableau-cartes tbody tr:last-child {
     border-bottom: 0;
+  }
+  /* Filtres : une ligne masquée reste masquée malgré l'affichage en carte */
+  .tableau-cartes tr[hidden] {
+    display: none;
   }
   .tableau-cartes td {
     display: block;

@@ -27,141 +27,132 @@ const parType = types.map((type) => {
     notesA: membres.filter((e) => e.note === "A").length,
   };
 });
-const sections = [
-  { id: "carte", libelle: "Carte" },
-  { id: "organisations", libelle: "Organisations" },
-  { id: "types", libelle: "Par type" },
-  { id: "departements", libelle: "Par département" },
-];
 ---
 <Base
   titre="Explorer l'observatoire"
   description="Carte des départements, liste filtrable des organisations analysées (villes, départements, régions, hôpitaux, universités) et moyennes par type."
 >
   <div class="conteneur">
-    <header class="entete-page">
-      <span class="surtitre">Observatoire</span>
-      <h1>Explorer</h1>
+    <header class="entete-explorer">
+      <div>
+        <span class="surtitre">Observatoire</span>
+        <h1>Explorer</h1>
+      </div>
       <p class="chapeau">
-        Un score élevé indique une empreinte numérique externe reposant sur des fournisseurs
-        européens. Un score faible signale une dépendance, pas une faute : consultez chaque fiche
-        pour les preuves et les pistes d'alternatives.
+        Choisissez un département sur la carte ou filtrez la liste. Un score faible signale une
+        dépendance, pas une faute : chaque fiche détaille les preuves et des pistes européennes.
       </p>
-      <nav class="sommaire-explorer" aria-label="Sections de la page">
-        <ul>
-          {sections.map((s) => <li><a href={`#${s.id}`}>{s.libelle}</a></li>)}
-        </ul>
-      </nav>
     </header>
 
-    <section class="section section--ancre" id="carte" aria-labelledby="titre-carte">
-      <h2 id="titre-carte">Carte des départements</h2>
-      <p class="chapeau">
-        Chaque département est coloré selon la note moyenne des organisations analysées.
-        Sélectionnez un département pour afficher ses organisations ; les mêmes données sont dans
-        <a href="#departements">le tableau par département</a>.
-      </p>
-      <div class="cadre-carte cadre-carte--large">
-        <CarteFrance departements={listeDepartements} titre="Note moyenne par département (carte interactive)" />
-      </div>
-    </section>
-
-    <section class="section section--ancre" id="organisations" aria-labelledby="titre-organisations">
-      <h2 id="titre-organisations">Organisations</h2>
-      <form class="filtres filtres--explorer" data-filtres onsubmit="return false">
-        <fieldset class="filtre-types">
-          <legend>Type d'organisation</legend>
-          <label>
-            <input type="radio" name="type" value="" checked />
-            <span class="type-organisation type-organisation--pastille type--services">
-              <span>Tous</span> <span class="nombre-type">{entrees.length}</span>
-            </span>
-          </label>
-          {
-            parType.map((ligne) => (
-              <label>
-                <input type="radio" name="type" value={ligne.type} />
-                <EtiquetteType type={ligne.type} variante="pastille" pluriel>
-                  {" "}<span class="nombre-type">{ligne.nombre}</span>
-                </EtiquetteType>
-              </label>
-            ))
-          }
-        </fieldset>
-        <div class="filtres__champs">
-          <div class="champ">
-            <label for="filtre-texte">Nom, département ou domaine</label>
-            <input id="filtre-texte" type="search" name="texte" autocomplete="off" />
-          </div>
-          <div class="champ">
-            <label for="filtre-departement">Département</label>
-            <select id="filtre-departement" name="departement">
-              <option value="">Tous les départements</option>
-              {avecDonnees.map((d) => <option value={d.code}>{d.code} — {d.nom}</option>)}
-            </select>
-          </div>
-          <div class="champ seulement-mobile">
-            <label for="tri-mobile">Trier par</label>
-            <select id="tri-mobile" data-tri-mobile>
-              <option value="score:desc">Meilleur score d'abord</option>
-              <option value="score:asc">Score le plus faible d'abord</option>
-              <option value="nom:asc">Nom (A → Z)</option>
-              <option value="population:desc">Population décroissante</option>
-              <option value="departement:asc">Département (par numéro)</option>
-            </select>
-          </div>
-        </div>
-      </form>
-      <p class="texte-secondaire petit" aria-live="polite" data-nombre-resultats>
-        {entrees.length} organisation(s)
-      </p>
-      <div class="carte" data-aucun-resultat hidden>
-        <p>
-          Aucune organisation ne correspond. Votre site n'est pas encore analysé&nbsp;? Vous
-          pouvez demander son analyse passive.
-        </p>
-        <BoutonAnalyse />
-      </div>
-      <div class="tableau-defilant">
-        <table class="tableau-cartes" data-tableau>
-          <caption class="visuellement-cache">Organisations analysées, triées par score décroissant</caption>
-          <thead>
-            <tr>
-              <th scope="col" data-tri="nom"><button type="button">Organisation</button></th>
-              <th scope="col" data-tri="departement"><button type="button">Département</button></th>
-              <th scope="col">Type</th>
-              <th scope="col" class="nombre" data-tri="population"><button type="button">Population</button></th>
-              <th scope="col" class="nombre" data-tri="score" aria-sort="descending"><button type="button">Score</button></th>
-              <th scope="col">Note</th>
-            </tr>
-          </thead>
-          <tbody>
+    <div class="explorer-principal">
+      <section class="explorer-liste section--ancre" id="organisations" aria-labelledby="titre-organisations">
+        <h2 id="titre-organisations" class="visuellement-cache">Organisations</h2>
+        <form class="filtres filtres--explorer" data-filtres onsubmit="return false">
+          <fieldset class="filtre-types">
+            <legend>Type d'organisation</legend>
+            <label>
+              <input type="radio" name="type" value="" checked />
+              <span class="type-organisation type-organisation--pastille type--services">
+                <span>Tous</span> <span class="nombre-type">{entrees.length}</span>
+              </span>
+            </label>
             {
-              entrees.map((e) => (
-                <tr
-                  data-nom={e.nom}
-                  data-texte={`${e.nom} ${e.departement_nom ?? ""} ${e.domaine}`.toLowerCase()}
-                  data-departement={e.departement ?? ""}
-                  data-type={e.type}
-                  data-population={e.population ?? 0}
-                  data-score={e.score}
-                >
-                  <td class="cellule-titre"><a href={`/organisation/${e.slug}/`}>{e.nom}</a></td>
-                  <td>{e.departement_nom ?? "—"}</td>
-                  <td><EtiquetteType type={e.type} /></td>
-                  <td class:list={["nombre", e.population == null && "masque-mobile"]}>
-                    {e.population != null ? nombre(e.population) : "—"}
-                    {e.population != null && <span class="suffixe-mobile">hab.</span>}
-                  </td>
-                  <td class="nombre">{e.score}/100</td>
-                  <td class="cellule-note"><BadgeNote note={e.note} provisoire={e.note_provisoire} /></td>
-                </tr>
+              parType.map((ligne) => (
+                <label>
+                  <input type="radio" name="type" value={ligne.type} />
+                  <EtiquetteType type={ligne.type} variante="pastille" pluriel>
+                    {" "}<span class="nombre-type">{ligne.nombre}</span>
+                  </EtiquetteType>
+                </label>
               ))
             }
-          </tbody>
-        </table>
-      </div>
-    </section>
+          </fieldset>
+          <div class="filtres__champs">
+            <div class="champ">
+              <label for="filtre-texte">Nom, département ou domaine</label>
+              <input id="filtre-texte" type="search" name="texte" autocomplete="off" />
+            </div>
+            <div class="champ">
+              <label for="filtre-departement">Département</label>
+              <select id="filtre-departement" name="departement">
+                <option value="">Tous les départements</option>
+                {avecDonnees.map((d) => <option value={d.code}>{d.code} — {d.nom}</option>)}
+              </select>
+            </div>
+            <div class="champ seulement-mobile">
+              <label for="tri-mobile">Trier par</label>
+              <select id="tri-mobile" data-tri-mobile>
+                <option value="score:desc">Meilleur score d'abord</option>
+                <option value="score:asc">Score le plus faible d'abord</option>
+                <option value="nom:asc">Nom (A → Z)</option>
+                <option value="population:desc">Population décroissante</option>
+                <option value="departement:asc">Département (par numéro)</option>
+              </select>
+            </div>
+          </div>
+        </form>
+        <p class="texte-secondaire petit" aria-live="polite" data-nombre-resultats>
+          {entrees.length} organisation(s)
+        </p>
+        <div class="carte" data-aucun-resultat hidden>
+          <p>
+            Aucune organisation ne correspond. Votre site n'est pas encore analysé&nbsp;? Vous
+            pouvez demander son analyse passive.
+          </p>
+          <BoutonAnalyse />
+        </div>
+        <div class="tableau-defilant">
+          <table class="tableau-cartes" data-tableau>
+            <caption class="visuellement-cache">Organisations analysées, triées par score décroissant</caption>
+            <thead>
+              <tr>
+                <th scope="col" data-tri="nom"><button type="button">Organisation</button></th>
+                <th scope="col" data-tri="departement"><button type="button">Département</button></th>
+                <th scope="col">Type</th>
+                <th scope="col" class="nombre colonne-population" data-tri="population"><button type="button">Population</button></th>
+                <th scope="col" class="nombre" data-tri="score" aria-sort="descending"><button type="button">Score</button></th>
+                <th scope="col">Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                entrees.map((e) => (
+                  <tr
+                    data-nom={e.nom}
+                    data-texte={`${e.nom} ${e.departement_nom ?? ""} ${e.domaine}`.toLowerCase()}
+                    data-departement={e.departement ?? ""}
+                    data-type={e.type}
+                    data-population={e.population ?? 0}
+                    data-score={e.score}
+                  >
+                    <td class="cellule-titre"><a href={`/organisation/${e.slug}/`}>{e.nom}</a></td>
+                    <td>{e.departement_nom ?? "—"}</td>
+                    <td><EtiquetteType type={e.type} /></td>
+                    <td class:list={["nombre", "colonne-population", e.population == null && "masque-mobile"]}>
+                      {e.population != null ? nombre(e.population) : "—"}
+                      {e.population != null && <span class="suffixe-mobile">hab.</span>}
+                    </td>
+                    <td class="nombre">{e.score}/100</td>
+                    <td class="cellule-note"><BadgeNote note={e.note} provisoire={e.note_provisoire} /></td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="explorer-carte section--ancre" id="carte" aria-labelledby="titre-carte">
+        <h2 id="titre-carte" class="visuellement-cache">Carte des départements</h2>
+        <div class="cadre-carte explorer-carte__cadre">
+          <CarteFrance departements={listeDepartements} titre="Note moyenne par département (carte interactive)" />
+          <p class="texte-secondaire petit explorer-carte__aide">
+            Couleur : note moyenne. Sélectionnez un département pour filtrer la liste
+            (<a href="#departements">tableau équivalent</a>).
+          </p>
+        </div>
+      </section>
+    </div>
 
     <section class="section section--ancre" id="types" aria-labelledby="titre-types">
       <h2 id="titre-types">Par type d'organisation</h2>
@@ -291,6 +282,48 @@ const sections = [
     formulaire.addEventListener("input", filtrer);
     filtrer();
 
+    // Département sélectionné : mis en évidence sur la carte
+    const carte = document.querySelector<SVGSVGElement>(".explorer-carte [data-carte]");
+    const liensCarte = carte ? [...carte.querySelectorAll<SVGAElement>("a")] : [];
+    const departementDuLien = (lien: Element) =>
+      new URLSearchParams((lien.getAttribute("href") ?? "").split("?")[1]?.split("#")[0] ?? "").get("departement") ?? "";
+    const marquerCarte = () => {
+      for (const lien of liensCarte) {
+        const choisi = champDepartement.value !== "" && departementDuLien(lien) === champDepartement.value;
+        lien.classList.toggle("departement-choisi", choisi);
+        if (choisi) lien.setAttribute("aria-current", "true");
+        else lien.removeAttribute("aria-current");
+      }
+    };
+    const memoriser = () => {
+      const p = new URLSearchParams();
+      if (champType.value) p.set("type", champType.value);
+      if (champDepartement.value) p.set("departement", champDepartement.value);
+      if (champTexte.value.trim()) p.set("texte", champTexte.value.trim());
+      history.replaceState(null, "", `${p.size ? `?${p}` : location.pathname}${location.hash}`);
+      marquerCarte();
+    };
+    formulaire.addEventListener("input", memoriser);
+    formulaire.addEventListener("change", () => { filtrer(); memoriser(); });
+    marquerCarte();
+    // Liste masquée sous la carte (téléphone) : on y descend après un choix
+    const montrerListe = () => {
+      const liste = document.getElementById("organisations");
+      if (liste && liste.getBoundingClientRect().top > innerHeight * 0.6) liste.scrollIntoView();
+    };
+
+    // Clic sur la carte : filtre la liste sans rechargement (un 2e clic retire le filtre)
+    for (const lien of liensCarte) {
+      lien.addEventListener("click", (evenement) => {
+        evenement.preventDefault();
+        const code = departementDuLien(lien);
+        champDepartement.value = champDepartement.value === code ? "" : code;
+        filtrer();
+        memoriser();
+        montrerListe();
+      });
+    }
+
     // Liens internes (tableaux par type et par département) : filtre sans rechargement
     for (const lien of document.querySelectorAll<HTMLAnchorElement>("[data-lien-type], [data-lien-departement]")) {
       lien.addEventListener("click", (evenement) => {
@@ -300,7 +333,7 @@ const sections = [
         if (lien.dataset.lienDepartement) p.set("departement", lien.dataset.lienDepartement);
         appliquerParametres(p);
         filtrer();
-        history.replaceState(null, "", `?${p}#organisations`);
+        memoriser();
         document.getElementById("organisations")?.scrollIntoView();
       });
     }
