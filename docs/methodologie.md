@@ -115,7 +115,8 @@ Les solutions françaises, européennes ou auto-hébergées (Matomo auto-héberg
 - **Bureau d'enregistrement** du domaine et **autorité de certification** du site.
 - **Offre qualifiée SecNumCloud** : l'usage réel d'une offre qualifiée par l'ANSSI n'est pas détectable de l'extérieur. Nous indiquons seulement que « ce fournisseur propose une offre qualifiée ».
 - SPF et DMARC (bonnes pratiques de sécurité de la messagerie).
-- **Assistants IA (chatbots)** intégrés au site : plateforme utilisée (par exemple Dialogflow de Google, Bot Framework de Microsoft, Chatbase, Botpress ou Voiceflow), repérée par le script chargé par la page. Cette information documente l'usage de l'IA par les collectivités ; elle **ne modifie pas le score** : les ressources de ces assistants restent prises en compte dans les services tiers exactement comme avant (la version de la méthodologie est donc inchangée).
+- **Assistants IA (chatbots)** intégrés au site : plateforme utilisée (par exemple Dialogflow de Google, Bot Framework de Microsoft, Chatbase, Botpress, Voiceflow ou Botnation), repérée par le script chargé par la page. Cette information documente l'usage de l'IA par les collectivités ; elle **ne modifie pas le score** : les ressources de ces assistants restent prises en compte dans les services tiers exactement comme avant (la version de la méthodologie est donc inchangée).
+- **Domaine vérifié auprès d'OpenAI** : enregistrement TXT public `openai-domain-verification=…`, ajouté quand un domaine est validé pour un espace ChatGPT (Business, Enterprise, Edu), l'authentification unique ou la publication de GPT. C'est un **indice**, pas une preuve d'usage ; il est affiché à titre informatif et **ne modifie pas le score**. L'IA utilisée en interne (Copilot, Gemini, comptes personnels…) ne laisse pas de trace publique : l'absence de constat ne signifie jamais absence d'IA.
 
 ## 6. Justification des points retirés
 

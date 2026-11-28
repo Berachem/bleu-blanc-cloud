@@ -31,6 +31,7 @@ export const LIBELLES_TYPES: Record<string, string> = {
 
 export const LIBELLES_TYPES_SERVICE: Record<string, string> = {
   assistant_ia: "Assistant IA (chatbot)",
+  verification_domaine: "Vérification de domaine",
   hebergement_web: "Hébergement web",
   cloud: "Cloud",
   serveurs: "Serveurs",
